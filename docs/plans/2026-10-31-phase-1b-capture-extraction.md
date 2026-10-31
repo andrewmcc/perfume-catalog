@@ -134,7 +134,7 @@ This mirrors Seeds' 1b: `~/code/seeds/docs/plans/2026-10-27-phase-1b-capture-ext
 ### Task 2: Collection helper, extraction service and routes
 
 **Files:**
-- Create: `supabase/migrations/00007_scan_discarded.sql`. It adds `'discarded'` to the `scans.status` check, and an index on `scans (collection_id, status, updated_at)`.
+- Create: `supabase/migrations/00008_scan_discarded.sql`. It adds `'discarded'` to the `scans.status` check, and an index on `scans (collection_id, status, updated_at)`.
 - Create: `apps/web/lib/collections/current.ts`, with `getCurrentCollectionId(supabase): Promise<string | null>`: the first membership by `created_at`.
 - Create: `apps/web/lib/scans/extract-scan.ts` (`import 'server-only'`) and `apps/web/lib/scans/__tests__/select-pending.test.ts`.
 - Create: `apps/web/lib/scans/__tests__/extract-scan.integration.test.ts`, which runs against the hosted DB with a fake extract function. Create `apps/web/vitest.integration.config.ts`, which loads `.env.local`, and add the script `test:integration`. Exclude `*.integration.test.ts` from `pnpm test`.
