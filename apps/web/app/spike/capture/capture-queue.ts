@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import type { BottleResult, Mode, SamplesResult, SetResult } from '@/lib/spike/extract-schema';
 
@@ -23,6 +23,21 @@ export type QueuedCapture = {
   error?: string;
 };
 
+const THUMB_EDGE = 240;
+
+/** Small JPEG object URL, so the list never holds a full-size photo just for a thumbnail. */
+async function makeThumb(blob: Blob): Promise<string> {
+  const bmp = await createImageBitmap(blob);
+  const scale = Math.min(1, THUMB_EDGE / Math.max(bmp.width, bmp.height));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(bmp.width * scale));
+  canvas.height = Math.max(1, Math.round(bmp.height * scale));
+  canvas.getContext('2d')!.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+  bmp.close();
+  const small = await new Promise<Blob | null>((r) => canvas.toBlob(r, 'image/jpeg', 0.7));
+  return small ? URL.createObjectURL(small) : '';
+}
+
 async function errorFrom(res: Response, label: string): Promise<Error> {
   const body = await res.json().catch(() => ({}));
   return new Error(body.error ?? `${label} ${res.status}`);
@@ -30,6 +45,8 @@ async function errorFrom(res: Response, label: string): Promise<Error> {
 
 export function useCaptureQueue(supabaseUrl: string, supabaseAnonKey: string) {
   const [items, setItems] = useState<QueuedCapture[]>([]);
+  const thumbUrls = useRef<string[]>([]);
+  useEffect(() => () => thumbUrls.current.forEach((u) => URL.revokeObjectURL(u)), []);
   const supabase = useMemo(() => createClient(supabaseUrl, supabaseAnonKey), [supabaseUrl, supabaseAnonKey]);
 
   const patch = (localId: string, p: Partial<QueuedCapture>) =>
@@ -81,11 +98,17 @@ export function useCaptureQueue(supabaseUrl: string, supabaseAnonKey: string) {
         localId: crypto.randomUUID(),
         mode,
         blobs,
-        thumb: URL.createObjectURL(blobs[0]),
+        thumb: '',
         status: 'uploading',
       };
       setItems((xs) => [item, ...xs]);
       void run(item);
+      makeThumb(blobs[0])
+        .then((url) => {
+          thumbUrls.current.push(url);
+          patch(item.localId, { thumb: url });
+        })
+        .catch(() => {});
     },
     [run],
   );

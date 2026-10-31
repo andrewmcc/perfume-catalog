@@ -44,7 +44,7 @@ function CaptureRow({ item, onRetry }: { item: QueuedCapture; onRetry: (i: Queue
   return (
     <li className="mb-2 flex gap-2 border-b border-white/20 pb-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={item.thumb} alt="" className="h-12 w-12 shrink-0 rounded object-cover" />
+      {item.thumb ? <img src={item.thumb} alt="" className="h-12 w-12 shrink-0 rounded object-cover" /> : <div className="h-12 w-12 shrink-0 rounded bg-white/10" />}
       <div className="min-w-0 flex-1">
         <p className="text-neutral-400">
           {item.mode} · {item.status}

@@ -16,7 +16,8 @@ const SQUARE_FRACTION = 0.8;
 const DETECT_SIZE = 160;
 const DETECT_INNER: Rect = { x: 16, y: 16, w: 128, h: 128 }; // square + 12.5% margin each side
 const CAPTURE_LONG_EDGE = 1600;
-const JPEG_QUALITY = 0.85;
+const JPEG_QUALITY_SQUARE = 0.85; // Bottle
+const JPEG_QUALITY_FULL = 0.9; // Samples / Set (full frame)
 const IDLE_MS = 20_000;
 const CONFIG_KEY = 'perfume-spike-gate-config-v1';
 
@@ -59,9 +60,9 @@ function squareInVideo(video: HTMLVideoElement): Rect {
   return { x: (vw - side) / 2, y: (vh - side) / 2, w: side, h: side };
 }
 
-function canvasToJpeg(canvas: HTMLCanvasElement): Promise<Blob> {
+function canvasToJpeg(canvas: HTMLCanvasElement, quality: number): Promise<Blob> {
   return new Promise((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('toBlob failed'))), 'image/jpeg', JPEG_QUALITY),
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('toBlob failed'))), 'image/jpeg', quality),
   );
 }
 
@@ -142,7 +143,7 @@ export default function CaptureClient({ supabaseUrl, supabaseAnonKey }: { supaba
         canvas.height = video.videoHeight;
         canvas.getContext('2d')!.drawImage(video, 0, 0);
       }
-      return canvasToJpeg(canvas);
+      return canvasToJpeg(canvas, m === 'bottle' ? JPEG_QUALITY_SQUARE : JPEG_QUALITY_FULL);
     },
     [videoRef],
   );
@@ -155,6 +156,7 @@ export default function CaptureClient({ supabaseUrl, supabaseAnonKey }: { supaba
     // Re-arm is judged against this view, so a jolt back to it doesn't re-capture.
     firedFrameRef.current = prevFrameRef.current;
     gateRef.current.lockUntilChange();
+    playShutter('front');
     tryHaptic();
     setFlash(true);
     setTimeout(() => setFlash(false), 250);
@@ -173,7 +175,6 @@ export default function CaptureClient({ supabaseUrl, supabaseAnonKey }: { supaba
     commitPending(); // a new bottle / set: the previous one goes out with 1 photo
     pendingRef.current = { mode: m, blobs: [blob] };
     setPendingCount(1);
-    playShutter('front');
   }, [grab, enqueue, commitPending]);
 
   // Latest-closure ref so the interval never sees stale state.
