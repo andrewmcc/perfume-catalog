@@ -25,13 +25,12 @@ export function parseConfirmParams(
 export function isSameOrigin(headers: Headers, requestOrigin: string, appUrl: string | undefined): boolean {
   const claimed = headers.get('origin') ?? headers.get('referer');
   if (!claimed) return false;
-  let origin: string;
+  const allowed = new Set([requestOrigin]);
   try {
-    origin = new URL(claimed).origin;
+    if (appUrl) allowed.add(new URL(appUrl).origin);
+    return allowed.has(new URL(claimed).origin);
   } catch {
+    // A malformed header or NEXT_PUBLIC_APP_URL fails closed.
     return false;
   }
-  const allowed = new Set([requestOrigin]);
-  if (appUrl) allowed.add(new URL(appUrl).origin);
-  return allowed.has(origin);
 }

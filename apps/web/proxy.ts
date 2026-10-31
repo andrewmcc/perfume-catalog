@@ -33,6 +33,7 @@ export async function proxy(request: NextRequest) {
   return redirect;
 }
 
+// Paths ending in image extensions skip the auth gate: never put protected route handlers at such paths.
 export const config = {
   matcher: ['/((?!_next/static|_next/image|.*\\.(?:png|jpg|jpeg|svg|ico|webp)$).*)'],
 };

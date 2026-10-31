@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
     setError(null);
     const base = process.env.NEXT_PUBLIC_APP_URL ?? window.location.origin;
     const { error: authError } = await createBrowserClient().auth.resetPasswordForEmail(email, {
-      redirectTo: `${base}/auth/confirm`,
+      redirectTo: `${base}/auth/callback?next=/reset-password`,
     });
     setBusy(false);
     if (authError) return setError("Couldn't send the email. Try again in a minute.");

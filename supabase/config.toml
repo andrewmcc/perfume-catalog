@@ -223,7 +223,10 @@ otp_expiry = 3600
 # sender_name = "Admin"
 
 # Uncomment to customize email template
-# Custom templates need a custom SMTP provider (free tier rejects them). Re-enable once SMTP is set up:
+# Custom templates need either a paste into the dashboard (Auth > Email Templates) or a custom SMTP
+# provider; `config push` rejects them on the free tier. Until then, password recovery falls back to
+# the default PKCE link (forgot-password sends redirectTo /auth/callback?next=/reset-password).
+# Re-enable these blocks once SMTP is set up:
 # [auth.email.template.invite]
 # subject = "You're invited to Perfume Catalog"
 # content_path = "./supabase/templates/invite.html"

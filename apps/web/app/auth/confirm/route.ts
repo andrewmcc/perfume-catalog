@@ -5,7 +5,7 @@ import { createServerClient } from '@/lib/supabase/server';
 const baseUrl = (origin: string) => process.env.NEXT_PUBLIC_APP_URL ?? origin;
 const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-const PAGE = (hidden: string) => `<!doctype html>
+const PAGE = (hidden: string, label: string) => `<!doctype html>
 <html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex"><title>Continue · Perfume Catalog</title>
 <style>
@@ -18,7 +18,7 @@ p{color:var(--muted);font-size:17px;line-height:1.5;margin:0}
 button{min-height:44px;border:0;border-radius:6px;background:var(--leaf);color:var(--leaf-ink);font-size:15px;font-weight:500;width:100%}
 </style></head><body><main>
 <p class="brand">Perfume Catalog</p><h1>Continue</h1>
-<p>Tap continue to choose your password.</p>
+<p>${label}</p>
 <form method="post" action="/auth/confirm">${hidden}<button type="submit">Continue</button></form>
 </main></body></html>`;
 
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
   ]
     .map(([k, v]) => `<input type="hidden" name="${k}" value="${esc(v!)}">`)
     .join('');
-  return new Response(PAGE(hidden), {
+  return new Response(PAGE(hidden, parsed.type === 'email' ? 'Continue to confirm your email' : 'Continue to set your password'), {
     headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store', 'x-robots-tag': 'noindex' },
   });
 }

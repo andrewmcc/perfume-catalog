@@ -3,7 +3,7 @@
 import { createBrowserClient } from '@perfume/supabase';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { friendlyResetError, type ResetError } from '@/lib/auth/reset-error';
 import { AuthShell, buttonClass, inputClass } from '../shell';
 
@@ -13,6 +13,15 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<ResetError | null>(null);
   const [busy, setBusy] = useState(false);
+  // undefined while checking; null means no session (the link was never confirmed or has expired).
+  const [account, setAccount] = useState<string | null | undefined>(undefined);
+
+  // Show whose password this sets, so a link that signed in the wrong account is obvious.
+  useEffect(() => {
+    createBrowserClient()
+      .auth.getUser()
+      .then(({ data }) => setAccount(data.user?.email ?? null));
+  }, []);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -25,11 +34,30 @@ export default function ResetPasswordPage() {
     router.refresh();
   }
 
+  if (account === undefined) return <AuthShell>{null}</AuthShell>;
+  if (account === null) {
+    return (
+      <AuthShell>
+        <div>
+          <h1 className="mb-2 text-2xl font-semibold">Link expired</h1>
+          <p role="alert" className="mb-4 text-sm">
+            This link has expired or was already used.
+          </p>
+          <Link href="/forgot-password" className="inline-flex min-h-11 items-center text-sm underline underline-offset-4">
+            Request a new link
+          </Link>
+        </div>
+      </AuthShell>
+    );
+  }
+
   return (
     <AuthShell>
       <div>
         <h1 className="mb-2 text-2xl font-semibold">Set your password</h1>
-        <p className="mb-6 text-sm opacity-70">Choose the password you will use to sign in.</p>
+        <p className="mb-6 text-sm opacity-70">
+          Setting the password for <strong>{account}</strong>
+        </p>
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <label className="flex flex-col gap-1.5 text-sm">
             Password

@@ -41,6 +41,10 @@ describe('isSameOrigin', () => {
     expect(isSameOrigin(h({ origin: 'https://app.test' }), 'http://internal', 'https://app.test')).toBe(true);
     expect(isSameOrigin(h({ referer: 'https://app.test/auth/confirm?x=1' }), 'http://internal', 'https://app.test')).toBe(true);
   });
+  it('fails closed on a malformed app url', () => {
+    expect(isSameOrigin(h({ origin: 'http://a.test' }), 'http://a.test', 'not a url')).toBe(false);
+    expect(isSameOrigin(h({ origin: 'https://evil.test' }), 'http://a.test', 'not a url')).toBe(false);
+  });
   it('rejects foreign, null and missing origins', () => {
     expect(isSameOrigin(h({ origin: 'https://evil.test' }), 'http://a.test', 'https://app.test')).toBe(false);
     expect(isSameOrigin(h({ origin: 'null' }), 'http://a.test', undefined)).toBe(false);
