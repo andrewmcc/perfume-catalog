@@ -56,13 +56,15 @@ export async function deleteTestCollection(id: string): Promise<void> {
   await admin().from('collections').delete().eq('id', id);
 }
 
-/** Removes every object under a prefix in the photos bucket (one folder level of nesting). */
+/** Recursively removes every object under a prefix in the photos bucket. */
 export async function removeStoragePrefix(prefix: string): Promise<void> {
   const storage = admin().storage.from('photos');
-  const { data: dirs } = await storage.list(prefix);
-  for (const d of dirs ?? []) {
-    const { data: files } = await storage.list(`${prefix}/${d.name}`);
-    if (files?.length) await storage.remove(files.map((f) => `${prefix}/${d.name}/${f.name}`));
-    await storage.remove([`${prefix}/${d.name}`]);
+  const { data } = await storage.list(prefix);
+  const files: string[] = [];
+  for (const e of data ?? []) {
+    // Folders have no id; files do.
+    if (e.id) files.push(`${prefix}/${e.name}`);
+    else await removeStoragePrefix(`${prefix}/${e.name}`);
   }
+  if (files.length) await storage.remove(files);
 }

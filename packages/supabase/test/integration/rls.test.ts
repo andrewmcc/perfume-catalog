@@ -47,14 +47,14 @@ describe.skipIf(!hasCredentials)('collection RLS', () => {
     const scanId = crypto.randomUUID();
     const sc = await A.client
       .from('scans')
-      .insert({ id: scanId, collection_id: CA, created_by: A.id, mode: 'bottle', photo_paths: [`${CA}/${scanId}/1.jpg`] })
+      .insert({ id: scanId, collection_id: CA, created_by: A.id, mode: 'bottle', photo_paths: [`${CA}/${scanId}/photo-1.jpg`] })
       .select('id')
       .single();
     expect(sc.error).toBeNull();
     aScan = sc.data!.id;
 
     // item_photos and scan_results are written by the server in practice; seed via admin for B-visibility checks.
-    const ph = await admin().from('item_photos').insert({ item_id: aItem, collection_id: CA, storage_path: `${CA}/x/1.jpg` }).select('id').single();
+    const ph = await admin().from('item_photos').insert({ item_id: aItem, collection_id: CA, storage_path: `${CA}/${crypto.randomUUID()}/photo-1.jpg` }).select('id').single();
     if (ph.error) throw ph.error;
     aPhoto = ph.data.id;
     const sr = await admin().from('scan_results').insert({ scan_id: aScan, collection_id: CA, position: 0, kind: 'bottle', read: {} }).select('id').single();
@@ -157,7 +157,7 @@ describe.skipIf(!hasCredentials)('collection RLS', () => {
       if (it.error) throw it.error;
       bItem = it.data.id;
       bScan = crypto.randomUUID();
-      const sc = await admin().from('scans').insert({ id: bScan, collection_id: CB, mode: 'bottle', photo_paths: [`${CB}/${bScan}/1.jpg`] });
+      const sc = await admin().from('scans').insert({ id: bScan, collection_id: CB, mode: 'bottle', photo_paths: [`${CB}/${bScan}/photo-1.jpg`] });
       if (sc.error) throw sc.error;
     });
 
@@ -182,25 +182,25 @@ describe.skipIf(!hasCredentials)('collection RLS', () => {
     });
 
     it("A cannot create item_photos in CA with item_id of CB's item", async () => {
-      const r = await A.client.from('item_photos').insert({ item_id: bItem, collection_id: CA, storage_path: `${CA}/y/1.jpg` });
+      const r = await A.client.from('item_photos').insert({ item_id: bItem, collection_id: CA, storage_path: `${CA}/y/photo-1.jpg` });
       rejected(r.error);
     });
 
     it('A cannot create item_photos with storage_path under CB/', async () => {
-      const r = await A.client.from('item_photos').insert({ item_id: aItem, collection_id: CA, storage_path: `${CB}/y/1.jpg` });
+      const r = await A.client.from('item_photos').insert({ item_id: aItem, collection_id: CA, storage_path: `${CB}/y/photo-1.jpg` });
       rejected(r.error);
-      const t = await A.client.from('item_photos').insert({ item_id: aItem, collection_id: CA, storage_path: `${CA}/y/1.jpg`, thumb_path: `${CB}/y/t.jpg` });
+      const t = await A.client.from('item_photos').insert({ item_id: aItem, collection_id: CA, storage_path: `${CA}/y/photo-1.jpg`, thumb_path: `${CB}/y/t.jpg` });
       rejected(t.error);
     });
 
     it("A cannot insert a scan whose photo_paths are outside CA/<scan id>/", async () => {
       const id = crypto.randomUUID();
       const base = { id, collection_id: CA, created_by: A.id, mode: 'bottle' as const };
-      for (const photo_paths of [[`${CB}/${id}/1.jpg`], [`${CA}/${crypto.randomUUID()}/1.jpg`], [], [`${CA}/${id}/1.jpg`, `${CB}/${id}/2.jpg`], [`${CA}/${id}/1.jpg`, `${CA}/${id}/2.jpg`, `${CA}/${id}/3.jpg`]]) {
+      for (const photo_paths of [[`${CB}/${id}/photo-1.jpg`], [`${CA}/${crypto.randomUUID()}/photo-1.jpg`], [], [`${CA}/${id}/photo-1.jpg`, `${CB}/${id}/photo-2.jpg`], [`${CA}/${id}/photo-1.jpg`, `${CA}/${id}/photo-2.jpg`, `${CA}/${id}/photo-3.jpg`]]) {
         const r = await A.client.from('scans').insert({ ...base, photo_paths });
         rejected(r.error);
       }
-      const ok = await A.client.from('scans').insert({ ...base, photo_paths: [`${CA}/${id}/1.jpg`, `${CA}/${id}/2.jpg`] });
+      const ok = await A.client.from('scans').insert({ ...base, photo_paths: [`${CA}/${id}/photo-1.jpg`, `${CA}/${id}/photo-2.jpg`] });
       expect(ok.error).toBeNull();
     });
 
@@ -228,8 +228,44 @@ describe.skipIf(!hasCredentials)('collection RLS', () => {
     it('client insert into scans that includes status or extraction is rejected', async () => {
       for (const extra of [{ status: 'reviewed' }, { extraction: { x: 1 } }]) {
         const id = crypto.randomUUID();
-        const r = await A.client.from('scans').insert({ id, collection_id: CA, created_by: A.id, mode: 'bottle', photo_paths: [`${CA}/${id}/1.jpg`], ...extra } as never);
+        const r = await A.client.from('scans').insert({ id, collection_id: CA, created_by: A.id, mode: 'bottle', photo_paths: [`${CA}/${id}/photo-1.jpg`], ...extra } as never);
         rejected(r.error);
+      }
+    });
+
+    it('scan photo_paths: traversal and wrong filenames rejected (23514), photo-1/photo-2 accepted', async () => {
+      const id = crypto.randomUUID();
+      const base = { id, collection_id: CA, created_by: A.id, mode: 'bottle' as const };
+      for (const paths of [[`${CA}/${id}/../../${CB}/x/photo-1.jpg`], [`${CA}/${id}/photo-3.jpg`], [`${CA}/${id}/photo-1.jpg/../../x.jpg`], [`${CA}/${id}/photo-1.jpgx`]]) {
+        const r = await A.client.from('scans').insert({ ...base, photo_paths: paths });
+        expect(r.error?.code).toBe('23514');
+      }
+      const ok = await A.client.from('scans').insert({ ...base, photo_paths: [`${CA}/${id}/photo-1.jpg`, `${CA}/${id}/photo-2.jpg`] });
+      expect(ok.error).toBeNull();
+    });
+
+    it('item_photos storage_path: traversal rejected (23514), strict path accepted', async () => {
+      const u = crypto.randomUUID();
+      for (const storage_path of [`${CA}/../${CB}/${u}/photo-1.jpg`, `${CA}/${u}/../../x.jpg`, `${CA}/${u}/photo 1.jpg`, `${CA}/${u}/photo-1.png`]) {
+        const r = await A.client.from('item_photos').insert({ item_id: aItem, collection_id: CA, storage_path });
+        expect(r.error?.code).toBe('23514');
+      }
+      const t = await A.client.from('item_photos').insert({ item_id: aItem, collection_id: CA, storage_path: `${CA}/${u}/photo-1.jpg`, thumb_path: `${CA}/${u}/../x/thumb-1.webp` });
+      expect(t.error?.code).toBe('23514');
+      const ok = await A.client.from('item_photos').insert({ item_id: aItem, collection_id: CA, storage_path: `${CA}/${u}/photo-1.jpg`, thumb_path: `${CA}/${u}/thumb-1.webp` });
+      expect(ok.error).toBeNull();
+    });
+
+    it('an unreferenced private perfume can move between two collections the user belongs to', async () => {
+      const CX = await createTestCollection([A.id]);
+      try {
+        const p = await A.client.from('perfumes').insert({ collection_id: CA, house: 'zz-test-move', name: 'Mover' }).select('id').single();
+        expect(p.error).toBeNull();
+        const mv = await A.client.from('perfumes').update({ collection_id: CX }).eq('id', p.data!.id).select('collection_id');
+        expect(mv.error).toBeNull();
+        expect(mv.data![0].collection_id).toBe(CX);
+      } finally {
+        await deleteTestCollection(CX);
       }
     });
 

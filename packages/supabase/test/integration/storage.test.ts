@@ -68,6 +68,15 @@ describe.skipIf(!hasCredentials)('photos bucket', () => {
     expect((l.data ?? []).length).toBeGreaterThan(0);
   });
 
+  it('upload with .. in the object name is rejected', async () => {
+    // A literal "/../" segment is resolved by the HTTP client before it reaches Storage, so the
+    // policy is exercised with ".." inside a segment, which is passed through untouched.
+    const bad = await A.client.storage.from('photos').upload(`${CA}/x/a..b/photo-1.jpg`, jpeg(), { contentType: 'image/jpeg' });
+    expect(bad.error).not.toBeNull();
+    const ok = await A.client.storage.from('photos').upload(`${CA}/x/ab/photo-1.jpg`, jpeg(), { contentType: 'image/jpeg' });
+    expect(ok.error).toBeNull();
+  });
+
   it('bucket is private with size and mime limits', async () => {
     const { data } = await admin().storage.getBucket('photos');
     expect(data?.public).toBe(false);
