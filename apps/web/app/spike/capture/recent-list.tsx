@@ -1,46 +1,18 @@
 'use client';
 
 import { useState } from 'react';
-import type { BottleResult, PerfumeRead, SamplesResult, SetResult } from '@/lib/spike/extract-schema';
+import { summarise } from '@/lib/spike/summarise';
 import type { QueuedCapture } from './capture-queue';
 
-const joinParts = (parts: string[]) => parts.filter(Boolean).join(' · ') || '(unnamed)';
-const perfumeLine = (p: PerfumeRead) => joinParts([p.house, p.name, p.concentration]);
-const statuses = (p: PerfumeRead) => `house ${p.status.house}, name ${p.status.name}, conc ${p.status.concentration}`;
-
-/** Readable summary lines; `empty` means the model recognised nothing usable (Review Focus 4). */
-export function summarise(item: QueuedCapture): { lines: string[]; empty: boolean } {
-  const { mode, result } = item;
-  if (!result) return { lines: [], empty: false };
-  if (mode === 'bottle') {
-    const r = result as BottleResult;
-    if (!r.is_perfume) return { lines: [], empty: true };
-    return { lines: [perfumeLine(r.perfume), statuses(r.perfume)], empty: false };
-  }
-  if (mode === 'samples') {
-    const r = result as SamplesResult;
-    if (!r.is_perfume_photo || r.vials.length === 0) {
-      return { lines: r.unreadable_count ? [`${r.unreadable_count} unreadable`] : [], empty: true };
-    }
-    return {
-      lines: [
-        `${r.vials.length} vials read, ${r.unreadable_count} unreadable`,
-        ...r.vials.map((v) => `${perfumeLine(v)} (${statuses(v)})`),
-      ],
-      empty: false,
-    };
-  }
-  const r = result as SetResult;
-  if (!r.is_discovery_set || r.scents.length === 0) return { lines: [], empty: true };
-  return {
-    lines: [joinParts([r.set_house, r.set_name]), ...r.scents.map((s) => `${perfumeLine(s)} (${statuses(s)})`)],
-    empty: false,
-  };
+function summariseItem(item: QueuedCapture): { lines: string[]; empty: boolean } {
+  if (!item.result) return { lines: [], empty: false };
+  const { recognised, lines } = summarise(item.mode, item.result);
+  return { lines, empty: !recognised };
 }
 
 function CaptureRow({ item, onRetry }: { item: QueuedCapture; onRetry: (i: QueuedCapture) => void }) {
   const [showJson, setShowJson] = useState(false);
-  const { lines, empty } = summarise(item);
+  const { lines, empty } = summariseItem(item);
   return (
     <li className="mb-2 flex gap-2 border-b border-white/20 pb-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
