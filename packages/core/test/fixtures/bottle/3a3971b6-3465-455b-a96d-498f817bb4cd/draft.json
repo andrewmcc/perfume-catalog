@@ -1,0 +1,23 @@
+{
+  "mode": "bottle",
+  "result": {
+    "is_perfume": true,
+    "perfume": {
+      "house": "E.P.C.",
+      "name": "Cardamom Moss",
+      "concentration": "edp",
+      "flanker_or_edition": "",
+      "size_ml": 0,
+      "status": {
+        "house": "clear",
+        "name": "clear",
+        "concentration": "clear"
+      }
+    },
+    "format": "travel",
+    "batch_code": "",
+    "identified_from": "label",
+    "other_text": "EAU DE PARFUM"
+  },
+  "ms": 1999
+}

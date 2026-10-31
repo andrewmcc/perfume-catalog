@@ -1,0 +1,23 @@
+{
+  "mode": "bottle",
+  "result": {
+    "is_perfume": true,
+    "perfume": {
+      "house": "Miller Harris",
+      "name": "Rêverie de Bergamote",
+      "concentration": "edp",
+      "flanker_or_edition": "",
+      "size_ml": 0,
+      "status": {
+        "house": "clear",
+        "name": "clear",
+        "concentration": "clear"
+      }
+    },
+    "format": "travel",
+    "batch_code": "",
+    "identified_from": "label",
+    "other_text": "PERFUMER LONDON; EAU DE PARFUM"
+  },
+  "ms": 1790
+}

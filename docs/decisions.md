@@ -55,4 +55,12 @@ Running log of decisions for the perfume catalogue. Tags: **[user]** = user deci
 
 ## Phase 0 spike findings
 
-_Pending iPhone session._
+- **Auto-capture:** Seeds' minSharpness 2500 never fired on bottles; real bottle captures measured 328–437. Default is now 200 and auto-capture fires. 2 false fires on a static floor scene, both discarded as not perfume. Glare measured 0 on every real capture, so no glare gating; maxGlare stays off. [my call]
+- **Identification:** the spec allows branding and shape evidence, so the strict "as printed" prompt was replaced. Naxos identified as Xerjoff from its X plaque and 1861 crest. [my call, spec]
+- **Identification, round 2:** 9 of 14 captures fully correct. Misses: 2 partial names (Sospiro "CON…O", Diptyque sample "de Peau Eb…") and 1 bottle with no text, correctly left blank. No confident wrong identifications. [my call]
+- **Sets:** the Matière Première lid shows only the house. UI now shows partial results instead of "Nothing recognised". [my call]
+- **Back photo** only when needed. Phase 1 review: a poorly identified bottle gets a retake / add-back prompt. [user; prompt my call]
+- **Truncated names → Phase 1:** use the most likely name from the house's range, flagged unclear, plus up to 2 alternatives. [user]
+- **Fixtures:** hand-correction of `expected.json` skipped; fixtures are unverified model output. [user]
+- **Timing:** extraction took about 1.5–9 s per bottle. [my call]
+- **Not measured:** seconds per bottle, samples-mode accuracy, set-insert reading. The user moved to the build. [user]

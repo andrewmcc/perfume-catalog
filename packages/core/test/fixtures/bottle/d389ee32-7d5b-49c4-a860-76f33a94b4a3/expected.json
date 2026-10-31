@@ -1,0 +1,14 @@
+{
+  "is_perfume": true,
+  "perfume": {
+    "house": "EPC",
+    "name": "Tonka Sesame",
+    "concentration": "edp",
+    "flanker_or_edition": "",
+    "size_ml": 0
+  },
+  "format": "travel",
+  "batch_code": "",
+  "identified_from": "label",
+  "other_text": "Eau de Parfum (partially legible, small text under EPC); roller-ball style bottle with black cap"
+}

@@ -1,0 +1,14 @@
+{
+  "is_perfume": true,
+  "perfume": {
+    "house": "Chloé",
+    "name": "Atelier des Fleurs Cedrus",
+    "concentration": "",
+    "flanker_or_edition": "",
+    "size_ml": 0
+  },
+  "format": "full",
+  "batch_code": "",
+  "identified_from": "label",
+  "other_text": "Atelier des Fleurs CEDRUS Chloé"
+}

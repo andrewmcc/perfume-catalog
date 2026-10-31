@@ -1,0 +1,14 @@
+{
+  "is_perfume": true,
+  "perfume": {
+    "house": "Acqua di Parma",
+    "name": "Fico di Amalfi",
+    "concentration": "",
+    "flanker_or_edition": "Blu Mediterraneo",
+    "size_ml": 0
+  },
+  "format": "full",
+  "batch_code": "",
+  "identified_from": "label",
+  "other_text": "Blu Mediterraneo"
+}
