@@ -134,7 +134,7 @@ This mirrors Seeds' 1b: `~/code/seeds/docs/plans/2026-10-27-phase-1b-capture-ext
 ### Task 2: Collection helper, extraction service and routes
 
 **Files:**
-- Create: `supabase/migrations/00008_scan_discarded.sql`. It adds `'discarded'` to the `scans.status` check, and an index on `scans (collection_id, status, updated_at)`.
+- Create: `supabase/migrations/00009_scan_discarded.sql`. It adds `'discarded'` to the `scans.status` check, and an index on `scans (collection_id, status, updated_at)`.
 - Create: `apps/web/lib/collections/current.ts`, with `getCurrentCollectionId(supabase): Promise<string | null>`: the first membership by `created_at`.
 - Create: `apps/web/lib/scans/extract-scan.ts` (`import 'server-only'`) and `apps/web/lib/scans/__tests__/select-pending.test.ts`.
 - Create: `apps/web/lib/scans/__tests__/extract-scan.integration.test.ts`, which runs against the hosted DB with a fake extract function. Create `apps/web/vitest.integration.config.ts`, which loads `.env.local`, and add the script `test:integration`. Exclude `*.integration.test.ts` from `pnpm test`.
@@ -162,7 +162,7 @@ This mirrors Seeds' 1b: `~/code/seeds/docs/plans/2026-10-27-phase-1b-capture-ext
 
 - [ ] **Step 1: Write the failing integration tests.** Users A and B are in collections CA and CB, and the extract function is fake.
   - `B gets not_found for CA's scan; row untouched`. Review Focus 1.
-  - `path outside prefix is refused`: set the path via admin to `CB/…`. The result is `not_found`, and nothing is downloaded. Review Focus 2.
+  - `path outside prefix is refused`. The DB CHECK from 1a migrations 00007/00008 already rejects bad paths, even for the service role, so test the server re-check as a pure function: `pathsOk(collectionId, scanId, paths)` is false for `CB/…`, for `CA/<sid>/../x`, and for a third element. In the integration test, a scan whose collection the requester isn't in returns `not_found`, and nothing is downloaded. Review Focus 2.
   - `bottle success writes extraction, status extracted, attempts 1, one scan_results row kind bottle`.
   - `samples success with 3 vials writes 3 vial rows`.
   - `flag false → discarded, error 'not perfume', no results`.
