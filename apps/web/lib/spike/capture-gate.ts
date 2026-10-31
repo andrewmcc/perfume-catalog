@@ -20,7 +20,8 @@ export type GateConfig = {
 // Edge ratio is off by default (0): with a packet in hand the ring around the square
 // (fingers, packet edges, table) is busier than the inside — measured 0.77–1.4.
 export const DEFAULT_GATE: GateConfig = {
-  minSharpness: 2500,
+  // 200: real bottle captures measured 328-437 (160x160, inner rect); 2500 was tuned on seed packets.
+  minSharpness: 200,
   maxDiff: 15,
   minEdgeRatio: 0,
   stableMs: 500,

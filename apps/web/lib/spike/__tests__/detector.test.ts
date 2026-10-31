@@ -22,7 +22,8 @@ describe('sharpness', () => {
   });
 
   it('dim noisy frame falls below the default gate threshold', () => {
-    expect(sharpness(noise(1, 8), W, H, INNER)).toBeLessThan(DEFAULT_GATE.minSharpness);
+    // noise(1, 8) measures ~425 in INNER (above the 200 default), so use amp 4.
+    expect(sharpness(noise(1, 4), W, H, INNER)).toBeLessThan(DEFAULT_GATE.minSharpness);
     expect(sharpness(packetOn(flat(128)), W, H, INNER)).toBeGreaterThanOrEqual(DEFAULT_GATE.minSharpness);
   });
 });

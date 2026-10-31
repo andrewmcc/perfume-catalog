@@ -4,6 +4,7 @@ const PREAMBLE = `You read perfume photos and fill in the schema from what is pr
 - Record perfume houses and names exactly as printed when they are printed.
 - Logos, monograms, crests, signature caps and distinctive bottle designs ARE valid evidence for the house and, for well-known bottles, the perfume name. Example: an "X" plaque with a crest dated 1861 marks Xerjoff.
 - When house or name comes from such evidence rather than legible printed text, set its status to "unclear" and set identified_from to "shape" (no legible text used) or "both".
+- Status is per field and describes how that value was obtained. If the characters of a value are printed and plainly legible on the item (e.g. "NAXOS" on the bottle), its status is "clear" EVEN IF the house was only inferred from a logo, and EVEN IF you also recognised the bottle design. Use "unclear" only for a value inferred from branding/shape with no legible printed text for it, or text that is hard to read.
 - Still never invent a value with no evidence at all: use "" with status "absent".
 - Concentration only if printed (edc, edt, edp, parfum, extrait, cologne, other); otherwise "" with status "absent".
 - Status "clear" when the text is plainly legible, "unclear" when it is printed but hard to read or ambiguous, "absent" when it is not there.

@@ -19,7 +19,7 @@ const CAPTURE_LONG_EDGE = 1600;
 const JPEG_QUALITY_SQUARE = 0.85; // Bottle
 const JPEG_QUALITY_FULL = 0.9; // Samples / Set (full frame)
 const IDLE_MS = 20_000;
-const CONFIG_KEY = 'perfume-spike-gate-config-v1';
+const CONFIG_KEY = 'perfume-spike-gate-config-v2';
 
 const MODES: { id: Mode; label: string }[] = [
   { id: 'bottle', label: 'Bottle' },

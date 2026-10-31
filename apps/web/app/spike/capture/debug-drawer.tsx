@@ -3,7 +3,7 @@
 import type { FrameMetrics, GateConfig, GateState } from '@/lib/spike/capture-gate';
 
 const SLIDERS: readonly (readonly [keyof GateConfig, number, number, number])[] = [
-  ['minSharpness', 0, 20000, 100],
+  ['minSharpness', 0, 2000, 25],
   ['maxDiff', 0, 40, 0.5],
   ['minEdgeRatio', 0, 10, 0.1],
   ['stableMs', 100, 2000, 50],
