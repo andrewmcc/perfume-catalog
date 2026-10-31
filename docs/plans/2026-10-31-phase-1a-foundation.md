@@ -33,7 +33,7 @@ all ready for 1b (capture and extraction) and 1c (review and collection) to buil
   Use the scope `@perfume/*`. Never modify `~/code/seeds`.
 - **Supabase project:**
   - ref `hrhxjchoxwcfhfvclnfb`, on the user's dedicated account.
-  - Every Supabase CLI call must run with `SUPABASE_ACCESS_TOKEN="$(cat .superpowers/sdd/2026-10-31-phase-0-spike/supabase-token.txt)"` (git-ignored). If the file is missing, ask the controller.
+  - Every Supabase CLI call must run with `SUPABASE_ACCESS_TOKEN="$(cat .superpowers/secrets/supabase-token.txt)"` (git-ignored). If the file is missing, ask the controller.
   - Never `supabase login` or `logout`: the global CLI login belongs to another account.
   - There is no Docker, so there is no local Supabase. Push migrations to the hosted project.
   - If `db push` needs a DB password that isn't in `.env.local`, stop and report. The user resets it in the dashboard into `SUPABASE_DB_PASSWORD`.
