@@ -4,11 +4,9 @@ node_modules
 dist
 .turbo
 .next
-.env
-.env.local
-.env*.local
 *.tsbuildinfo
 .vercel
 .DS_Store
 supabase/.temp/
 .env*
+!.env.example
