@@ -44,9 +44,10 @@ describe.skipIf(!hasCredentials)('collection RLS', () => {
     expect(i.error).toBeNull();
     aItem = i.data!.id;
 
+    const scanId = crypto.randomUUID();
     const sc = await A.client
       .from('scans')
-      .insert({ id: crypto.randomUUID(), collection_id: CA, created_by: A.id, mode: 'bottle', photo_paths: [`${CA}/x/1.jpg`] })
+      .insert({ id: scanId, collection_id: CA, created_by: A.id, mode: 'bottle', photo_paths: [`${CA}/${scanId}/1.jpg`] })
       .select('id')
       .single();
     expect(sc.error).toBeNull();
@@ -140,5 +141,103 @@ describe.skipIf(!hasCredentials)('collection RLS', () => {
     const ok = await admin().from('perfumes').insert({ collection_id: CB, house: sharedHouse, name: 'Shared One', concentration: 'edp' });
     expect(ok.error).toBeNull();
     expect(aPhoto && aResult).toBeTruthy();
+  });
+
+  describe('cross-collection references and pinned behaviour', () => {
+    let bPerfume: string, bSet: string, bItem: string, bScan: string;
+
+    beforeAll(async () => {
+      const p = await admin().from('perfumes').insert({ collection_id: CB, house: 'zz-test-bx', name: 'B Private' }).select('id').single();
+      if (p.error) throw p.error;
+      bPerfume = p.data.id;
+      const st = await admin().from('sets').insert({ collection_id: CB, name: 'B set' }).select('id').single();
+      if (st.error) throw st.error;
+      bSet = st.data.id;
+      const it = await admin().from('items').insert({ collection_id: CB, perfume_id: bPerfume }).select('id').single();
+      if (it.error) throw it.error;
+      bItem = it.data.id;
+      bScan = crypto.randomUUID();
+      const sc = await admin().from('scans').insert({ id: bScan, collection_id: CB, mode: 'bottle', photo_paths: [`${CB}/${bScan}/1.jpg`] });
+      if (sc.error) throw sc.error;
+    });
+
+    const rejected = (e: { code?: string } | null) => expect(e).not.toBeNull();
+
+    it("A cannot create an item in CA pointing at CB's private perfume", async () => {
+      const r = await A.client.from('items').insert({ collection_id: CA, perfume_id: bPerfume });
+      rejected(r.error);
+      expect(['42501', '23503']).toContain(r.error!.code);
+    });
+
+    it("A cannot update an existing item to point at CB's private perfume", async () => {
+      const r = await A.client.from('items').update({ perfume_id: bPerfume }).eq('id', aItem).select('id');
+      expect(r.error !== null || (r.data ?? []).length === 0).toBe(true);
+      const row = await admin().from('items').select('perfume_id').eq('id', aItem).single();
+      expect(row.data!.perfume_id).toBe(aPerfume);
+    });
+
+    it("A cannot create an item in CA with set_id of CB's set", async () => {
+      const r = await A.client.from('items').insert({ collection_id: CA, perfume_id: shared.id, set_id: bSet });
+      rejected(r.error);
+    });
+
+    it("A cannot create item_photos in CA with item_id of CB's item", async () => {
+      const r = await A.client.from('item_photos').insert({ item_id: bItem, collection_id: CA, storage_path: `${CA}/y/1.jpg` });
+      rejected(r.error);
+    });
+
+    it('A cannot create item_photos with storage_path under CB/', async () => {
+      const r = await A.client.from('item_photos').insert({ item_id: aItem, collection_id: CA, storage_path: `${CB}/y/1.jpg` });
+      rejected(r.error);
+      const t = await A.client.from('item_photos').insert({ item_id: aItem, collection_id: CA, storage_path: `${CA}/y/1.jpg`, thumb_path: `${CB}/y/t.jpg` });
+      rejected(t.error);
+    });
+
+    it("A cannot insert a scan whose photo_paths are outside CA/<scan id>/", async () => {
+      const id = crypto.randomUUID();
+      const base = { id, collection_id: CA, created_by: A.id, mode: 'bottle' as const };
+      for (const photo_paths of [[`${CB}/${id}/1.jpg`], [`${CA}/${crypto.randomUUID()}/1.jpg`], [], [`${CA}/${id}/1.jpg`, `${CB}/${id}/2.jpg`], [`${CA}/${id}/1.jpg`, `${CA}/${id}/2.jpg`, `${CA}/${id}/3.jpg`]]) {
+        const r = await A.client.from('scans').insert({ ...base, photo_paths });
+        rejected(r.error);
+      }
+      const ok = await A.client.from('scans').insert({ ...base, photo_paths: [`${CA}/${id}/1.jpg`, `${CA}/${id}/2.jpg`] });
+      expect(ok.error).toBeNull();
+    });
+
+    it('scan_results cannot point at another collection\'s scan or item (admin insert)', async () => {
+      const r = await admin().from('scan_results').insert({ scan_id: bScan, collection_id: CA, position: 0, kind: 'bottle', read: {} });
+      rejected(r.error);
+      const r2 = await admin().from('scan_results').insert({ scan_id: aScan, collection_id: CA, position: 1, kind: 'bottle', read: {}, created_item_id: bItem });
+      rejected(r2.error);
+    });
+
+    it("A cannot update CA's private perfume to collection_id = null or move it to CB", async () => {
+      const toShared = await A.client.from('perfumes').update({ collection_id: null }).eq('id', aPerfume).select('id');
+      expect(toShared.error !== null || (toShared.data ?? []).length === 0).toBe(true);
+      const toCB = await A.client.from('perfumes').update({ collection_id: CB }).eq('id', aPerfume).select('id');
+      expect(toCB.error !== null || (toCB.data ?? []).length === 0).toBe(true);
+      const row = await admin().from('perfumes').select('collection_id').eq('id', aPerfume).single();
+      expect(row.data!.collection_id).toBe(CA);
+    });
+
+    it('a referenced private perfume cannot change collection even via service role', async () => {
+      const r = await admin().from('perfumes').update({ collection_id: CB }).eq('id', aPerfume);
+      rejected(r.error);
+    });
+
+    it('client insert into scans that includes status or extraction is rejected', async () => {
+      for (const extra of [{ status: 'reviewed' }, { extraction: { x: 1 } }]) {
+        const id = crypto.randomUUID();
+        const r = await A.client.from('scans').insert({ id, collection_id: CA, created_by: A.id, mode: 'bottle', photo_paths: [`${CA}/${id}/1.jpg`], ...extra } as never);
+        rejected(r.error);
+      }
+    });
+
+    it('deleting collection CB succeeds even after A attempted cross references', async () => {
+      const { error } = await admin().from('collections').delete().eq('id', CB);
+      expect(error).toBeNull();
+      const left = await admin().from('items').select('id').eq('collection_id', CB);
+      expect(left.data).toEqual([]);
+    });
   });
 });

@@ -18,21 +18,18 @@ export type Database = {
         Row: {
           collection_id: string
           created_at: string
-          id: string
           role: string
           user_id: string
         }
         Insert: {
           collection_id: string
           created_at?: string
-          id?: string
           role?: string
           user_id: string
         }
         Update: {
           collection_id?: string
           created_at?: string
-          id?: string
           role?: string
           user_id?: string
         }
@@ -107,11 +104,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "item_photos_item_id_fkey"
-            columns: ["item_id"]
+            foreignKeyName: "item_photos_item_same_collection_fkey"
+            columns: ["collection_id", "item_id"]
             isOneToOne: false
             referencedRelation: "items"
-            referencedColumns: ["id"]
+            referencedColumns: ["collection_id", "id"]
           },
         ]
       }
@@ -186,11 +183,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "items_set_id_fkey"
-            columns: ["set_id"]
+            foreignKeyName: "items_set_same_collection_fkey"
+            columns: ["collection_id", "set_id"]
             isOneToOne: false
             referencedRelation: "sets"
-            referencedColumns: ["id"]
+            referencedColumns: ["collection_id", "id"]
           },
         ]
       }
@@ -335,18 +332,18 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "scan_results_created_item_id_fkey"
-            columns: ["created_item_id"]
+            foreignKeyName: "scan_results_item_same_collection_fkey"
+            columns: ["collection_id", "created_item_id"]
             isOneToOne: false
             referencedRelation: "items"
-            referencedColumns: ["id"]
+            referencedColumns: ["collection_id", "id"]
           },
           {
-            foreignKeyName: "scan_results_scan_id_fkey"
-            columns: ["scan_id"]
+            foreignKeyName: "scan_results_scan_same_collection_fkey"
+            columns: ["collection_id", "scan_id"]
             isOneToOne: false
             referencedRelation: "scans"
-            referencedColumns: ["id"]
+            referencedColumns: ["collection_id", "id"]
           },
         ]
       }

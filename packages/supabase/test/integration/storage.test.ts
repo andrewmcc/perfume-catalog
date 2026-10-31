@@ -59,6 +59,15 @@ describe.skipIf(!hasCredentials)('photos bucket', () => {
     expect(r.error).not.toBeNull();
   });
 
+  it('upload to a non-uuid first segment is rejected without leaking a cast error; listing still works', async () => {
+    const r = await A.client.storage.from('photos').upload('not-a-uuid/x/photo-1.jpg', jpeg(), { contentType: 'image/jpeg' });
+    expect(r.error).not.toBeNull();
+    expect(JSON.stringify(r.error)).not.toMatch(/22P02|invalid input syntax/i);
+    const l = await A.client.storage.from('photos').list(CA);
+    expect(l.error).toBeNull();
+    expect((l.data ?? []).length).toBeGreaterThan(0);
+  });
+
   it('bucket is private with size and mime limits', async () => {
     const { data } = await admin().storage.getBucket('photos');
     expect(data?.public).toBe(false);
