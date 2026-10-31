@@ -1,5 +1,7 @@
 import { defineConfig } from 'vitest/config';
-import path from 'path';
+import { fileURLToPath } from 'node:url';
+
+const here = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 
 export default defineConfig({
   test: {
@@ -9,8 +11,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, '.'),
-      'server-only': path.resolve(__dirname, 'test/server-only-stub.ts'),
+      '@': here('.'),
+      'server-only': here('test/server-only-stub.ts'),
     },
   },
 });
