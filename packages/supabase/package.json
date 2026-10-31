@@ -1,0 +1,32 @@
+{
+  "name": "@perfume/supabase",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run test/*.test.ts",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "gen:types": "supabase gen types typescript --project-id hrhxjchoxwcfhfvclnfb --schema public > src/database.types.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.118.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^5.7.0",
+    "vitest": "^5.0.5"
+  }
+}
