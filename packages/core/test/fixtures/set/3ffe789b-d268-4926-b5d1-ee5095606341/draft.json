@@ -1,0 +1,13 @@
+{
+  "mode": "set",
+  "result": {
+    "is_discovery_set": true,
+    "set_house": "Matiere Premiere",
+    "set_name": "",
+    "status": {
+      "set_name": "absent"
+    },
+    "scents": []
+  },
+  "ms": 1942
+}

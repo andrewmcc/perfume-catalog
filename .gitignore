@@ -1,2 +1,12 @@
 .superpowers/
 .playwright-mcp/
+node_modules
+dist
+.turbo
+.next
+*.tsbuildinfo
+.vercel
+.DS_Store
+supabase/.temp/
+.env*
+!.env.example

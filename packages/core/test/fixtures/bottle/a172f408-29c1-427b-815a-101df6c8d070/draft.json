@@ -1,0 +1,23 @@
+{
+  "mode": "bottle",
+  "result": {
+    "is_perfume": true,
+    "perfume": {
+      "house": "Louis Vuitton",
+      "name": "IMAGINATION",
+      "concentration": "",
+      "flanker_or_edition": "",
+      "size_ml": 0,
+      "status": {
+        "house": "unclear",
+        "name": "clear",
+        "concentration": "absent"
+      }
+    },
+    "format": "full",
+    "batch_code": "",
+    "identified_from": "both",
+    "other_text": "Louis Vuitton name is faintly embossed on the glass and seen mirrored; the bottle and cap design is the Louis Vuitton Les Parfums style."
+  },
+  "ms": 2466
+}

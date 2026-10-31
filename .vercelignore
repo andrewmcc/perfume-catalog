@@ -1,0 +1,12 @@
+# Local caches and tooling output; Vercel builds from source.
+.turbo
+**/.turbo
+**/.next
+**/node_modules
+**/dist
+.playwright-mcp
+.superpowers
+**/.env*
+!.env.example
+# Eval photos aren't needed to build or run the app.
+packages/core/test/fixtures

@@ -1,0 +1,23 @@
+{
+  "mode": "bottle",
+  "result": {
+    "is_perfume": true,
+    "perfume": {
+      "house": "CHANEL",
+      "name": "PARIS - ÉDIMBOURG",
+      "concentration": "",
+      "flanker_or_edition": "",
+      "size_ml": 0,
+      "status": {
+        "house": "clear",
+        "name": "clear",
+        "concentration": "absent"
+      }
+    },
+    "format": "full",
+    "batch_code": "",
+    "identified_from": "label",
+    "other_text": "PARIS"
+  },
+  "ms": 1543
+}

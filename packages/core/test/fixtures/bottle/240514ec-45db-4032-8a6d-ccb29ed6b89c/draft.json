@@ -1,0 +1,23 @@
+{
+  "mode": "bottle",
+  "result": {
+    "is_perfume": true,
+    "perfume": {
+      "house": "Diptyque",
+      "name": "de Peau Eb",
+      "concentration": "",
+      "flanker_or_edition": "",
+      "size_ml": 0,
+      "status": {
+        "house": "clear",
+        "name": "unclear",
+        "concentration": "absent"
+      }
+    },
+    "format": "decant",
+    "batch_code": "",
+    "identified_from": "label",
+    "other_text": "Handwritten-style/printed green label on a clear atomizer vial; text partially cut off: \"Diptyque\" and \"de Peau Eb...\" (possibly Eau de Peau or similar)"
+  },
+  "ms": 2335
+}

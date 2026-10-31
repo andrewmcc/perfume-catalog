@@ -1,0 +1,13 @@
+{
+  "mode": "set",
+  "result": {
+    "is_discovery_set": false,
+    "set_house": "",
+    "set_name": "",
+    "status": {
+      "set_name": "absent"
+    },
+    "scents": []
+  },
+  "ms": 2372
+}

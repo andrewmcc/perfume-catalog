@@ -1,0 +1,14 @@
+{
+  "is_perfume": false,
+  "perfume": {
+    "house": "",
+    "name": "",
+    "concentration": "",
+    "flanker_or_edition": "",
+    "size_ml": 0
+  },
+  "format": "full",
+  "batch_code": "",
+  "identified_from": "none",
+  "other_text": ""
+}

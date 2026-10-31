@@ -1,0 +1,23 @@
+{
+  "mode": "bottle",
+  "result": {
+    "is_perfume": true,
+    "perfume": {
+      "house": "Aēsop.",
+      "name": "Above Us, Steorra",
+      "concentration": "edp",
+      "flanker_or_edition": "",
+      "size_ml": 0,
+      "status": {
+        "house": "clear",
+        "name": "clear",
+        "concentration": "clear"
+      }
+    },
+    "format": "full",
+    "batch_code": "",
+    "identified_from": "label",
+    "other_text": "Eau de Parfum"
+  },
+  "ms": 1655
+}

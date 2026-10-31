@@ -1,0 +1,23 @@
+{
+  "mode": "bottle",
+  "result": {
+    "is_perfume": true,
+    "perfume": {
+      "house": "",
+      "name": "NAXOS",
+      "concentration": "",
+      "flanker_or_edition": "",
+      "size_ml": 0,
+      "status": {
+        "house": "absent",
+        "name": "clear",
+        "concentration": "absent"
+      }
+    },
+    "format": "full",
+    "batch_code": "",
+    "identified_from": "both",
+    "other_text": "X logo plaque, crest with 1861, Naxos"
+  },
+  "ms": 2151
+}
