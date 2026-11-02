@@ -9,7 +9,10 @@
         "SUPABASE_SERVICE_ROLE_KEY",
         "SUPABASE_ANON_KEY",
         "ANTHROPIC_API_KEY",
-        "SPIKE_PASSCODE"
+        "SPIKE_PASSCODE",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "NEXT_PUBLIC_APP_URL"
       ]
     },
     "test": { "dependsOn": ["^build"], "cache": false },

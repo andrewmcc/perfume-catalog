@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1024" height="1024">
+  <!-- Flacon app icon, option C: upright Bodoni Moda "F" (outlined, 500 weight, opsz 72) in gold foil,
+       double gold ring, oxblood radial vignette. The letter is centred on its ink box. -->
+  <defs>
+    <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6e2a4"/><stop offset=".35" stop-color="#e2bd62"/><stop offset=".55" stop-color="#b98a32"/><stop offset=".8" stop-color="#e9c977"/><stop offset="1" stop-color="#a87a2a"/>
+    </linearGradient>
+    <radialGradient id="ox" cx=".5" cy=".38" r=".75">
+      <stop offset="0" stop-color="#7d3030"/><stop offset=".7" stop-color="#5a2020"/><stop offset="1" stop-color="#3f1515"/>
+    </radialGradient>
+  </defs>
+  <rect width="100" height="100" fill="url(#ox)"/>
+  <circle cx="50" cy="50" r="35" fill="none" stroke="url(#foil)" stroke-width="1.6"/>
+  <circle cx="50" cy="50" r="31.5" fill="none" stroke="url(#foil)" stroke-width=".5" opacity=".8"/>
+  <path fill="url(#foil)" d="M55.19 55.17Q55.09 53.63 54.36 52.51Q53.62 51.38 52.27 50.77Q50.91 50.16 49 50.16H45.99V50.02H49Q50.91 50.02 52.27 49.47Q53.62 48.92 54.36 47.85Q55.09 46.78 55.19 45.24H55.32V55.17ZM62.11 32.75V42.18H61.97Q61.88 39.72 60.99 37.6Q60.11 35.49 58.36 34.18Q56.61 32.87 53.94 32.87H47.16V67.14H51.76V67.25H37.89V67.14H42.01V32.87H37.89V32.75Z"/>
+</svg>
