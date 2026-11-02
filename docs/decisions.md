@@ -89,3 +89,13 @@ Running log of decisions for the perfume catalogue. Tags: **[user]** = user deci
 - Fact edits are stored as overrides on every item of the perfume; the page shows the latest non-empty overrides. Setting a value back to the source removes the override. [my call]
 - Enrichment fills only empty fields, labelled AI-suggested; unknown perfumes get no notes rather than invented ones. Real call (Xerjoff Naxos): 5.5 s, sensible. [my call]
 - Deferred to later phases: wears, "Wear today", your stats and notes (Phase 2); smells like, layering, wishlist adding, add-from-text (Phase 3). [plan]
+
+## 2026-11-02 — Phase 2 deployed
+- Today (three picks with reasons, nudges, Wear), the Diary month view (log, edit, delete), perfume-page stats and notes, set tried marks, rating and worn filters, Stats, and a location setting. [plan]
+- Wears are client-written under member RLS; a trigger copies `perfume_id` from the item and refuses items from another collection; `created_by` is always the signed-in member and can't be changed or cleared by members (00013–00016). Deleting an item keeps its wears. [security review]
+- Location is per collection: UK postcode (postcodes.io, outward code stored) or browser location, both rounded to 2 dp. Weather from Open-Meteo, cached 15 min, attributed on Today and Settings. [my call]
+- Today scoring: season, time of day, occasion, a weight fit against temperature (or season) with the lighter/bolder nudge, and rotation (worn recently down, untried samples and >6-week neglect up). Picks aren't stored: the last six days are replayed and anything shown yesterday or the day before is pushed down, so an unworn favourite rotates instead of topping the list all week. [review fix]
+- Model reasons: `claude-haiku-5-5`, thinking disabled (adaptive thinking cost ~900 tokens and ~3 s), 8 s cap, cached per day and context; any failure keeps the rule reasons. Real calls: ~2.0 s. [my call]
+- Logging a wear from Today doesn't re-rank the page (the card would vanish under its rating form); picks refresh on the next visit. [my call]
+- Stats value: purchase price, else typical £/ml × size; unpriced items counted. Neglected = not worn in 90 days, linking to `/collection?worn=neglected`. Gaps are Phase 3. [plan]
+- Not done: gaps, wishlist, smells like, layering, diary year view (Phase 3); delete account (two manual launch users). [plan]
