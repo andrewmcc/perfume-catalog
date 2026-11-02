@@ -440,6 +440,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_scan: {
+        Args: { p_claim: string; p_id: string }
+        Returns: {
+          attempts: number
+          collection_id: string
+          created_at: string
+          created_by: string | null
+          error: string | null
+          extraction: Json | null
+          id: string
+          mode: string
+          model: string | null
+          photo_paths: string[]
+          status: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "scans"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       normalise_name: { Args: { p_text: string }; Returns: string }
     }
     Enums: {

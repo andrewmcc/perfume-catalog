@@ -71,3 +71,10 @@ Running log of decisions for the perfume catalogue. Tags: **[user]** = user deci
 - `NEXT_PUBLIC_APP_URL` in production is `https://perfume-catalog-cyan.vercel.app`; local stays `http://localhost:3000`, so `add-member.mts` must be run with `--app-url` for production links. [my call]
 - Members: two, one collection (`02252a09-3364-4db0-a612-01866577574b`), first as owner. Links handed over manually; no email sent. [user supplied emails]
 - iPhone check passed: invite, password set, sign-in, Add to Home Screen lands on `/today` signed in, scan icon and tabs navigate, sign-out works. [user]
+
+## 2026-11-02 — Phase 1b deployed
+- Production deployed from `0215b4e`. Smoke: signed-out `/scan` and `/today` 307 to login, `/spike/*` now protected (307 to login), unauthenticated `POST /api/scans/{id}/extract` 401. [my call]
+- Eval on unverified fixtures: bottle no_error 15/15, house 11/13, name 8/13, concentration 13/13; alternatives offered on 3/15; median 3.3 s, max 9.5 s. [my call]
+- Claude calls capped at 55 s with 1 retry; the pending sweep stops starting work after 60 s, so a run fits the 300 s function limit. [my call]
+- Spike removed: bucket `perfume-spike-captures` deleted; `SPIKE_PASSCODE` and `SUPABASE_ANON_KEY` unused (Vercel removal left to the user). [my call]
+- Shipped before the iPhone batch (10 bottles, 6+ samples, one set): production had 0 scans at merge. Timings and accuracy on real captures to be recorded after it. [user: "next phase and ship"]

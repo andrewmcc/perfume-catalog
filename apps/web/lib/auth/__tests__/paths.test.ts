@@ -41,11 +41,9 @@ describe('isPublicPath', () => {
     '/apple-icon.png',
     '/favicon.ico',
     '/_next/static/x.js',
-    '/spike/capture',
-    '/api/spike/extract',
   ])('%s is public', (p) => expect(isPublicPath(p)).toBe(true));
 
-  it.each(['/', '/today', '/collection', '/scan', '/review', '/api/scans', '/loginx', '/signup', '/authx'])('%s is protected', (p) =>
+  it.each(['/', '/today', '/collection', '/scan', '/review', '/api/scans', '/spike', '/spike/capture', '/spike/unlock', '/api/spike/extract', '/loginx', '/signup', '/authx'])('%s is protected', (p) =>
     expect(isPublicPath(p)).toBe(false),
   );
 });

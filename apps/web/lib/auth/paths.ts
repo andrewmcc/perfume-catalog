@@ -1,10 +1,9 @@
 // Route rules shared by proxy.ts and the auth routes.
 
-const PUBLIC_EXACT = new Set(['/spike', '/login', '/forgot-password', '/reset-password', '/offline', '/manifest.webmanifest', '/sw.js', '/favicon.ico']);
-// /spike and /api/spike have their own passcode gate in proxy.ts, so the session gate skips them.
-const PUBLIC_PREFIXES = ['/auth/', '/_next/', '/spike/', '/api/spike/'];
+const PUBLIC_EXACT = new Set(['/login', '/forgot-password', '/reset-password', '/offline', '/manifest.webmanifest', '/sw.js', '/favicon.ico']);
+const PUBLIC_PREFIXES = ['/auth/', '/_next/'];
 
-/** Paths reachable without a session: auth pages, the offline page, PWA assets and the passcode-gated spike. */
+/** Paths reachable without a session: auth pages, the offline page, PWA assets. */
 export function isPublicPath(pathname: string): boolean {
   if (PUBLIC_EXACT.has(pathname)) return true;
   if (/^\/(apple-)?icon[^/]*$/.test(pathname)) return true;
