@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { summarise } from '@/lib/scans/summarise';
 import type { ScanItem } from './use-scan-queue';
 
@@ -55,6 +56,11 @@ export function RecentCaptures({ items, onRetry, onClose }: { items: ScanItem[];
     <section aria-label="Recent captures" className="label-card absolute inset-x-3 top-[calc(4.5rem+env(safe-area-inset-top))] bottom-[calc(7.5rem+env(safe-area-inset-bottom))] z-30 flex flex-col text-ink">
       <div className="flex items-center justify-between px-4 pt-3">
         <h2 className="font-display text-xl italic">Recent</h2>
+        {items.some((i) => i.serverStatus === 'extracted') && (
+          <Link href="/review" className="ml-auto min-h-11 px-2 pt-3 text-sm text-oxblood underline underline-offset-4">
+            Review
+          </Link>
+        )}
         <button onClick={onClose} className="min-h-11 px-2 text-sm text-oxblood underline underline-offset-4">
           Close
         </button>
