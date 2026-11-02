@@ -2,16 +2,16 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { applyFilters, filterOptions, matchesSearch, type CollectionRow, type Filters } from '@perfume/core';
+import { applyFilters, filterOptions, londonNow, matchesSearch, type CollectionRow, type Filters } from '@perfume/core';
 import type { SetRow } from '@/lib/collection/load';
 import { FilterSheet } from './filter-sheet';
 import { PerfumeRow } from './perfume-row';
 import { ViewSwitch, type View } from './view-switch';
 
-export function CollectionView({ rows, sets }: { rows: CollectionRow[]; sets: SetRow[] }) {
+export function CollectionView({ rows, sets, initialFilters = {} }: { rows: CollectionRow[]; sets: SetRow[]; initialFilters?: Filters }) {
   const [view, setView] = useState<View>('owned');
   const [q, setQ] = useState('');
-  const [filters, setFilters] = useState<Filters>({});
+  const [filters, setFilters] = useState<Filters>(initialFilters);
   const [sheet, setSheet] = useState(false);
 
   const status = view === 'wishlist' ? 'wishlist' : 'owned';
@@ -20,7 +20,7 @@ export function CollectionView({ rows, sets }: { rows: CollectionRow[]; sets: Se
     [rows, status],
   );
   const options = useMemo(() => filterOptions(inView), [inView]);
-  const shown = applyFilters(inView, filters).filter((r) => matchesSearch(r, q));
+  const shown = applyFilters(inView, filters, londonNow(new Date()).date).filter((r) => matchesSearch(r, q));
   const active = Object.values(filters).reduce((n, v) => n + (v?.length ?? 0), 0);
   const itemCount = inView.reduce((n, r) => n + r.items.length, 0);
 

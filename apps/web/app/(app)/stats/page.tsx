@@ -1,12 +1,88 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
+import { connection } from 'next/server';
+import { Suspense } from 'react';
+import { formatGbp } from '@perfume/core';
+import { Breakdown } from '@/components/stats/breakdown';
+import { loadStats } from '@/lib/stats/load';
+import { createServerClient } from '@/lib/supabase/server';
 
 export const metadata: Metadata = { title: 'Stats' };
+
+function Tile({ value, label, note }: { value: string; label: string; note?: string }) {
+  return (
+    <div className="label-card flex flex-col items-center px-2 py-3 text-center">
+      <span className="font-display text-3xl leading-none text-ink">{value}</span>
+      <span className="mt-1 text-[12px] tracking-[0.12em] text-muted uppercase">{label}</span>
+      {note && <span className="mt-0.5 text-[11px] text-muted">{note}</span>}
+    </div>
+  );
+}
+
+async function Stats() {
+  await connection();
+  const s = await loadStats(await createServerClient());
+  if (s.bottles + s.samples === 0) return <p className="mt-3 text-muted">Stats appear once your shelf has something on it.</p>;
+  return (
+    <>
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <Tile value={String(s.bottles)} label={s.bottles === 1 ? 'bottle' : 'bottles'} />
+        <Tile value={String(s.samples)} label={s.samples === 1 ? 'sample' : 'samples'} />
+        <Tile value={String(s.sets)} label={s.sets === 1 ? 'set' : 'sets'} />
+        <Tile value={formatGbp(s.value.total)} label="est. value" note={s.value.unpriced ? `${s.value.unpriced} without a price` : undefined} />
+      </div>
+      <p className="mt-2 text-[12px] text-muted">Value is an estimate: what you paid where entered, otherwise typical retail price for the size.</p>
+
+      <section aria-label="Worn vs neglected" className="label-card mt-4 p-4">
+        <h2 className="font-display text-lg italic">Worn vs neglected</h2>
+        <p className="mt-1 text-[15px] text-ink">
+          <span className="font-display text-2xl">{s.neglected}</span> not worn in 3 months
+          {s.neglected > 0 && (
+            <>
+              {' · '}
+              <Link href="/collection?worn=neglected" className="text-oxblood underline underline-offset-4">
+                see them
+              </Link>
+            </>
+          )}
+        </p>
+        {s.mostWorn && (
+          <p className="mt-2 text-sm text-ink">
+            Most worn:{' '}
+            <Link href={`/collection/${s.mostWorn.perfumeId}`} className="underline underline-offset-4">
+              {s.mostWorn.name}
+            </Link>{' '}
+            ({s.mostWorn.count}×)
+          </p>
+        )}
+        {s.topRated && (
+          <p className="mt-1 text-sm text-ink">
+            Highest rated:{' '}
+            <Link href={`/collection/${s.topRated.perfumeId}`} className="underline underline-offset-4">
+              {s.topRated.name}
+            </Link>{' '}
+            (★{s.topRated.avg})
+          </p>
+        )}
+      </section>
+
+      <div className="mt-4 flex flex-col gap-4">
+        <Breakdown title="By scent family" rows={s.byFamily} swatch />
+        <Breakdown title="By season" rows={s.bySeason} />
+        <Breakdown title="By house" rows={s.byHouse} raw />
+        <Breakdown title="By format" rows={s.byFormat} />
+      </div>
+    </>
+  );
+}
 
 export default function Page() {
   return (
     <>
       <h1 className="font-display text-2xl italic">Stats</h1>
-      <p className="mt-2 text-muted">Gaps in your shelf, favourites and neglected bottles are coming.</p>
+      <Suspense fallback={<div className="h-96" />}>
+        <Stats />
+      </Suspense>
     </>
   );
 }

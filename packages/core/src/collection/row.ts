@@ -9,6 +9,7 @@ export type CollectionRow = {
   name: string;
   concentration: string | null;
   family: string | null;
+  sillage: string | null;
   seasons: string[];
   times: string[];
   occasions: string[];
@@ -17,4 +18,6 @@ export type CollectionRow = {
   weight: Weight | null;
   thumb: string | null;
   items: CollectionItem[];
+  /** This collection's wears of the perfume. */
+  wear: { count: number; avgRating: number | null; lastWorn: string | null };
 };

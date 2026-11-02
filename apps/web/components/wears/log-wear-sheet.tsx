@@ -1,0 +1,88 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { fold } from '@perfume/core';
+import { Button } from '@/components/ui/button';
+import { label } from '@/components/collection/labels';
+import type { Wearable } from '@/lib/wears/load';
+import { useWears } from './use-wears';
+import { WearForm } from './wear-form';
+
+/** "Log a wear": search the shelf, pick an item, then date, time, stars and notes. */
+export function LogWearSheet({ wearables, collectionId, defaultDate }: { wearables: Wearable[]; collectionId: string; defaultDate: string }) {
+  const router = useRouter();
+  const wears = useWears(collectionId);
+  const [open, setOpen] = useState(false);
+  const [q, setQ] = useState('');
+  const [picked, setPicked] = useState<Wearable | null>(null);
+
+  const close = () => {
+    setOpen(false);
+    setPicked(null);
+    setQ('');
+  };
+  const needle = fold(q.trim());
+  const shown = needle ? wearables.filter((w) => fold(`${w.house} ${w.name}`).includes(needle)) : wearables;
+
+  return (
+    <>
+      <Button onClick={() => setOpen(true)} className="w-full">
+        Log a wear
+      </Button>
+      {open && (
+        <div role="dialog" aria-modal="true" aria-label="Log a wear" className="fixed inset-0 z-40 flex items-end bg-ink/40" onClick={close}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="label-card mx-auto max-h-[85dvh] w-full max-w-xl overflow-y-auto rounded-b-none px-5 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"
+          >
+            <h2 className="font-display text-xl italic">{picked ? `${picked.name}` : 'What did you wear?'}</h2>
+            {picked ? (
+              <>
+                <p className="mb-3 text-[12px] tracking-[0.14em] text-muted uppercase">{picked.house}</p>
+                <WearForm
+                  initial={{ wornOn: defaultDate, timeOfDay: null, rating: null, notes: '' }}
+                  saveLabel="Log it"
+                  onCancel={() => setPicked(null)}
+                  onSave={async (p) => {
+                    await wears.log(picked.itemId, p);
+                    close();
+                    router.refresh();
+                  }}
+                />
+              </>
+            ) : wearables.length === 0 ? (
+              <p className="mt-3 text-sm text-muted">Nothing on your shelf yet. Scan a bottle from the icon at the top.</p>
+            ) : (
+              <>
+                <input
+                  type="search"
+                  autoFocus
+                  aria-label="Search your shelf"
+                  placeholder="Search your shelf…"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  className="mt-3 min-h-11 w-full rounded-[3px] border border-line bg-card px-3 text-[16px] text-ink placeholder:text-muted/70 focus:border-oxblood focus:outline-none"
+                />
+                <ul className="mt-2">
+                  {shown.map((w) => (
+                    <li key={w.itemId} className="border-b border-line-soft last:border-0">
+                      <button onClick={() => setPicked(w)} className="flex min-h-12 w-full flex-col items-start py-2 text-left">
+                        <span className="text-[12px] tracking-[0.14em] text-muted uppercase">{w.house}</span>
+                        <span className="font-display text-[17px] text-ink">
+                          {w.name}
+                          {w.format !== 'full' && <span className="ml-2 font-sans text-[13px] text-muted">{label(w.format)}{w.setName ? ` · ${w.setName}` : ''}</span>}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                  {shown.length === 0 && <li className="py-3 text-sm text-muted">Nothing matches “{q}”.</li>}
+                </ul>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
