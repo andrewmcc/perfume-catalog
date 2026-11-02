@@ -110,6 +110,16 @@ describe('wears', () => {
     expect(data).toMatchObject({ item_id: null, perfume_id: perfumeA });
   });
 
+  it('created_by is always the signed-in member and cannot be changed', async () => {
+    const other = users[1]!;
+    const { data: w, error } = await wears(a).insert(asWearInsert({ collection_id: ca, item_id: itemA, worn_on: '2026-10-29', created_by: other } as never)).select('id, created_by').single();
+    expect(error).toBeNull();
+    expect(w!.created_by).toBe(users[0]);
+    await wears(a).update({ created_by: other }).eq('id', w!.id);
+    const { data } = await admin.from('wears').select('created_by').eq('id', w!.id).single();
+    expect(data!.created_by).toBe(users[0]);
+  });
+
   it('rating 0 and 6 are refused; null is fine', async () => {
     for (const rating of [0, 6]) {
       const { error } = await wears(a).insert(asWearInsert({ collection_id: ca, item_id: itemA, worn_on: '2026-11-02', rating }));
@@ -117,6 +127,21 @@ describe('wears', () => {
     }
     const { error } = await wears(a).insert(asWearInsert({ collection_id: ca, item_id: itemA, worn_on: '2026-11-02', rating: null }));
     expect(error).toBeNull();
+  });
+});
+
+describe('deleting the member', () => {
+  it('keeps their wears with created_by null', async () => {
+    const m = await member();
+    const p = await itemOf(m.cid, perfumeA);
+    const { data: w, error } = await wears(m.client).insert(asWearInsert({ collection_id: m.cid, item_id: p, worn_on: '2026-10-28' })).select('id').single();
+    expect(error).toBeNull();
+    const uid = users.pop()!;
+    const { error: dErr } = await admin.auth.admin.deleteUser(uid);
+    expect(dErr).toBeNull();
+    const { data } = await admin.from('wears').select('created_by').eq('id', w!.id).single();
+    expect(data!.created_by).toBeNull();
+    await admin.from('collections').delete().eq('id', m.cid);
   });
 });
 
