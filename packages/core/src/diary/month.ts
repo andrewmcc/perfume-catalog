@@ -34,5 +34,9 @@ export function monthLabel(ym: string): string {
 /** True for a well-formed YYYY-MM. */
 export const isMonth = (s: string | null | undefined): s is string => !!s && /^\d{4}-(0[1-9]|1[0-2])$/.test(s);
 /** True for a well-formed YYYY-MM-DD that is a real date. */
-export const isDate = (s: string | null | undefined): s is string =>
-  !!s && /^\d{4}-\d{2}-\d{2}$/.test(s) && new Date(`${s}T00:00:00Z`).toISOString().startsWith(s);
+export function isDate(s: string | null | undefined): s is string {
+  if (!s || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const d = new Date(`${s}T00:00:00Z`);
+  // An invalid Date (month 13, day 32) would make toISOString throw; a rolled-over one (Feb 30) won't match.
+  return !Number.isNaN(d.getTime()) && d.toISOString().startsWith(s);
+}

@@ -1,5 +1,5 @@
 import type { Weight } from '../collection/pyramid.js';
-import { daysBetween, type Daypart, type Season } from '../time/london.js';
+import { addDays, daysBetween, type Daypart, type Season } from '../time/london.js';
 
 export type Candidate = {
   perfumeId: string;
@@ -49,13 +49,25 @@ export function idealHeft(ctx: TodayContext): number {
   return clamp(clamp(base + late) + nudge);
 }
 
-/** Deterministic [0, 1) from a string (FNV-1a). */
+/**
+ * Day-to-day variety, in score points. Big enough to reorder candidates a point or two apart
+ * (so the same top picks don't repeat all week); smaller than a season or rotation swing.
+ */
+export const JITTER = 1;
+
+/** Deterministic [0, 1) from a string (FNV-1a, then a murmur3 finaliser). */
 function jitter(s: string): number {
   let h = 0x811c9dc5;
   for (let i = 0; i < s.length; i++) {
     h ^= s.charCodeAt(i);
     h = Math.imul(h, 0x01000193);
   }
+  // murmur3 finaliser: FNV-1a alone leaves the high bits correlated for similar inputs.
+  h ^= h >>> 16;
+  h = Math.imul(h, 0x85ebca6b);
+  h ^= h >>> 13;
+  h = Math.imul(h, 0xc2b2ae35);
+  h ^= h >>> 16;
   return (h >>> 0) / 2 ** 32;
 }
 
@@ -107,15 +119,22 @@ function score(c: Candidate, ctx: TodayContext, ideal: number): Scored {
     }
   }
 
-  s += jitter(`${ctx.date}|${c.perfumeId}`);
+  s += JITTER * jitter(`${ctx.date}|${c.perfumeId}`);
   reasons.sort((a, b) => b[1] - a[1]);
   return { candidate: c, score: s, reasons: reasons.map(([r]) => r), strengths: reasons.map(([, n]) => n) };
 }
 
-/** Top n candidates for now. A pick sharing a family with an earlier pick loses a point. */
-export function pickToday(cands: Candidate[], ctx: TodayContext, n = 3): Pick[] {
+/** Picks shown but not worn lose this much the next day and the day after. */
+export const SHOWN_PENALTY = [1.5, 0.5] as const;
+/** Days of simulated history behind today's picks. */
+const HISTORY_DAYS = 6;
+
+function pickOnce(cands: Candidate[], ctx: TodayContext, n: number, shown: Map<string, number>): Pick[] {
   const ideal = idealHeft(ctx);
-  const pool = cands.map((c) => score(c, ctx, ideal));
+  const pool = cands.map((c) => {
+    const p = score(c, ctx, ideal);
+    return { ...p, score: p.score - (shown.get(c.perfumeId) ?? 0) };
+  });
   const picks: Pick[] = [];
   while (picks.length < n && pool.length) {
     const families = new Set(picks.map((p) => p.candidate.family).filter(Boolean));
@@ -129,4 +148,25 @@ export function pickToday(cands: Candidate[], ctx: TodayContext, n = 3): Pick[] 
     picks.push({ candidate: p!.candidate, score: adjusted(p!), reasons: p!.reasons });
   }
   return picks;
+}
+
+/**
+ * Top n candidates for now. A pick sharing a family with an earlier pick loses a point.
+ * Picks aren't stored, so the last few days are replayed (same shelf, no new wears) and
+ * anything shown yesterday or the day before is pushed down: an unworn favourite rotates out
+ * instead of topping the list all week.
+ */
+export function pickToday(cands: Candidate[], ctx: TodayContext, n = 3): Pick[] {
+  let recent: string[][] = [];
+  for (let back = HISTORY_DAYS; back >= 1; back--) {
+    const day = pickOnce(cands, { ...ctx, date: addDays(ctx.date, -back) }, n, shownPenalties(recent));
+    recent = [day.map((p) => p.candidate.perfumeId), ...recent].slice(0, SHOWN_PENALTY.length);
+  }
+  return pickOnce(cands, ctx, n, shownPenalties(recent));
+}
+
+function shownPenalties(recent: string[][]): Map<string, number> {
+  const m = new Map<string, number>();
+  recent.forEach((ids, i) => ids.forEach((id) => m.set(id, (m.get(id) ?? 0) + SHOWN_PENALTY[i]!)));
+  return m;
 }

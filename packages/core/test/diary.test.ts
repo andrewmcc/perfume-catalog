@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addMonths, monthGrid, monthLabel, wearSummary } from '../src/index.js';
+import { addMonths, isDate, isMonth, monthGrid, monthLabel, wearSummary } from '../src/index.js';
 
 describe('monthGrid', () => {
   it('November 2026 starts on Monday 26 October and has 6 weeks', () => {
@@ -35,5 +35,13 @@ describe('wearSummary', () => {
     expect(s.get('p')).toEqual({ count: 4, avgRating: 4.3, ratedCount: 3, lastWorn: '2026-10-17' });
     expect(s.get('q')).toEqual({ count: 1, avgRating: null, ratedCount: 0, lastWorn: '2026-09-01' });
     expect(s.get('none')).toBeUndefined();
+  });
+});
+
+describe('URL date validation', () => {
+  it('rejects impossible dates without throwing', () => {
+    expect(['2026-13-01', '2026-00-10', '2026-01-32', '2026-02-30', '2026-01-00', 'x', ''].map(isDate)).toEqual([false, false, false, false, false, false, false]);
+    expect(['2026-11-02', '2028-02-29'].map(isDate)).toEqual([true, true]);
+    expect(['2026-13', '2026-00', '2026-1'].map(isMonth)).toEqual([false, false, false]);
   });
 });

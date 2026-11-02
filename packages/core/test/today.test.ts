@@ -86,9 +86,30 @@ describe('pickToday', () => {
     expect(firsts.size).toBeGreaterThan(1);
   });
   it('the same family loses a point after the first pick', () => {
-    // Three equal scores: without the penalty floral would miss the top two on some dates.
-    const cs = [cand('w1', { family: 'woody' }), cand('w2', { family: 'woody' }), cand('f', { family: 'floral' })];
-    for (let d = 10; d < 20; d++) expect(ids(cs, ctx({ date: `2026-11-${d}` }), 2)).toContain('f');
+    // Same id (same jitter) and same heft; only the family differs from the first pick.
+    const same = pickToday([cand('w1', { family: 'woody', seasons: ['autumn'] }), cand('w2', { family: 'woody' })], ctx(), 2);
+    const diff = pickToday([cand('w1', { family: 'woody', seasons: ['autumn'] }), cand('w2', { family: 'floral' })], ctx(), 2);
+    expect(diff[1]!.score - same[1]!.score).toBeCloseTo(1);
+  });
+  it('a mixed shelf rotates its picks across a week', () => {
+    const fams = ['woody', 'citrus', 'oriental', 'floral', 'green', 'gourmand', 'aromatic', 'leather', 'musky', 'spicy'];
+    const cs = Array.from({ length: 20 }, (_, i) =>
+      cand(`7f3c9a${String(i).padStart(2, '0')}-4b1e-4c2d-9a8f-${String(4096 + i * 7919).padStart(12, '0')}`, {
+        family: fams[i % fams.length]!,
+        seasons: i % 3 === 0 ? ['autumn', 'winter'] : i % 3 === 1 ? ['autumn'] : ['spring', 'summer'],
+        times: i % 2 ? ['evening'] : ['day'],
+        weight: (['top', 'heart', 'base'] as const)[i % 3]!,
+        sillage: i % 4 === 0 ? 'strong' : null,
+        lastWorn: '2026-10-15',
+      }),
+    );
+    const days = Array.from({ length: 7 }, (_, d) => ids(cs, ctx({ date: `2026-11-0${d + 2}`, tempC: 11 }), 3));
+    const seen = new Set(days.flat());
+    const appearances = Math.max(...[...seen].map((id) => days.filter((d) => d.includes(id)).length));
+    const sets = days.map((d) => [...d].sort().join());
+    expect(sets.some((s, i) => i > 0 && s === sets[i - 1])).toBe(false); // never the same three two days running
+    expect(appearances).toBeLessThanOrEqual(5); // even the best match rests some days
+    expect(seen.size).toBeGreaterThanOrEqual(7);
   });
 });
 
