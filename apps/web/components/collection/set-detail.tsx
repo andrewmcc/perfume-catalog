@@ -31,7 +31,10 @@ export function SetDetail({ set }: { set: Detail }) {
                   <span className="block truncate text-[12px] tracking-[0.14em] text-muted uppercase">{i.house}</span>
                   <span className="font-display text-[18px] text-ink">{i.name}</span>
                 </span>
-                {i.status === 'gone' && <span className="rounded-full border border-line px-2 py-px text-[12px] text-muted">Gone</span>}
+                <span className="flex shrink-0 gap-1.5">
+                  {i.status === 'gone' && <span className="rounded-full border border-line px-2 py-px text-[12px] text-muted">Gone</span>}
+                  <span className={`rounded-full border px-2 py-px text-[12px] ${i.tried ? 'border-gold-deep text-gold-deep' : 'border-line text-muted'}`}>{i.tried ? 'Tried' : 'Untried'}</span>
+                </span>
               </Link>
             </li>
           ))}

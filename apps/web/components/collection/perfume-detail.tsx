@@ -13,6 +13,10 @@ import { ItemCard } from './item-card';
 import type { ItemPatch } from './item-edit-form';
 import { label } from './labels';
 import { SourceBadge } from './source-badge';
+import Link from 'next/link';
+import { StarRating } from '@/components/wears/star-rating';
+import { WearToday } from '@/components/wears/wear-today';
+import { dayAndMonth, shortDay } from '@/lib/dates';
 
 const list = (v: unknown) => ((v as string[] | null) ?? []).map(label).join(', ');
 
@@ -104,6 +108,15 @@ export function PerfumeDetail({ detail }: { detail: Detail }) {
         </p>
       )}
 
+      <section aria-label="Your stats" className="mt-4">
+        <p className="text-[15px] text-ink">
+          {detail.wear.count === 0
+            ? 'Not worn yet'
+            : [`Worn ${detail.wear.count}×`, detail.wear.avgRating != null && `avg ★${detail.wear.avgRating}`, detail.wear.lastWorn && `last worn ${dayAndMonth(detail.wear.lastWorn)}`].filter(Boolean).join(' · ')}
+        </p>
+        {detail.wearItemId && <WearToday collectionId={detail.collectionId} itemId={detail.wearItemId} className="mt-3" />}
+      </section>
+
       <section aria-label="Scent pyramid" className="label-card mt-5 flex gap-4 p-4">
         <ScentPyramid weight={detail.weight} size={64} />
         {hasNotes ? (
@@ -136,6 +149,26 @@ export function PerfumeDetail({ detail }: { detail: Detail }) {
         <button onClick={() => setEditing(true)} className="mt-3 min-h-11 text-sm text-oxblood underline underline-offset-4">
           Edit details
         </button>
+      )}
+
+      {detail.notes.length > 0 && (
+        <section aria-label="Your notes" className="mt-6">
+          <h2 className="font-display text-xl italic">
+            Your notes{detail.wear.avgRating != null && <span className="ml-2 font-sans text-sm text-muted not-italic">avg ★{detail.wear.avgRating}</span>}
+          </h2>
+          <ul className="label-card mt-3 px-4">
+            {detail.notes.map((n) => (
+              <li key={n.id} className="border-b border-line-soft py-3 last:border-0">
+                <Link href={`/diary?m=${n.wornOn.slice(0, 7)}&d=${n.wornOn}`} className="block">
+                  <p className="flex items-center gap-2 text-[12px] tracking-[0.14em] text-muted uppercase">
+                    {shortDay(n.wornOn)} <StarRating value={n.rating} className="text-[13px] tracking-normal" />
+                  </p>
+                  {n.notes && <p className="mt-1 text-[15px] whitespace-pre-line text-ink">{n.notes}</p>}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
 
       <h2 className="mt-6 font-display text-xl italic">On your shelf</h2>

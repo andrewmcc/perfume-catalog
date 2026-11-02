@@ -1,5 +1,5 @@
 import 'server-only';
-import { effectivePerfume, pyramidWeight, type CollectionRow, type PerfumeFacts } from '@perfume/core';
+import { NO_WEARS, effectivePerfume, pyramidWeight, wearSummary, type CollectionRow, type PerfumeFacts } from '@perfume/core';
 import type { createServerClient } from '@perfume/supabase';
 import { latestOverrides } from './overrides';
 
@@ -27,15 +27,18 @@ export const listPath = (photos: Photo[]): string | null => {
 export { latestOverrides } from './overrides';
 
 export async function loadCollection(supabase: Client): Promise<{ rows: CollectionRow[]; sets: SetRow[] }> {
-  const [{ data: items, error }, { data: sets, error: sErr }] = await Promise.all([
+  const [{ data: items, error }, { data: sets, error: sErr }, { data: wears, error: wErr }] = await Promise.all([
     supabase
       .from('items')
       .select('id, perfume_id, format, size_ml, status, set_id, overrides, updated_at, created_at, perfumes(*), sets(id, name), item_photos(storage_path, thumb_path, position)')
       .order('created_at', { ascending: true }),
     supabase.from('sets').select('id, house, name, created_at').order('created_at', { ascending: true }),
+    supabase.from('wears').select('id, perfume_id, worn_on, rating'),
   ]);
   if (error) throw error;
   if (sErr) throw sErr;
+  if (wErr) throw wErr;
+  const worn = wearSummary(wears.map((w) => ({ id: w.id, perfumeId: w.perfume_id, wornOn: w.worn_on, rating: w.rating })));
 
   const url = await signPaths(supabase, items.map((i) => listPath(i.item_photos)));
 
@@ -62,7 +65,7 @@ export async function loadCollection(supabase: Client): Promise<{ rows: Collecti
       weight: pyramidWeight({ notes_top: notes.top, notes_heart: notes.heart, notes_base: notes.base }),
       thumb: thumbPath ? (url.get(thumbPath) ?? null) : null,
       items: group.map((i) => ({ id: i.id, format: i.format, size_ml: i.size_ml, status: i.status, setId: i.set_id, setName: i.sets?.name ?? null })),
-      wear: { count: 0, avgRating: null, lastWorn: null },
+      wear: (({ count, avgRating, lastWorn }) => ({ count, avgRating, lastWorn }))(worn.get(perfumeId) ?? NO_WEARS),
     });
   }
   rows.sort((a, b) => a.house.localeCompare(b.house) || a.name.localeCompare(b.name));

@@ -8,10 +8,10 @@ import { FilterSheet } from './filter-sheet';
 import { PerfumeRow } from './perfume-row';
 import { ViewSwitch, type View } from './view-switch';
 
-export function CollectionView({ rows, sets }: { rows: CollectionRow[]; sets: SetRow[] }) {
+export function CollectionView({ rows, sets, initialFilters = {} }: { rows: CollectionRow[]; sets: SetRow[]; initialFilters?: Filters }) {
   const [view, setView] = useState<View>('owned');
   const [q, setQ] = useState('');
-  const [filters, setFilters] = useState<Filters>({});
+  const [filters, setFilters] = useState<Filters>(initialFilters);
   const [sheet, setSheet] = useState(false);
 
   const status = view === 'wishlist' ? 'wishlist' : 'owned';
