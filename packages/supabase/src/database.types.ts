@@ -43,6 +43,38 @@ export type Database = {
           },
         ]
       }
+      collection_settings: {
+        Row: {
+          collection_id: string
+          lat: number | null
+          lon: number | null
+          place: string | null
+          updated_at: string
+        }
+        Insert: {
+          collection_id: string
+          lat?: number | null
+          lon?: number | null
+          place?: string | null
+          updated_at?: string
+        }
+        Update: {
+          collection_id?: string
+          lat?: number | null
+          lon?: number | null
+          place?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_settings_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: true
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collections: {
         Row: {
           created_at: string
@@ -441,6 +473,70 @@ export type Database = {
             columns: ["collection_id"]
             isOneToOne: false
             referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wears: {
+        Row: {
+          collection_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          item_id: string | null
+          notes: string | null
+          perfume_id: string
+          rating: number | null
+          time_of_day: string | null
+          updated_at: string
+          worn_on: string
+        }
+        Insert: {
+          collection_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          item_id?: string | null
+          notes?: string | null
+          perfume_id: string
+          rating?: number | null
+          time_of_day?: string | null
+          updated_at?: string
+          worn_on: string
+        }
+        Update: {
+          collection_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          item_id?: string | null
+          notes?: string | null
+          perfume_id?: string
+          rating?: number | null
+          time_of_day?: string | null
+          updated_at?: string
+          worn_on?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wears_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wears_item_same_collection_fkey"
+            columns: ["collection_id", "item_id"]
+            isOneToOne: false
+            referencedRelation: "items"
+            referencedColumns: ["collection_id", "id"]
+          },
+          {
+            foreignKeyName: "wears_perfume_id_fkey"
+            columns: ["perfume_id"]
+            isOneToOne: false
+            referencedRelation: "perfumes"
             referencedColumns: ["id"]
           },
         ]
