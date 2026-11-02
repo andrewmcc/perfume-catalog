@@ -2,20 +2,15 @@ import 'server-only';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@perfume/supabase';
 
-export const LOOKUP_COOLDOWN_MS = 24 * 3600 * 1000;
+/** Web lookups a collection may start per day (each ~15–20p). */
+export const LOOKUPS_PER_DAY = 20;
 
 /**
- * Claims today's lookup for a perfume (service role). True for at most one caller per perfume per
- * day: the conditional update is atomic, so parallel taps can't both spend a web search.
+ * Claims a "Look up notes" for a perfume (service role only). False when this perfume was looked
+ * up in the last day or the collection has used its daily lookups. Atomic per collection.
  */
-export async function claimLookup(db: SupabaseClient<Database>, perfumeId: string, now = new Date()): Promise<boolean> {
-  const cutoff = new Date(now.getTime() - LOOKUP_COOLDOWN_MS).toISOString();
-  const { data, error } = await db
-    .from('perfumes')
-    .update({ lookup_at: now.toISOString() })
-    .eq('id', perfumeId)
-    .or(`lookup_at.is.null,lookup_at.lt.${cutoff}`)
-    .select('id');
+export async function claimLookup(db: SupabaseClient<Database>, collectionId: string, perfumeId: string, now = new Date(), cap = LOOKUPS_PER_DAY): Promise<boolean> {
+  const { data, error } = await db.rpc('claim_lookup', { p_collection: collectionId, p_perfume: perfumeId, p_now: now.toISOString(), p_daily_cap: cap });
   if (error) throw error;
-  return data.length === 1;
+  return data === true;
 }

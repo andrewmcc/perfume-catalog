@@ -1,5 +1,6 @@
 import { createServiceClient } from '@perfume/supabase';
 import { enrichPerfume, rowHasNotes } from '@/lib/perfumes/enrich';
+import { getCurrentCollectionId } from '@/lib/collections/current';
 import { claimLookup } from '@/lib/perfumes/lookup';
 import { createServerClient } from '@/lib/supabase/server';
 
@@ -9,7 +10,7 @@ export const maxDuration = 300;
 
 /**
  * "Look up notes" for a perfume that has none: memory, then web search. Only for a perfume the
- * member's collection has an item of, only while it has no notes, and once per perfume per day.
+ * member's collection has an item of, only while it has no notes; once per perfume per day and LOOKUPS_PER_DAY per collection.
  */
 export async function POST(_request: Request, ctx: RouteContext<'/api/perfumes/[id]/enrich'>) {
   const { id } = await ctx.params;
@@ -27,7 +28,9 @@ export async function POST(_request: Request, ctx: RouteContext<'/api/perfumes/[
   ]);
   if (!item || !p) return Response.json({ error: 'not found' }, { status: 404 });
   if (rowHasNotes(p)) return Response.json({ found: true });
-  if (!(await claimLookup(createServiceClient(), id))) return Response.json({ error: 'Already looked up today. Try again tomorrow.' }, { status: 429 });
+  const collectionId = await getCurrentCollectionId(supabase);
+  if (!collectionId) return Response.json({ error: 'unauthorized' }, { status: 401 });
+  if (!(await claimLookup(createServiceClient(), collectionId, id))) return Response.json({ error: 'Already looked up today, or the daily lookups are used up. Try again tomorrow.' }, { status: 429 });
 
   await enrichPerfume(id);
   const { data: after } = await supabase.from('perfumes').select('notes_top, notes_heart, notes_base').eq('id', id).single();
