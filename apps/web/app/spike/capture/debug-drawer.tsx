@@ -1,6 +1,6 @@
 'use client';
 
-import type { FrameMetrics, GateConfig, GateState } from '@/lib/spike/capture-gate';
+import type { FrameMetrics, GateConfig, GateState } from '@/lib/capture/capture-gate';
 
 const SLIDERS: readonly (readonly [keyof GateConfig, number, number, number])[] = [
   ['minSharpness', 0, 2000, 25],

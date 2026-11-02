@@ -1,8 +1,9 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Database } from '@perfume/supabase';
+import type { createServerClient } from '@perfume/supabase';
+
+type Client = ReturnType<typeof createServerClient>;
 
 /** The signed-in member's collection: their first membership by created_at. RLS limits rows to their own. */
-export async function getCurrentCollectionId(supabase: SupabaseClient<Database>): Promise<string | null> {
+export async function getCurrentCollectionId(supabase: Client): Promise<string | null> {
   const { data: auth } = await supabase.auth.getUser();
   if (!auth.user) return null;
   const { data, error } = await supabase

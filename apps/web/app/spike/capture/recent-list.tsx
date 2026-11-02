@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { summarise } from '@/lib/spike/summarise';
+import { summarise } from '@/lib/scans/summarise';
 import type { QueuedCapture } from './capture-queue';
 
 function summariseItem(item: QueuedCapture): { lines: string[]; empty: boolean } {
   if (!item.result) return { lines: [], empty: false };
-  const { recognised, lines } = summarise(item.mode, item.result);
+  const { recognised, lines } = summarise(item.mode, item.result as never);
   return { lines, empty: !recognised };
 }
 

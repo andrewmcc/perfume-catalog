@@ -1,12 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { DEFAULT_GATE, createCaptureGate, type GateConfig, type GateState } from '@/lib/spike/capture-gate';
-import { edgeRatio, frameDiff, glareFraction, sharpness, toGray, type FrameMetrics, type Rect } from '@/lib/spike/detector';
+import { DEFAULT_GATE, createCaptureGate, type GateConfig, type GateState } from '@/lib/capture/capture-gate';
+import { edgeRatio, frameDiff, glareFraction, sharpness, toGray, type FrameMetrics, type Rect } from '@/lib/capture/detector';
 import type { Mode } from '@/lib/spike/extract-schema';
-import { playShutter, tryHaptic, unlockAudio } from '@/lib/spike/feedback';
-import { createIdleTimer } from '@/lib/spike/idle';
-import { useCamera } from '@/lib/spike/use-camera';
+import { playShutter, tryHaptic, unlockAudio } from '@/lib/capture/feedback';
+import { createIdleTimer } from '@/lib/capture/idle';
+import { useCamera } from '@/lib/capture/use-camera';
 import { useCaptureQueue } from './capture-queue';
 import { DebugDrawer } from './debug-drawer';
 import { RecentList } from './recent-list';
