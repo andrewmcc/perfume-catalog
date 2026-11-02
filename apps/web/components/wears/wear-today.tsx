@@ -8,7 +8,23 @@ import { useWears } from './use-wears';
 import { WearForm } from './wear-form';
 
 /** One tap logs a wear for today (current time of day); then offers stars and a note. */
-export function WearToday({ collectionId, itemId, label = 'Wear today', className = '' }: { collectionId: string; itemId: string; label?: string; className?: string }) {
+/**
+ * `refresh` re-renders the page after logging. Today turns it off: re-ranking would swap the
+ * worn pick out from under its rating form.
+ */
+export function WearToday({
+  collectionId,
+  itemId,
+  label = 'Wear today',
+  className = '',
+  refresh = true,
+}: {
+  collectionId: string;
+  itemId: string;
+  label?: string;
+  className?: string;
+  refresh?: boolean;
+}) {
   const router = useRouter();
   const api = useWears(collectionId);
   const [state, setState] = useState<'idle' | 'busy' | 'logged' | 'saved'>('idle');
@@ -24,7 +40,7 @@ export function WearToday({ collectionId, itemId, label = 'Wear today', classNam
     try {
       setWearId(await api.log(itemId, { worn_on: now.date, time_of_day: now.daypart, rating: null, notes: null }));
       setState('logged');
-      router.refresh();
+      if (refresh) router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setState('idle');
@@ -54,7 +70,7 @@ export function WearToday({ collectionId, itemId, label = 'Wear today', classNam
           onSave={async (p) => {
             await api.update(wearId!, { rating: p.rating, notes: p.notes, time_of_day: p.time_of_day });
             setState('saved');
-            router.refresh();
+            if (refresh) router.refresh();
           }}
         />
       </div>

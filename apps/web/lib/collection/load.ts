@@ -57,6 +57,7 @@ export async function loadCollection(supabase: Client): Promise<{ rows: Collecti
       name: p.name,
       concentration: v.concentration as string | null,
       family: v.family as string | null,
+      sillage: v.sillage as string | null,
       seasons: v.seasons as string[],
       times: v.times_of_day as string[],
       occasions: v.occasions as string[],

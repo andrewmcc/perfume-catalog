@@ -9,6 +9,7 @@ export type CollectionRow = {
   name: string;
   concentration: string | null;
   family: string | null;
+  sillage: string | null;
   seasons: string[];
   times: string[];
   occasions: string[];

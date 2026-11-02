@@ -29,6 +29,7 @@ const row = (over: Partial<CollectionRow> = {}): CollectionRow => ({
   name: 'Naxos',
   concentration: 'edp',
   family: 'oriental',
+  sillage: 'strong',
   seasons: ['autumn', 'winter'],
   times: ['evening'],
   occasions: ['date'],
