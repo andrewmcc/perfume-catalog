@@ -1,6 +1,7 @@
 import 'server-only';
 import { effectivePerfume, pyramidWeight, type CollectionRow, type PerfumeFacts } from '@perfume/core';
 import type { createServerClient } from '@perfume/supabase';
+import { latestOverrides } from './overrides';
 
 type Client = ReturnType<typeof createServerClient>;
 export type SetRow = { id: string; house: string | null; name: string | null; count: number; thumb: string | null };
@@ -23,9 +24,7 @@ export const listPath = (photos: Photo[]): string | null => {
   return first ? (first.thumb_path ?? first.storage_path) : null;
 };
 
-/** Overrides of the most recently updated item (fact edits are written to every item of a perfume). */
-export const latestOverrides = (items: { overrides: unknown; updated_at: string }[]): Record<string, unknown> =>
-  ([...items].sort((a, b) => b.updated_at.localeCompare(a.updated_at))[0]?.overrides ?? {}) as Record<string, unknown>;
+export { latestOverrides } from './overrides';
 
 export async function loadCollection(supabase: Client): Promise<{ rows: CollectionRow[]; sets: SetRow[] }> {
   const [{ data: items, error }, { data: sets, error: sErr }] = await Promise.all([

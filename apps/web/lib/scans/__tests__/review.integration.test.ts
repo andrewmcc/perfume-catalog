@@ -200,6 +200,28 @@ describe('approve_result', () => {
     expect(await perfumesNamed('Naxos Variant')).toHaveLength(1);
   });
 
+  it('a flanker is a different perfume', async () => {
+    const base = await extracted(ca, 'bottle', [read('Flank Base')]);
+    const { data: d1 } = await approve(a, base.results[0]!);
+    const elixir = await extracted(ca, 'bottle', [read('Flank Base', { flanker_or_edition: 'Elixir' })]);
+    const { data: d2, error } = await approve(a, elixir.results[0]!);
+    expect(error).toBeNull();
+    expect(d2![0]!.created_perfume_id).toBeTruthy();
+    expect((await item(d2![0]!.item_id)).perfume_id).not.toBe((await item(d1![0]!.item_id)).perfume_id);
+    const again = await extracted(ca, 'bottle', [read('Flank Base', { flanker_or_edition: 'ELIXIR ' })]);
+    const { data: d3 } = await approve(a, again.results[0]!);
+    expect((await item(d3![0]!.item_id)).perfume_id).toBe((await item(d2![0]!.item_id)).perfume_id);
+  });
+
+  it('accented and unaccented spellings match', async () => {
+    const first = await extracted(ca, 'bottle', [read('Eau de Peau Ébène')]);
+    const { data: d1 } = await approve(a, first.results[0]!);
+    const caps = await extracted(ca, 'bottle', [read('EAU DE PEAU EBENE')]);
+    const { data: d2 } = await approve(a, caps.results[0]!);
+    expect(d2![0]!.created_perfume_id).toBeNull();
+    expect((await item(d2![0]!.item_id)).perfume_id).toBe((await item(d1![0]!.item_id)).perfume_id);
+  });
+
   it('a set approved sequentially and in parallel creates one set with every item linked', async () => {
     const s = await extracted(ca, 'set', ['Set A', 'Set B', 'Set C', 'Set D', 'Set E'].map((n) => read(n, { size_ml: 2 })));
     for (const r of s.results.slice(0, 3)) expect((await approve(a, r)).error).toBeNull();
