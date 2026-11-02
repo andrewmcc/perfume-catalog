@@ -116,6 +116,7 @@ describe('wears', () => {
     expect(error).toBeNull();
     expect(w!.created_by).toBe(users[0]);
     await wears(a).update({ created_by: other }).eq('id', w!.id);
+    await wears(a).update({ created_by: null }).eq('id', w!.id);
     const { data } = await admin.from('wears').select('created_by').eq('id', w!.id).single();
     expect(data!.created_by).toBe(users[0]);
   });
