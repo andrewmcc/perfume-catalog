@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useState, type FormEvent } from 'react';
 import { safeRedirect } from '@/lib/auth/paths';
-import { AuthShell, buttonClass, inputClass } from '../shell';
+import { Button } from '@/components/ui/button';
+import { Field } from '@/components/ui/field';
+import { AuthShell, FormError, linkClass } from '../shell';
 
 function LoginForm() {
   const router = useRouter();
@@ -36,29 +38,19 @@ function LoginForm() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-semibold">Sign in</h1>
+      <h1 className="mb-6 font-display text-2xl italic">Sign in</h1>
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1.5 text-sm">
-          Email
-          <input className={inputClass} type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        </label>
-        <label className="flex flex-col gap-1.5 text-sm">
-          Password
-          <input className={inputClass} type="password" required minLength={8} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        </label>
-        <Link href="/forgot-password" className="inline-flex min-h-11 items-center self-start text-sm underline underline-offset-4">
+        <Field label="Email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <Field label="Password" type="password" required minLength={8} autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <Link href="/forgot-password" className={`${linkClass} self-start`}>
           Forgot password?
         </Link>
-        {error && (
-          <p role="alert" className="text-sm text-red-700 dark:text-red-400">
-            {error}
-          </p>
-        )}
-        <button type="submit" disabled={busy} className={buttonClass}>
+        {error && <FormError>{error}</FormError>}
+        <Button type="submit" disabled={busy}>
           {busy ? 'One moment…' : 'Sign in'}
-        </button>
+        </Button>
       </form>
-      <p className="mt-6 text-sm opacity-70">Access is by invitation only.</p>
+      <p className="mt-6 text-sm text-muted">Access is by invitation only.</p>
     </div>
   );
 }

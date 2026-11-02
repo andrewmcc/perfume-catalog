@@ -3,7 +3,9 @@
 import { createBrowserClient } from '@perfume/supabase';
 import Link from 'next/link';
 import { useState, type FormEvent } from 'react';
-import { AuthShell, buttonClass, inputClass } from '../shell';
+import { Button } from '@/components/ui/button';
+import { Field } from '@/components/ui/field';
+import { AuthShell, FormError, linkClass } from '../shell';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -28,27 +30,20 @@ export default function ForgotPasswordPage() {
   return (
     <AuthShell>
       <div>
-        <h1 className="mb-6 text-2xl font-semibold">Reset your password</h1>
+        <h1 className="mb-6 font-display text-2xl italic">Reset your password</h1>
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1.5 text-sm">
-            Email
-            <input className={inputClass} type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          </label>
-          {error && (
-            <p role="alert" className="text-sm text-red-700 dark:text-red-400">
-              {error}
-            </p>
-          )}
+          <Field label="Email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          {error && <FormError>{error}</FormError>}
           {notice && (
             <p role="status" className="text-sm">
               {notice}
             </p>
           )}
-          <button type="submit" disabled={busy} className={buttonClass}>
+          <Button type="submit" disabled={busy}>
             {busy ? 'One moment…' : 'Email me a reset link'}
-          </button>
+          </Button>
         </form>
-        <Link href="/login" className="mt-4 inline-flex min-h-11 items-center text-sm underline underline-offset-4">
+        <Link href="/login" className={`${linkClass} mt-4`}>
           Back to sign in
         </Link>
       </div>

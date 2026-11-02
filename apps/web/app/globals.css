@@ -1,26 +1,51 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Apothecary tokens. Keep paper/oxblood in step with manifest.ts and the viewport themeColor in layout.tsx. */
+@theme {
+  --color-paper: #f5eee0;
+  --color-card: #fffaf0;
+  --color-ink: #3a1d1d;
+  --color-muted: #7a5b47;
+  --color-line: #d8c8a8;
+  --color-line-soft: #e7d9bd;
+  --color-oxblood: #6e2a2a;
+  --color-gold: #e8c46a;
+  --color-gold-deep: #b8892a;
+  --color-rose: #c98a8a;
+  --color-danger: #a1261f;
+  --font-display: var(--font-bodoni), "Bodoni 72", Didot, serif;
+  --font-body: var(--font-figtree), system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--color-paper);
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-oxblood);
+  outline-offset: 2px;
+}
+
+/* Engraved-label card: a fine inner rule inset from the border. */
+.label-card {
+  position: relative;
+  background: var(--color-card);
+  border: 1px solid var(--color-line);
+  border-radius: 4px;
+}
+.label-card::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid var(--color-line-soft);
+  border-radius: 2px;
+  pointer-events: none;
 }

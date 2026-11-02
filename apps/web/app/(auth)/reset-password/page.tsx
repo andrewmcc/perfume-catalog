@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
 import { friendlyResetError, type ResetError } from '@/lib/auth/reset-error';
-import { AuthShell, buttonClass, inputClass } from '../shell';
+import { Button } from '@/components/ui/button';
+import { Field } from '@/components/ui/field';
+import { AuthShell, FormError, linkClass } from '../shell';
 
 /** Sets the password for the session /auth/confirm just created (invite or recovery). */
 export default function ResetPasswordPage() {
@@ -39,11 +41,11 @@ export default function ResetPasswordPage() {
     return (
       <AuthShell>
         <div>
-          <h1 className="mb-2 text-2xl font-semibold">Link expired</h1>
+          <h1 className="mb-2 font-display text-2xl italic">Link expired</h1>
           <p role="alert" className="mb-4 text-sm">
             This link has expired or was already used.
           </p>
-          <Link href="/forgot-password" className="inline-flex min-h-11 items-center text-sm underline underline-offset-4">
+          <Link href="/forgot-password" className={linkClass}>
             Request a new link
           </Link>
         </div>
@@ -54,18 +56,23 @@ export default function ResetPasswordPage() {
   return (
     <AuthShell>
       <div>
-        <h1 className="mb-2 text-2xl font-semibold">Set your password</h1>
-        <p className="mb-6 text-sm opacity-70">
-          Setting the password for <strong>{account}</strong>
+        <h1 className="mb-2 font-display text-2xl italic">Set your password</h1>
+        <p className="mb-6 text-sm text-muted">
+          Setting the password for <strong className="font-semibold text-ink [overflow-wrap:anywhere]">{account}</strong>
         </p>
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-1.5 text-sm">
-            Password
-            <input className={inputClass} type="password" required minLength={8} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            <span className="opacity-70">At least 8 characters</span>
-          </label>
+          <Field
+            label="Password"
+            type="password"
+            required
+            minLength={8}
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            help="At least 8 characters"
+          />
           {error && (
-            <p role="alert" className="text-sm text-red-700 dark:text-red-400">
+            <FormError>
               {error.message}
               {error.expired && (
                 <>
@@ -75,11 +82,11 @@ export default function ResetPasswordPage() {
                   </Link>
                 </>
               )}
-            </p>
+            </FormError>
           )}
-          <button type="submit" disabled={busy} className={buttonClass}>
+          <Button type="submit" disabled={busy}>
             {busy ? 'One moment…' : 'Save password'}
-          </button>
+          </Button>
         </form>
       </div>
     </AuthShell>

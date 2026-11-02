@@ -1,6 +1,6 @@
 // Route rules shared by proxy.ts and the auth routes.
 
-const PUBLIC_EXACT = new Set(['/spike', '/login', '/forgot-password', '/reset-password', '/offline', '/manifest.webmanifest', '/favicon.ico']);
+const PUBLIC_EXACT = new Set(['/spike', '/login', '/forgot-password', '/reset-password', '/offline', '/manifest.webmanifest', '/sw.js', '/favicon.ico']);
 // /spike and /api/spike have their own passcode gate in proxy.ts, so the session gate skips them.
 const PUBLIC_PREFIXES = ['/auth/', '/_next/', '/spike/', '/api/spike/'];
 

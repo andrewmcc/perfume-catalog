@@ -7,19 +7,22 @@ const esc = (v: string) => v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').repl
 
 const PAGE = (hidden: string, label: string) => `<!doctype html>
 <html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex"><title>Continue · Perfume Catalog</title>
+<meta name="robots" content="noindex"><title>Continue · Flacon</title>
 <style>
-:root{color-scheme:light dark;--paper:#eee3cc;--ink:#2e241a;--muted:#6a5a44;--leaf:#3e5b36;--leaf-ink:#f6eedc}
-@media(prefers-color-scheme:dark){:root{--paper:#1d1914;--ink:#ede3cf;--muted:#b3a387;--leaf:#93b27f;--leaf-ink:#1d1914}}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:ui-sans-serif,system-ui,sans-serif}
-main{max-width:24rem;margin:0 auto;padding:max(15vh,env(safe-area-inset-top)) 1.5rem 2.5rem;display:flex;flex-direction:column;gap:1rem}
-.brand{font:400 2rem/1 Georgia,serif;margin:0}h1{font:400 1.5rem/1.2 Georgia,serif;margin:1rem 0 0}
-p{color:var(--muted);font-size:17px;line-height:1.5;margin:0}
-button{min-height:44px;border:0;border-radius:6px;background:var(--leaf);color:var(--leaf-ink);font-size:15px;font-weight:500;width:100%}
+:root{color-scheme:light;--paper:#f5eee0;--card:#fffaf0;--line:#d8c8a8;--rule:#e7d9bd;--ink:#3a1d1d;--muted:#7a5b47;--oxblood:#6e2a2a}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Figtree,system-ui,sans-serif}
+main{max-width:24rem;margin:0 auto;padding:max(15vh,env(safe-area-inset-top)) 1.5rem 2.5rem;display:flex;flex-direction:column;gap:1.5rem}
+.brand{font:400 2.25rem/1 "Bodoni Moda","Bodoni 72",Didot,Georgia,serif;letter-spacing:.08em;color:var(--oxblood);text-align:center;margin:0}
+.card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:4px;padding:1.75rem 1.5rem;display:flex;flex-direction:column;gap:1rem}
+.card:before{content:"";position:absolute;inset:3px;border:1px solid var(--rule);border-radius:2px;pointer-events:none}
+h1{font:italic 400 1.5rem/1.2 "Bodoni Moda","Bodoni 72",Didot,Georgia,serif;margin:0}
+p{color:var(--muted);font-size:16px;line-height:1.5;margin:0}
+button{min-height:44px;border:0;border-radius:4px;background:var(--oxblood);color:var(--paper);font-size:15px;font-weight:500;width:100%;box-shadow:inset 0 0 0 3px var(--oxblood),inset 0 0 0 4px rgba(232,196,106,.55)}
 </style></head><body><main>
-<p class="brand">Perfume Catalog</p><h1>Continue</h1>
+<p class="brand">Flacon</p>
+<div class="card"><h1>Continue</h1>
 <p>${label}</p>
-<form method="post" action="/auth/confirm">${hidden}<button type="submit">Continue</button></form>
+<form method="post" action="/auth/confirm">${hidden}<button type="submit">Continue</button></form></div>
 </main></body></html>`;
 
 /**

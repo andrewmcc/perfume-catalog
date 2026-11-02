@@ -36,6 +36,7 @@ describe('isPublicPath', () => {
     '/auth/confirm',
     '/auth/callback',
     '/manifest.webmanifest',
+    '/sw.js',
     '/icon.png',
     '/apple-icon.png',
     '/favicon.ico',
