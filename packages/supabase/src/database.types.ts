@@ -237,7 +237,6 @@ export type Database = {
           house_type: string | null
           id: string
           longevity: string | null
-          lookup_at: string | null
           match_key: string | null
           name: string
           notes_base: string[]
@@ -267,7 +266,6 @@ export type Database = {
           house_type?: string | null
           id?: string
           longevity?: string | null
-          lookup_at?: string | null
           match_key?: string | null
           name: string
           notes_base?: string[]
@@ -297,7 +295,6 @@ export type Database = {
           house_type?: string | null
           id?: string
           longevity?: string | null
-          lookup_at?: string | null
           match_key?: string | null
           name?: string
           notes_base?: string[]
@@ -555,6 +552,15 @@ export type Database = {
           created_perfume_id: string
           item_id: string
         }[]
+      }
+      claim_lookup: {
+        Args: {
+          p_collection: string
+          p_daily_cap?: number
+          p_now?: string
+          p_perfume: string
+        }
+        Returns: boolean
       }
       claim_scan: {
         Args: { p_claim: string; p_id: string }
