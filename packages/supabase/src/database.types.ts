@@ -353,6 +353,7 @@ export type Database = {
           collection_id: string
           created_at: string
           created_by: string | null
+          created_set_id: string | null
           error: string | null
           extraction: Json | null
           id: string
@@ -367,6 +368,7 @@ export type Database = {
           collection_id: string
           created_at?: string
           created_by?: string | null
+          created_set_id?: string | null
           error?: string | null
           extraction?: Json | null
           id?: string
@@ -381,6 +383,7 @@ export type Database = {
           collection_id?: string
           created_at?: string
           created_by?: string | null
+          created_set_id?: string | null
           error?: string | null
           extraction?: Json | null
           id?: string
@@ -397,6 +400,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "collections"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scans_created_set_same_collection_fkey"
+            columns: ["collection_id", "created_set_id"]
+            isOneToOne: false
+            referencedRelation: "sets"
+            referencedColumns: ["collection_id", "id"]
           },
         ]
       }
@@ -440,6 +450,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_result: {
+        Args: { p_input: Json; p_result_id: string }
+        Returns: {
+          created_perfume_id: string
+          item_id: string
+        }[]
+      }
       claim_scan: {
         Args: { p_claim: string; p_id: string }
         Returns: {
@@ -447,6 +464,7 @@ export type Database = {
           collection_id: string
           created_at: string
           created_by: string | null
+          created_set_id: string | null
           error: string | null
           extraction: Json | null
           id: string
@@ -463,7 +481,26 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      discard_result: { Args: { p_result_id: string }; Returns: undefined }
+      dismiss_scan: { Args: { p_scan_id: string }; Returns: undefined }
+      find_perfume: {
+        Args: {
+          p_collection: string
+          p_conc: string
+          p_house: string
+          p_name: string
+        }
+        Returns: string
+      }
       normalise_name: { Args: { p_text: string }; Returns: string }
+      review_lookup: {
+        Args: { p_scan_ids: string[] }
+        Returns: {
+          duplicate: boolean
+          perfume_id: string
+          result_id: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
