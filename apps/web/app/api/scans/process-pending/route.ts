@@ -1,10 +1,11 @@
 import { after } from 'next/server';
 import { createServerClient } from '@/lib/supabase/server';
 import { extractScan } from '@/lib/scans/extract-scan';
-import { scanDeps, runLimited } from '@/lib/scans/deps';
+import { SWEEP_START_BUDGET_MS, runLimited } from '@/lib/scans/budget';
+import { scanDeps } from '@/lib/scans/deps';
 import { selectPending } from '@/lib/scans/pending';
 
-export const maxDuration = 300;
+export const maxDuration = 300; // = ROUTE_MAX_DURATION_S
 
 /** Re-queues the requester's stuck scans (no cron on Hobby: Scan and Today call this on load). */
 export async function POST() {
@@ -28,6 +29,6 @@ export async function POST() {
     .limit(100);
   const pending = selectPending(rows ?? [], new Date());
 
-  if (pending.length) after(() => runLimited(pending, 3, (s) => extractScan(deps, s.id, user.id, 'sweep')));
+  if (pending.length) after(() => runLimited(pending, 3, SWEEP_START_BUDGET_MS, (s) => extractScan(deps, s.id, user.id, 'sweep')));
   return Response.json({ queued: pending.length });
 }

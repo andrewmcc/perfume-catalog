@@ -3,7 +3,7 @@ import { createServerClient } from '@/lib/supabase/server';
 import { extractScan } from '@/lib/scans/extract-scan';
 import { scanDeps } from '@/lib/scans/deps';
 
-export const maxDuration = 300;
+export const maxDuration = 300; // = ROUTE_MAX_DURATION_S
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
