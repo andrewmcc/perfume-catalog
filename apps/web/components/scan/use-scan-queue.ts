@@ -101,7 +101,7 @@ export function useScanQueue(collectionId: string, userId: string) {
   );
 
   const enqueue = useCallback(
-    (mode: Mode, blobs: Blob[]) => {
+    (mode: Mode, blobs: Blob[]): string => {
       const item: ScanItem = {
         scanId: crypto.randomUUID(),
         mode,
@@ -119,6 +119,7 @@ export function useScanQueue(collectionId: string, userId: string) {
           patch(item.scanId, { thumb: url });
         })
         .catch(() => {});
+      return item.scanId;
     },
     [run, patch],
   );

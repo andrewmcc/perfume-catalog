@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Mode } from '@perfume/core';
 import { DEFAULT_GATE, createCaptureGate, type GateState } from '@/lib/capture/capture-gate';
+import { blockSignature, createBackgrounds, type Signature } from '@/lib/capture/background';
 import { edgeRatio, frameDiff, glareFraction, sharpness, toGray, type FrameMetrics, type Rect } from '@/lib/capture/detector';
 import { playShutter, tryHaptic, unlockAudio } from '@/lib/capture/feedback';
 import { createIdleTimer } from '@/lib/capture/idle';
@@ -32,7 +33,8 @@ const HINTS: Record<Mode, string> = {
   set: 'Photograph the box, then add the insert card if there is one.',
 };
 
-type Pending = { mode: Mode; blobs: Blob[] };
+/** `sig` is the detection view at the first photo, learned as background if the server says "not a perfume". */
+type Pending = { mode: Mode; blobs: Blob[]; sig: Signature | null };
 
 /** The on-screen square, mapped into the video's intrinsic pixels (video is object-cover, centred). */
 function squareInVideo(video: HTMLVideoElement): Rect {
@@ -89,6 +91,10 @@ export function CaptureView({ collectionId, userId }: { collectionId: string; us
   const pausedRef = useRef(false);
   const prevFrameRef = useRef<Uint8Array | null>(null);
   const firedFrameRef = useRef<Uint8Array | null>(null);
+  const sigRef = useRef<Signature | null>(null);
+  const backgroundsRef = useRef(createBackgrounds());
+  /** Bottle scans whose view may be an empty background, until the server has read them. */
+  const sigByScan = useRef(new Map<string, Signature>());
   const detectCanvas = useRef<HTMLCanvasElement | null>(null);
   const captureCanvas = useRef<HTMLCanvasElement | null>(null);
   const tickRef = useRef<() => void>(() => {});
@@ -105,9 +111,20 @@ export function CaptureView({ collectionId, userId }: { collectionId: string; us
     pendingRef.current = null;
     setPendingCount(0);
     setSecond(false);
-    enqueue(p.mode, p.blobs);
+    const scanId = enqueue(p.mode, p.blobs);
+    if (p.sig) sigByScan.current.set(scanId, p.sig);
     playShutter('pair');
   }, [enqueue]);
+
+  // A bottle shot the server called "not a perfume" was the empty table: never auto-capture that view again.
+  useEffect(() => {
+    for (const i of items) {
+      const sig = sigByScan.current.get(i.scanId);
+      if (!sig || !i.serverStatus || i.serverStatus === 'processing' || i.serverStatus === 'uploaded') continue;
+      if (i.serverStatus === 'discarded') backgroundsRef.current.add(sig);
+      sigByScan.current.delete(i.scanId);
+    }
+  }, [items]);
 
   /** Bottle: square crop at 1600 px. Samples/Set: full frame at native resolution. */
   const grab = useCallback(
@@ -156,7 +173,7 @@ export function CaptureView({ collectionId, userId }: { collectionId: string; us
       return;
     }
     commitPending(); // a new bottle / set: the previous one goes out with 1 photo
-    pendingRef.current = { mode: m, blobs: [blob] };
+    pendingRef.current = { mode: m, blobs: [blob], sig: m === 'bottle' ? sigRef.current : null };
     setPendingCount(1);
   }, [grab, enqueue, commitPending]);
 
@@ -175,14 +192,17 @@ export function CaptureView({ collectionId, userId }: { collectionId: string; us
     const gray = toGray(c.getImageData(0, 0, DETECT_SIZE, DETECT_SIZE).data, DETECT_SIZE, DETECT_SIZE);
     const prev = prevFrameRef.current;
     const fired = firedFrameRef.current;
+    const sig = blockSignature(gray, DETECT_SIZE, DETECT_SIZE, DETECT_INNER);
     const metrics: FrameMetrics = {
       sharpness: sharpness(gray, DETECT_SIZE, DETECT_SIZE, DETECT_INNER),
       diff: prev ? frameDiff(gray, prev) : 255,
       edgeRatio: edgeRatio(gray, DETECT_SIZE, DETECT_SIZE, DETECT_INNER),
       sinceFire: fired ? frameDiff(gray, fired) : 255,
       glare: glareFraction(gray, DETECT_SIZE, DETECT_SIZE, DETECT_INNER),
+      sinceBackground: backgroundsRef.current.distance(sig),
     };
     prevFrameRef.current = gray;
+    sigRef.current = sig;
 
     // Auto-capture is Bottle-only, pauses when idle, and stands down while waiting for a manual second photo.
     const now = performance.now();

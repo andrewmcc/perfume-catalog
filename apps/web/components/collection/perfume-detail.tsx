@@ -13,6 +13,7 @@ import { ItemCard } from './item-card';
 import type { ItemPatch } from './item-edit-form';
 import { label } from './labels';
 import { SourceBadge } from './source-badge';
+import { LookupNotes } from './lookup-notes';
 import Link from 'next/link';
 import { StarRating } from '@/components/wears/star-rating';
 import { WearToday } from '@/components/wears/wear-today';
@@ -129,7 +130,7 @@ export function PerfumeDetail({ detail }: { detail: Detail }) {
             ))}
           </dl>
         ) : (
-          <p className="text-sm text-muted">Notes unknown. Add them with Edit details.</p>
+          <LookupNotes perfumeId={detail.id} />
         )}
       </section>
 

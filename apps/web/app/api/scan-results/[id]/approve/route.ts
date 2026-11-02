@@ -5,7 +5,8 @@ import { createServerClient } from '@/lib/supabase/server';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Approves one scan result as the signed-in member (approve_result checks membership and state). */
-export const maxDuration = 120;
+// Enrichment runs in after(): memory, then web search when that gives no notes (see ENRICH_SEARCH_TIMEOUT_MS).
+export const maxDuration = 300;
 
 export async function POST(request: Request, ctx: RouteContext<'/api/scan-results/[id]/approve'>) {
   const { id } = await ctx.params;
