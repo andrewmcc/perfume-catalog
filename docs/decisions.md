@@ -64,3 +64,10 @@ Running log of decisions for the perfume catalogue. Tags: **[user]** = user deci
 - **Fixtures:** hand-correction of `expected.json` skipped; fixtures are unverified model output. [user]
 - **Timing:** extraction took about 1.5–9 s per bottle. [my call]
 - **Not measured:** seconds per bottle, samples-mode accuracy, set-insert reading. The user moved to the build. [user]
+
+## 2026-11-02 — Phase 1a deployed
+- Production deployed (`dpl_Adb3QdHqasJ5M3nrgWTEupQrxfEz`). Smoke tests passed: signed-out `/collection` 307 to login, manifest `start_url` `/today`, `/spike/capture` 307 to `/spike/unlock`. [my call]
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` is stored in Vercel as `--type config`: the CLI requires an explicit choice for public credential-like values, and the anon key is public by design (RLS guards data). [my call]
+- `NEXT_PUBLIC_APP_URL` in production is `https://perfume-catalog-cyan.vercel.app`; local stays `http://localhost:3000`, so `add-member.mts` must be run with `--app-url` for production links. [my call]
+- Members: two, one collection (`02252a09-3364-4db0-a612-01866577574b`), first as owner. Links handed over manually; no email sent. [user supplied emails]
+- iPhone check passed: invite, password set, sign-in, Add to Home Screen lands on `/today` signed in, scan icon and tabs navigate, sign-out works. [user]
