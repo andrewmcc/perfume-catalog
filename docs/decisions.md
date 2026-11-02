@@ -78,3 +78,14 @@ Running log of decisions for the perfume catalogue. Tags: **[user]** = user deci
 - Claude calls capped at 55 s with 1 retry; the pending sweep stops starting work after 60 s, so a run fits the 300 s function limit. [my call]
 - Spike removed: bucket `perfume-spike-captures` deleted; `SPIKE_PASSCODE` and `SUPABASE_ANON_KEY` unused (Vercel removal left to the user). [my call]
 - Shipped before the iPhone batch (10 bottles, 6+ samples, one set): production had 0 scans at merge. Timings and accuracy on real captures to be recorded after it. [user: "next phase and ship"]
+
+## 2026-11-02 — Phase 1c deployed
+- Review queue, AI enrichment and the Collection (Owned · Sets · Wishlist, perfume and set pages) deployed from `a0621e8`. Smoke: signed-out `/review`, `/collection`, `/collection/{id}` 307 to login; approve route 401. [my call]
+- Approval is one security-definer RPC (`approve_result`): it locks the scan, matches or creates the perfume, creates the set once per set scan, then the item and photos. Double approve and parallel set approvals create exactly one item / one set. [my call]
+- A perfume enters the **shared** catalogue only when every identity field (house, name, concentration, flanker) came unedited from a label read (`identified_from` label/both); edits are derived on the server, never trusted from the client. Otherwise it is private to the collection. [security review]
+- Matching: normalised house + name + flanker, accents folded (`unaccent`); concentration exact or missing on either side. [review fix]
+- Flags: "Hard to read" (unclear/missing/alternatives), "Already on your shelf", "New to the catalogue" (no match and not read from a label). A clear label creating a new perfume is not flagged, so bulk approve stays useful. [my call, as Seeds]
+- Thumbnails: 240 px **JPEG** uploaded at capture as `thumb-{n}.jpg` (iOS Safari can't encode WebP). [my call]
+- Fact edits are stored as overrides on every item of the perfume; the page shows the latest non-empty overrides. Setting a value back to the source removes the override. [my call]
+- Enrichment fills only empty fields, labelled AI-suggested; unknown perfumes get no notes rather than invented ones. Real call (Xerjoff Naxos): 5.5 s, sensible. [my call]
+- Deferred to later phases: wears, "Wear today", your stats and notes (Phase 2); smells like, layering, wishlist adding, add-from-text (Phase 3). [plan]
