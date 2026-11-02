@@ -16,8 +16,8 @@ const THUMB_EDGE = 240;
 const POLL_MS = 3000;
 const SETTLED = new Set(['extracted', 'failed', 'discarded', 'reviewed']);
 
-/** Small JPEG object URL, so the list never holds a full-size photo just for a thumbnail. */
-async function makeThumb(blob: Blob): Promise<string> {
+/** 240 px JPEG (q 0.8) of a photo. JPEG because iOS Safari's canvas can't encode WebP. */
+export async function toThumb(blob: Blob): Promise<Blob> {
   const bmp = await createImageBitmap(blob);
   const scale = Math.min(1, THUMB_EDGE / Math.max(bmp.width, bmp.height));
   const canvas = document.createElement('canvas');
@@ -25,8 +25,14 @@ async function makeThumb(blob: Blob): Promise<string> {
   canvas.height = Math.max(1, Math.round(bmp.height * scale));
   canvas.getContext('2d')!.drawImage(bmp, 0, 0, canvas.width, canvas.height);
   bmp.close();
-  const small = await new Promise<Blob | null>((r) => canvas.toBlob(r, 'image/jpeg', 0.7));
-  return small ? URL.createObjectURL(small) : '';
+  const small = await new Promise<Blob | null>((r) => canvas.toBlob(r, 'image/jpeg', 0.8));
+  if (!small) throw new Error('thumbnail failed');
+  return small;
+}
+
+/** Small JPEG object URL, so the list never holds a full-size photo just for a thumbnail. */
+async function makeThumb(blob: Blob): Promise<string> {
+  return URL.createObjectURL(await toThumb(blob));
 }
 
 /**
@@ -58,6 +64,11 @@ export function useScanQueue(collectionId: string, userId: string) {
               .upload(path(step.index), item.blobs[step.index]!, { contentType: 'image/jpeg' });
             // "Already exists": a previous attempt's upload landed but its response was lost. No update policy, so no upsert.
             if (error && !/already exists/i.test(error.message)) throw new Error(`Upload failed: ${error.message}`);
+            // Thumbnail for the collection list: best effort, never fails the capture.
+            const n = step.index + 1;
+            await toThumb(item.blobs[step.index]!)
+              .then((t) => supabase.storage.from('photos').upload(`${collectionId}/${item.scanId}/thumb-${n}.jpg`, t, { contentType: 'image/jpeg' }))
+              .catch(() => {});
             item.uploaded = item.uploaded.map((u, i) => u || i === step.index);
             patch(item.scanId, { uploaded: item.uploaded });
           } else if (step.kind === 'register') {
