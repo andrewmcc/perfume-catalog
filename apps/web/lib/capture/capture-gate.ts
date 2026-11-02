@@ -14,6 +14,8 @@ export type GateConfig = {
   rearmDiff: number;
   /** Max fraction of blown-out pixels in the square; 1 disables the check. */
   maxGlare: number;
+  /** A view this close to a known empty background is never captured. */
+  minBackgroundDiff: number;
 };
 
 // Tuned from iPhone sessions (real packets, hand-held, 4K stream): frame diff ~6–25.
@@ -27,6 +29,8 @@ export const DEFAULT_GATE: GateConfig = {
   stableMs: 500,
   rearmDiff: 25,
   maxGlare: 1,
+  // = BACKGROUND_MATCH: a bottle on the table measures several times this on test frames.
+  minBackgroundDiff: 10,
 };
 
 export type GateState = 'armed' | 'steadying' | 'waiting-for-change';
@@ -36,7 +40,7 @@ export function createCaptureGate(cfg: GateConfig) {
   let steadySince = 0;
 
   const isGood = (m: FrameMetrics) =>
-    m.sharpness >= cfg.minSharpness && m.diff <= cfg.maxDiff && m.edgeRatio >= cfg.minEdgeRatio && m.glare <= cfg.maxGlare;
+    m.sharpness >= cfg.minSharpness && m.diff <= cfg.maxDiff && m.edgeRatio >= cfg.minEdgeRatio && m.glare <= cfg.maxGlare && m.sinceBackground >= cfg.minBackgroundDiff;
 
   return {
     push(m: FrameMetrics, nowMs: number): { state: GateState; fire: boolean } {

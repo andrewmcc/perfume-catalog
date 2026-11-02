@@ -14,6 +14,8 @@ export type FrameMetrics = {
   sinceFire: number;
   /** Fraction (0–1) of pixels inside the square that are blown out (luma ≥ threshold). */
   glare: number;
+  /** Block-signature difference from the nearest known empty background (Infinity if none). */
+  sinceBackground: number;
 };
 
 export function toGray(rgba: Uint8ClampedArray, w: number, h: number): Uint8Array {

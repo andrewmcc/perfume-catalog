@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { DEFAULT_GATE, createCaptureGate, type FrameMetrics } from '../capture-gate';
 
 // sinceFire = difference from the frame captured at the last fire.
-const GOOD: FrameMetrics = { sharpness: 1e6, diff: 0, edgeRatio: 100, sinceFire: 0, glare: 0 };
-const BAD: FrameMetrics = { sharpness: 0, diff: 0, edgeRatio: 1, sinceFire: 0, glare: 0 };
+const GOOD: FrameMetrics = { sharpness: 1e6, diff: 0, edgeRatio: 100, sinceFire: 0, glare: 0, sinceBackground: Infinity };
+const BAD: FrameMetrics = { sharpness: 0, diff: 0, edgeRatio: 1, sinceFire: 0, glare: 0, sinceBackground: Infinity };
 const NEW_SIDE: FrameMetrics = { ...GOOD, sinceFire: DEFAULT_GATE.rearmDiff + 20 };
 const JOLT: FrameMetrics = { ...GOOD, diff: DEFAULT_GATE.rearmDiff + 20, sinceFire: DEFAULT_GATE.rearmDiff + 20 };
 
@@ -21,6 +21,16 @@ const every100 = (from: number, to: number, m: FrameMetrics): Frame[] => {
 };
 
 describe('capture gate', () => {
+  it('never fires on a view that matches a known empty background', () => {
+    const EMPTY_TABLE: FrameMetrics = { ...GOOD, sinceFire: 255, sinceBackground: DEFAULT_GATE.minBackgroundDiff / 2 };
+    expect(fireTimes(every100(0, 3000, EMPTY_TABLE))).toEqual([]);
+  });
+
+  it('a bottle placed on that table still fires', () => {
+    const BOTTLE: FrameMetrics = { ...GOOD, sinceFire: 255, sinceBackground: DEFAULT_GATE.minBackgroundDiff * 3 };
+    expect(fireTimes(every100(0, 1000, BOTTLE))).toEqual([500]);
+  });
+
   it('fires once after 500ms of steady good frames', () => {
     expect(fireTimes(every100(0, 1000, GOOD))).toEqual([500]);
   });
