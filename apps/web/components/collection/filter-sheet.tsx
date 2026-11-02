@@ -2,7 +2,7 @@
 
 import type { FilterKey, Filters, filterOptions } from '@perfume/core';
 import { Button } from '@/components/ui/button';
-import { FILTER_TITLES, label } from './labels';
+import { FILTER_TITLES, filterValueLabel } from './labels';
 
 type Options = ReturnType<typeof filterOptions>;
 
@@ -13,7 +13,7 @@ export function FilterSheet({ options, filters, onChange, onClose }: { options: 
     onChange({ ...filters, [k]: cur.includes(v) ? cur.filter((x) => x !== v) : [...cur, v] });
   };
   const groups = (Object.keys(FILTER_TITLES) as FilterKey[])
-    .map((k) => ({ k, values: k === 'set' ? options.set.map((s) => ({ v: s.id, l: s.name })) : options[k].map((v) => ({ v, l: k === 'house' ? v : label(v) })) }))
+    .map((k) => ({ k, values: k === 'set' ? options.set.map((s) => ({ v: s.id, l: s.name })) : options[k].map((v) => ({ v, l: filterValueLabel(k, v) })) }))
     .filter((g) => g.values.length > 0);
   return (
     <div role="dialog" aria-modal="true" aria-label="Filters" className="fixed inset-0 z-40 flex items-end bg-ink/40" onClick={onClose}>

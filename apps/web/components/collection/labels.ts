@@ -19,4 +19,13 @@ export const FILTER_TITLES = {
   house: 'House',
   format: 'Format',
   set: 'Set',
+  rating: 'Rating',
+  worn: 'Worn',
 } as const;
+
+const FILTER_VALUE_COPY: Record<string, Record<string, string>> = {
+  rating: { '4': '4★ and up', '3': '3★ and up' },
+  worn: { recent: 'In the last 3 months', neglected: 'Not in 3 months' },
+};
+/** Chip text for a filter value. */
+export const filterValueLabel = (k: string, v: string): string => FILTER_VALUE_COPY[k]?.[v] ?? (k === 'house' ? v : label(v));

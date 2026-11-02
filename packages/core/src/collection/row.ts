@@ -17,4 +17,6 @@ export type CollectionRow = {
   weight: Weight | null;
   thumb: string | null;
   items: CollectionItem[];
+  /** This collection's wears of the perfume. */
+  wear: { count: number; avgRating: number | null; lastWorn: string | null };
 };

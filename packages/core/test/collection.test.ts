@@ -37,6 +37,7 @@ const row = (over: Partial<CollectionRow> = {}): CollectionRow => ({
   weight: 'base',
   thumb: null,
   items: [{ id: 'i1', format: 'full', size_ml: 100, status: 'owned', setId: null, setName: null }],
+  wear: { count: 0, avgRating: null, lastWorn: null },
   ...over,
 });
 
@@ -88,6 +89,8 @@ describe('search', () => {
   });
 });
 
+const TODAY = '2026-11-02';
+
 describe('applyFilters', () => {
   const rows = [
     row({ perfumeId: 'a', family: 'oriental', seasons: ['winter'] }),
@@ -95,17 +98,38 @@ describe('applyFilters', () => {
     row({ perfumeId: 'c', family: 'woody', seasons: ['winter'], items: [{ id: 'i', format: 'sample', size_ml: 2, status: 'owned', setId: 's1', setName: 'Discovery' }] }),
   ];
   const ids = (r: CollectionRow[]) => r.map((x) => x.perfumeId);
-  it('empty filters keep everything', () => expect(ids(applyFilters(rows, {}))).toEqual(['a', 'b', 'c']));
-  it('OR within a key', () => expect(ids(applyFilters(rows, { family: ['oriental', 'citrus'] }))).toEqual(['a', 'b']));
-  it('AND across keys', () => expect(ids(applyFilters(rows, { family: ['oriental', 'woody'], season: ['winter'] }))).toEqual(['a', 'c']));
+  it('empty filters keep everything', () => expect(ids(applyFilters(rows, {}, TODAY))).toEqual(['a', 'b', 'c']));
+  it('OR within a key', () => expect(ids(applyFilters(rows, { family: ['oriental', 'citrus'] }, TODAY))).toEqual(['a', 'b']));
+  it('AND across keys', () => expect(ids(applyFilters(rows, { family: ['oriental', 'woody'], season: ['winter'] }, TODAY))).toEqual(['a', 'c']));
   it('format and set match any item', () => {
-    expect(ids(applyFilters(rows, { format: ['sample'] }))).toEqual(['c']);
-    expect(ids(applyFilters(rows, { set: ['s1'] }))).toEqual(['c']);
+    expect(ids(applyFilters(rows, { format: ['sample'] }, TODAY))).toEqual(['c']);
+    expect(ids(applyFilters(rows, { set: ['s1'] }, TODAY))).toEqual(['c']);
+  });
+  it('rating keeps rows whose average is at least N; unrated rows never match', () => {
+    const rated = [
+      row({ perfumeId: 'r5', wear: { count: 2, avgRating: 4.5, lastWorn: '2026-10-01' } }),
+      row({ perfumeId: 'r3', wear: { count: 1, avgRating: 3, lastWorn: '2026-10-01' } }),
+      row({ perfumeId: 'r0', wear: { count: 1, avgRating: null, lastWorn: '2026-10-01' } }),
+    ];
+    expect(ids(applyFilters(rated, { rating: ['4'] }, TODAY))).toEqual(['r5']);
+    expect(ids(applyFilters(rated, { rating: ['3'] }, TODAY))).toEqual(['r5', 'r3']);
+  });
+  it('worn: recent is within 90 days; neglected is never worn or older', () => {
+    const worn = [
+      row({ perfumeId: 'never' }),
+      row({ perfumeId: 'old', wear: { count: 1, avgRating: null, lastWorn: '2026-08-03' } }), // 91 days
+      row({ perfumeId: 'edge', wear: { count: 1, avgRating: null, lastWorn: '2026-08-04' } }), // 90 days
+      row({ perfumeId: 'new', wear: { count: 1, avgRating: null, lastWorn: '2026-11-01' } }),
+    ];
+    expect(ids(applyFilters(worn, { worn: ['neglected'] }, TODAY))).toEqual(['never', 'old']);
+    expect(ids(applyFilters(worn, { worn: ['recent'] }, TODAY))).toEqual(['edge', 'new']);
   });
   it('options list the values present', () => {
     const o = filterOptions(rows);
     expect(o.family).toEqual(['citrus', 'oriental', 'woody']);
     expect(o.format).toEqual(['full', 'sample']);
     expect(o.set).toEqual([{ id: 's1', name: 'Discovery' }]);
+    expect(o.rating).toEqual([]);
+    expect(o.worn).toEqual(['recent', 'neglected']);
   });
 });

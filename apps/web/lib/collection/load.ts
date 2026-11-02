@@ -62,6 +62,7 @@ export async function loadCollection(supabase: Client): Promise<{ rows: Collecti
       weight: pyramidWeight({ notes_top: notes.top, notes_heart: notes.heart, notes_base: notes.base }),
       thumb: thumbPath ? (url.get(thumbPath) ?? null) : null,
       items: group.map((i) => ({ id: i.id, format: i.format, size_ml: i.size_ml, status: i.status, setId: i.set_id, setName: i.sets?.name ?? null })),
+      wear: { count: 0, avgRating: null, lastWorn: null },
     });
   }
   rows.sort((a, b) => a.house.localeCompare(b.house) || a.name.localeCompare(b.name));
