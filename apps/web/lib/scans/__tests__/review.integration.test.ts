@@ -132,6 +132,15 @@ describe('approve_result', () => {
     expect(p.sources).toMatchObject({ name: 'edited' });
   });
 
+  it('an edited concentration alone gives a private perfume', async () => {
+    const s = await extracted(ca, 'bottle', [read('Conc Edit')]);
+    const { data, error } = await approve(a, s.results[0]!, { concentration: 'extrait' });
+    expect(error).toBeNull();
+    const p = (await item(data![0]!.item_id)).perfumes!;
+    expect(p).toMatchObject({ concentration: 'extrait', collection_id: ca });
+    expect(p.sources).toMatchObject({ concentration: 'edited' });
+  });
+
   it('identified_from shape gives a private perfume', async () => {
     const s = await extracted(ca, 'bottle', [read('Shape Only', { identified_from: 'shape' })]);
     const { data } = await approve(a, s.results[0]!);
