@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '@perfume/supabase';
+import { asWearInsert } from '../insert';
 
 // Hosted DB. Members A (collection CA) and B (collection CB), each with one item of a shared perfume.
 type Db = SupabaseClient<Database>;
@@ -76,17 +77,17 @@ describe('wears', () => {
   });
 
   it("a wear with another collection's item is refused", async () => {
-    const { error } = await wears(a).insert({ collection_id: ca, item_id: itemB, worn_on: '2026-11-02' });
+    const { error } = await wears(a).insert(asWearInsert({ collection_id: ca, item_id: itemB, worn_on: '2026-11-02' }));
     expect(error).not.toBeNull();
   });
 
   it('a wear without an item is refused', async () => {
-    const { error } = await wears(a).insert({ collection_id: ca, perfume_id: perfumeA, worn_on: '2026-11-02' });
+    const { error } = await wears(a).insert({ collection_id: ca, perfume_id: perfumeA, worn_on: '2026-11-02' } as never);
     expect(error).not.toBeNull();
   });
 
   it('a non-member cannot read or update the wear', async () => {
-    const { data: w } = await wears(a).insert({ collection_id: ca, item_id: itemA, worn_on: '2026-11-01' }).select('id').single();
+    const { data: w } = await wears(a).insert(asWearInsert({ collection_id: ca, item_id: itemA, worn_on: '2026-11-01' })).select('id').single();
     const { data: seen } = await wears(b).select('id').eq('id', w!.id);
     expect(seen).toEqual([]);
     const { data: updated } = await wears(b).update({ rating: 1 }).eq('id', w!.id).select('id');
@@ -94,7 +95,7 @@ describe('wears', () => {
   });
 
   it('an update cannot repoint the perfume', async () => {
-    const { data: w } = await wears(a).insert({ collection_id: ca, item_id: itemA, worn_on: '2026-10-30' }).select('id').single();
+    const { data: w } = await wears(a).insert(asWearInsert({ collection_id: ca, item_id: itemA, worn_on: '2026-10-30' })).select('id').single();
     await wears(a).update({ perfume_id: perfumeB }).eq('id', w!.id);
     const { data } = await admin.from('wears').select('perfume_id').eq('id', w!.id).single();
     expect(data).toMatchObject({ perfume_id: perfumeA });
@@ -102,7 +103,7 @@ describe('wears', () => {
 
   it('deleting the item keeps the wear and its perfume', async () => {
     const extra = await itemOf(ca, perfumeA);
-    const { data: w } = await wears(a).insert({ collection_id: ca, item_id: extra, worn_on: '2026-10-31' }).select('id').single();
+    const { data: w } = await wears(a).insert(asWearInsert({ collection_id: ca, item_id: extra, worn_on: '2026-10-31' })).select('id').single();
     const { error } = await a.from('items').delete().eq('id', extra);
     expect(error).toBeNull();
     const { data } = await wears(a).select('*').eq('id', w!.id).single();
@@ -111,10 +112,10 @@ describe('wears', () => {
 
   it('rating 0 and 6 are refused; null is fine', async () => {
     for (const rating of [0, 6]) {
-      const { error } = await wears(a).insert({ collection_id: ca, item_id: itemA, worn_on: '2026-11-02', rating });
+      const { error } = await wears(a).insert(asWearInsert({ collection_id: ca, item_id: itemA, worn_on: '2026-11-02', rating }));
       expect(error).not.toBeNull();
     }
-    const { error } = await wears(a).insert({ collection_id: ca, item_id: itemA, worn_on: '2026-11-02', rating: null });
+    const { error } = await wears(a).insert(asWearInsert({ collection_id: ca, item_id: itemA, worn_on: '2026-11-02', rating: null }));
     expect(error).toBeNull();
   });
 });
