@@ -12,7 +12,7 @@ async function Location() {
   await connection();
   const supabase = await createServerClient();
   const { data } = await supabase.from('collection_settings').select('place, lat').maybeSingle();
-  return <LocationForm place={data?.lat != null ? (data.place ?? 'your location') : null} />;
+  return <LocationForm place={data?.lat != null ? (data.place === 'Your location' ? 'your location' : (data.place ?? 'your location')) : null} />;
 }
 
 export default function Page() {

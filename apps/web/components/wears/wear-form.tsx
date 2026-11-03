@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Daypart } from '@perfume/core';
+import { londonNow, type Daypart } from '@perfume/core';
 import { Button } from '@/components/ui/button';
 import { ConfirmButton } from '@/components/collection/confirm-button';
 import { StarRating } from './star-rating';
@@ -50,7 +50,7 @@ export function WearForm({
       className="flex flex-col gap-3"
       onSubmit={(e) => {
         e.preventDefault();
-        void run(() => onSave(wearPatch(f)));
+        void run(() => onSave(wearPatch(f, londonNow(new Date()).date)));
       }}
     >
       {showDate && (
@@ -59,6 +59,7 @@ export function WearForm({
           <input
             type="date"
             required
+            max={londonNow(new Date()).date}
             value={f.wornOn}
             onChange={(e) => setF({ ...f, wornOn: e.target.value })}
             className="min-h-11 rounded-[3px] border border-line bg-card px-3 text-[16px] text-ink focus:border-oxblood focus:outline-none"

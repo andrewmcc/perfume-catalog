@@ -10,6 +10,8 @@ export type ReadEdits = Partial<{
   batch_code: string | null;
   set_house: string;
   set_name: string;
+  /** 'wishlist' approves a tester or wanted bottle onto the wishlist. */
+  status: 'owned' | 'wishlist';
 }>;
 
 const norm = (v: unknown) => (typeof v === 'string' ? v.trim() || null : (v ?? null));

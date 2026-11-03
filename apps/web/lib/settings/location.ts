@@ -24,5 +24,5 @@ export async function resolveLocation(body: unknown, lookup: Lookup = lookupPost
   const { lat, lon } = b;
   if (typeof lat !== 'number' || typeof lon !== 'number' || !Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180)
     return bad('That location is not valid.');
-  return { ok: true, lat: roundCoord(lat), lon: roundCoord(lon), place: 'Your location' };
+  return { ok: true, lat: roundCoord(lat), lon: roundCoord(lon), place: 'your location' };
 }

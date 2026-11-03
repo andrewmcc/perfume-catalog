@@ -3,7 +3,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@perfume/supabase';
-import type { FactField, Source } from '@perfume/core';
+import { formatAvg, type FactField, type Source } from '@perfume/core';
 import { ScentPyramid } from '@/components/brand/pyramid';
 import { CONCENTRATION_LABEL } from '@/components/review/edits';
 import { overridePatch } from '@/lib/collection/overrides';
@@ -33,7 +33,8 @@ function Fact({ title, source, children }: { title: string; source: Source | nul
   );
 }
 
-export function PerfumeDetail({ detail }: { detail: Detail }) {
+/** `pairs` is the server-rendered Smells like / Layer with block. */
+export function PerfumeDetail({ detail, pairs }: { detail: Detail; pairs?: ReactNode }) {
   const router = useRouter();
   const supabase = useMemo(() => createBrowserClient(), []);
   const [editing, setEditing] = useState(false);
@@ -73,6 +74,7 @@ export function PerfumeDetail({ detail }: { detail: Detail }) {
       if (detail.items.length === 1) router.push('/collection');
     });
 
+  const wishOnly = detail.items.every((i) => i.status === 'wishlist');
   const notes = [
     ['Top', v.notes_top, s.notes_top],
     ['Heart', v.notes_heart, s.notes_heart],
@@ -102,6 +104,7 @@ export function PerfumeDetail({ detail }: { detail: Detail }) {
       )}
       <p className="text-[12px] tracking-[0.16em] text-muted uppercase">{detail.house}</p>
       <h1 className="font-display text-3xl leading-tight italic">{detail.name}</h1>
+      {wishOnly && <p className="mt-1 w-fit rounded-full border border-gold-deep px-2 py-px text-[12px] text-gold-deep">On your wishlist</p>}
       {Boolean(v.concentration || v.flanker) && (
         <p className="mt-1 flex flex-wrap items-center gap-2 text-muted">
           {[v.concentration && (CONCENTRATION_LABEL[v.concentration as string] ?? (v.concentration as string)), v.flanker].filter(Boolean).join(' · ')}
@@ -109,14 +112,16 @@ export function PerfumeDetail({ detail }: { detail: Detail }) {
         </p>
       )}
 
+      {!(wishOnly && detail.wear.count === 0) && (
       <section aria-label="Your stats" className="mt-4">
         <p className="text-[15px] text-ink">
           {detail.wear.count === 0
             ? 'Not worn yet'
-            : [`Worn ${detail.wear.count}×`, detail.wear.avgRating != null && `avg ★${detail.wear.avgRating}`, detail.wear.lastWorn && `last worn ${dayAndMonth(detail.wear.lastWorn)}`].filter(Boolean).join(' · ')}
+            : [`Worn ${detail.wear.count}×`, detail.wear.avgRating != null && `avg ★${formatAvg(detail.wear.avgRating)}`, detail.wear.lastWorn && `last worn ${dayAndMonth(detail.wear.lastWorn)}`].filter(Boolean).join(' · ')}
         </p>
         {detail.wearItemId && <WearToday collectionId={detail.collectionId} itemId={detail.wearItemId} className="mt-3" />}
       </section>
+      )}
 
       <section aria-label="Scent pyramid" className="label-card mt-5 flex gap-4 p-4">
         <ScentPyramid weight={detail.weight} size={64} />
@@ -152,10 +157,12 @@ export function PerfumeDetail({ detail }: { detail: Detail }) {
         </button>
       )}
 
+      {pairs}
+
       {detail.notes.length > 0 && (
         <section aria-label="Your notes" className="mt-6">
           <h2 className="font-display text-xl italic">
-            Your notes{detail.wear.avgRating != null && <span className="ml-2 font-sans text-sm text-muted not-italic">avg ★{detail.wear.avgRating}</span>}
+            Your notes{detail.wear.avgRating != null && <span className="ml-2 font-sans text-sm text-muted not-italic">avg ★{formatAvg(detail.wear.avgRating)}</span>}
           </h2>
           <ul className="label-card mt-3 px-4">
             {detail.notes.map((n) => (

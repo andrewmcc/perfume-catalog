@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
-import { formatGbp } from '@perfume/core';
+import { findGaps, formatAvg, formatGbp } from '@perfume/core';
 import { Breakdown } from '@/components/stats/breakdown';
+import { GapCard } from '@/components/stats/gap-card';
+import { loadCollection } from '@/lib/collection/load';
 import { loadStats } from '@/lib/stats/load';
 import { createServerClient } from '@/lib/supabase/server';
 
@@ -21,8 +23,10 @@ function Tile({ value, label, note }: { value: string; label: string; note?: str
 
 async function Stats() {
   await connection();
-  const s = await loadStats(await createServerClient());
-  if (s.bottles + s.samples === 0) return <p className="mt-3 text-muted">Stats appear once your shelf has something on it.</p>;
+  const supabase = await createServerClient();
+  const [s, { rows }] = await Promise.all([loadStats(supabase), loadCollection(supabase)]);
+  const gaps = findGaps(rows.filter((r) => r.items.some((i) => i.status === 'owned')));
+  const empty = s.bottles + s.samples === 0;
   return (
     <>
       <div className="mt-4 grid grid-cols-2 gap-3">
@@ -32,6 +36,21 @@ async function Stats() {
         <Tile value={formatGbp(s.value.total)} label="est. value" note={s.value.unpriced ? `${s.value.unpriced} without a price` : undefined} />
       </div>
       <p className="mt-2 text-[12px] text-muted">Value is an estimate: what you paid where entered, otherwise typical retail price for the size.</p>
+      {empty ? (
+        <p className="mt-4 text-muted">The rest of your stats appear once your shelf has something on it.</p>
+      ) : (
+        <>
+
+      {gaps.length > 0 && (
+        <section aria-label="Gaps in your shelf" className="mt-4">
+          <h2 className="font-display text-lg italic">Gaps in your shelf</h2>
+          <ul className="mt-2 flex flex-col gap-3">
+            {gaps.map((g) => (
+              <GapCard key={g.id} gap={g} />
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section aria-label="Worn vs neglected" className="label-card mt-4 p-4">
         <h2 className="font-display text-lg italic">Worn vs neglected</h2>
@@ -61,7 +80,7 @@ async function Stats() {
             <Link href={`/collection/${s.topRated.perfumeId}`} className="underline underline-offset-4">
               {s.topRated.name}
             </Link>{' '}
-            (★{s.topRated.avg})
+            (★{formatAvg(s.topRated.avg)})
           </p>
         )}
       </section>
@@ -72,6 +91,8 @@ async function Stats() {
         <Breakdown title="By house" rows={s.byHouse} raw />
         <Breakdown title="By format" rows={s.byFormat} />
       </div>
+        </>
+      )}
     </>
   );
 }

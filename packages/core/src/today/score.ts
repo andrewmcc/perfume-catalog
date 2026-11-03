@@ -31,7 +31,7 @@ const LIGHT_FAMILIES = new Set(['citrus', 'aquatic', 'green']);
 const HEAVY_FAMILIES = new Set(['gourmand', 'oriental', 'leather', 'spicy']);
 
 /** How heavy a perfume wears, −2 (light) … 2 (heavy). */
-export function heft(c: Candidate): number {
+export function heft(c: { family: string | null; weight: Weight | null; sillage: string | null }): number {
   const fam = c.family ? (LIGHT_FAMILIES.has(c.family) ? -1 : HEAVY_FAMILIES.has(c.family) ? 1 : 0) : 0;
   const weight = c.weight === 'top' ? -1 : c.weight === 'base' ? 1 : 0;
   const sillage = c.sillage === 'intimate' ? -1 : c.sillage === 'strong' || c.sillage === 'enormous' ? 1 : 0;

@@ -16,21 +16,28 @@ export type DiaryWear = {
   house: string;
   name: string;
   family: string | null;
+  /** The collection still has an item of it, so its page exists. */
+  onShelf: boolean;
 };
 
 export type Wearable = { itemId: string; perfumeId: string; house: string; name: string; format: string; setName: string | null };
 
 /** Effective family per perfume: the collection's latest override, else the perfume's own. */
-async function familiesOf(supabase: Client, perfumeIds: string[], own: Map<string, string | null>): Promise<Map<string, string | null>> {
-  if (!perfumeIds.length) return new Map();
+async function familiesOf(
+  supabase: Client,
+  perfumeIds: string[],
+  own: Map<string, string | null>,
+): Promise<{ families: Map<string, string | null>; onShelf: Set<string> }> {
+  if (!perfumeIds.length) return { families: new Map(), onShelf: new Set() };
   const { data, error } = await supabase.from('items').select('perfume_id, overrides, updated_at').in('perfume_id', perfumeIds);
   if (error) throw error;
-  return new Map(
+  const families = new Map(
     perfumeIds.map((id) => {
       const o = latestOverrides(data.filter((i) => i.perfume_id === id));
-      return [id, 'family' in o ? ((o.family as string | null) ?? null) : (own.get(id) ?? null)];
+      return [id, 'family' in o ? ((o.family as string | null) ?? null) : (own.get(id) ?? null)] as const;
     }),
   );
+  return { families, onShelf: new Set(data.map((i) => i.perfume_id)) };
 }
 
 /** Wears dated within a month (YYYY-MM), oldest first, with each perfume's effective family. */
@@ -46,7 +53,7 @@ export async function loadMonth(supabase: Client, ym: string): Promise<DiaryWear
     .order('created_at');
   if (error) throw error;
   const ids = [...new Set(data.map((w) => w.perfume_id))];
-  const families = await familiesOf(supabase, ids, new Map(data.map((w) => [w.perfume_id, w.perfumes?.family ?? null])));
+  const { families, onShelf } = await familiesOf(supabase, ids, new Map(data.map((w) => [w.perfume_id, w.perfumes?.family ?? null])));
   return data.map((w) => ({
     id: w.id,
     perfumeId: w.perfume_id,
@@ -58,6 +65,7 @@ export async function loadMonth(supabase: Client, ym: string): Promise<DiaryWear
     house: w.perfumes?.house ?? '',
     name: w.perfumes?.name ?? '',
     family: families.get(w.perfume_id) ?? null,
+    onShelf: onShelf.has(w.perfume_id),
   }));
 }
 
@@ -68,4 +76,13 @@ export async function loadWearables(supabase: Client): Promise<Wearable[]> {
   return data
     .map((i) => ({ itemId: i.id, perfumeId: i.perfume_id, house: i.perfumes?.house ?? '', name: i.perfumes?.name ?? '', format: i.format, setName: i.sets?.name ?? null }))
     .sort((a, b) => a.house.localeCompare(b.house) || a.name.localeCompare(b.name));
+}
+
+/** Wears per London date in a year. */
+export async function loadYearCounts(supabase: Client, year: number): Promise<Map<string, number>> {
+  const { data, error } = await supabase.from('wears').select('worn_on').gte('worn_on', `${year}-01-01`).lte('worn_on', `${year}-12-31`);
+  if (error) throw error;
+  const counts = new Map<string, number>();
+  for (const w of data) counts.set(w.worn_on, (counts.get(w.worn_on) ?? 0) + 1);
+  return counts;
 }

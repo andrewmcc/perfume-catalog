@@ -162,6 +162,7 @@ export type Database = {
           size_ml: number | null
           status: string
           updated_at: string
+          wish_reason: string | null
         }
         Insert: {
           batch_code?: string | null
@@ -180,6 +181,7 @@ export type Database = {
           size_ml?: number | null
           status?: string
           updated_at?: string
+          wish_reason?: string | null
         }
         Update: {
           batch_code?: string | null
@@ -198,6 +200,7 @@ export type Database = {
           size_ml?: number | null
           status?: string
           updated_at?: string
+          wish_reason?: string | null
         }
         Relationships: [
           {
@@ -552,6 +555,15 @@ export type Database = {
           created_perfume_id: string
           item_id: string
         }[]
+      }
+      claim_ai: {
+        Args: {
+          p_cap: number
+          p_collection: string
+          p_kind: string
+          p_now?: string
+        }
+        Returns: boolean
       }
       claim_lookup: {
         Args: {

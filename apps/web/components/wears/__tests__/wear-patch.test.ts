@@ -19,3 +19,10 @@ describe('wearPatch', () => {
     expect(() => wearPatch({ wornOn: '2026-11-02', timeOfDay: null, rating: 6, notes: '' })).toThrow();
   });
 });
+
+describe('future dates', () => {
+  it('a wear can’t be dated after today', () => {
+    expect(() => wearPatch({ wornOn: '2026-11-04', timeOfDay: null, rating: null, notes: '' }, '2026-11-03')).toThrow('A wear can’t be in the future.');
+    expect(wearPatch({ wornOn: '2026-11-03', timeOfDay: null, rating: null, notes: '' }, '2026-11-03').worn_on).toBe('2026-11-03');
+  });
+});

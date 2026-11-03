@@ -90,5 +90,5 @@ export function collectionStats(items: StatItem[], wears: WearLite[], setCount: 
 /** £840, £3.2k. */
 export function formatGbp(n: number): string {
   const r = Math.round(n);
-  return r >= 1000 ? `£${(r / 1000).toFixed(1)}k` : `£${r}`;
+  return r >= 1000 ? `£${(r / 1000).toFixed(1).replace(/\.0$/, '')}k` : `£${r}`;
 }

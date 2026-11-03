@@ -170,7 +170,7 @@ describe('approve_result', () => {
       collection_id: cb,
       perfume_id: other!.id,
       photo_paths: [`${cb}/x/photo-1.jpg`],
-      status: 'wishlist',
+      status: 'gone',
     });
     expect(error).toBeNull();
     const it = await item(data![0]!.item_id);
@@ -249,6 +249,14 @@ describe('approve_result', () => {
     expect(upErr).toBeNull();
     const { data } = await approve(a, s.results[0]!);
     expect((await item(data![0]!.item_id)).item_photos[0]!.thumb_path).toBe(thumb);
+  });
+
+  it('status wishlist makes a wishlist item; other statuses are ignored', async () => {
+    const s = await extracted(ca, 'samples', [read('Wished'), read('Not Gone')]);
+    const w = await approve(a, s.results[0]!, { status: 'wishlist' });
+    expect((await item(w.data![0]!.item_id)).status).toBe('wishlist');
+    const g = await approve(a, s.results[1]!, { status: 'gone' });
+    expect((await item(g.data![0]!.item_id)).status).toBe('owned');
   });
 
   it('requires house and name', async () => {

@@ -16,6 +16,7 @@ export type ItemDetail = {
   purchase_source: string | null;
   batch_code: string | null;
   notes: string | null;
+  wish_reason: string | null;
   overrides: Record<string, unknown>;
   setId: string | null;
   setName: string | null;
@@ -85,6 +86,7 @@ export async function loadPerfume(supabase: Client, perfumeId: string): Promise<
         purchase_source: i.purchase_source,
         batch_code: i.batch_code,
         notes: i.notes,
+        wish_reason: i.wish_reason,
         overrides: (i.overrides ?? {}) as Record<string, unknown>,
         setId: i.set_id,
         setName: i.sets?.name ?? null,

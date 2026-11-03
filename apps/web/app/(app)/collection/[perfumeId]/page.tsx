@@ -1,6 +1,7 @@
 import { connection } from 'next/server';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
+import { Pairs } from '@/components/collection/pairs';
 import { PerfumeDetail } from '@/components/collection/perfume-detail';
 import { loadPerfume } from '@/lib/collection/perfume';
 import { createServerClient } from '@/lib/supabase/server';
@@ -13,7 +14,16 @@ async function Perfume({ params }: { params: Promise<{ perfumeId: string }> }) {
   if (!UUID.test(perfumeId)) notFound();
   const detail = await loadPerfume(await createServerClient(), perfumeId);
   if (!detail) notFound();
-  return <PerfumeDetail detail={detail} />;
+  return (
+    <PerfumeDetail
+      detail={detail}
+      pairs={
+        <Suspense fallback={null}>
+          <Pairs perfumeId={perfumeId} />
+        </Suspense>
+      }
+    />
+  );
 }
 
 export default function Page(props: PageProps<'/collection/[perfumeId]'>) {
