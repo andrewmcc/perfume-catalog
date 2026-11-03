@@ -87,3 +87,19 @@ body {
     opacity: 0.6;
   }
 }
+
+/* Touch feedback: a small press for anything tappable that opts in */
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+.press {
+  transition: transform 100ms ease-out;
+}
+.press:active:not(:disabled) {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .press:active:not(:disabled) {
+    transform: none;
+  }
+}

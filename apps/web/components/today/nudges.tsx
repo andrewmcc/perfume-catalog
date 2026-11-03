@@ -1,31 +1,39 @@
 'use client';
 
-import Link from 'next/link';
+import { useOptimistic } from 'react';
 import { useRouter } from 'next/navigation';
 import { OCCASIONS, type Nudge } from '@perfume/core';
 import { label } from '@/components/collection/labels';
+import { todayHref } from '@/lib/today/href';
+import { usePending } from './pending';
 
-const href = (n: Nudge | null, o: string | null) => {
-  const q = new URLSearchParams();
-  if (n) q.set('n', n);
-  if (o) q.set('o', o);
-  const s = q.toString();
-  return s ? `/today?${s}` : '/today';
-};
+type Choice = { nudge: Nudge | null; occasion: string | null };
 
-/** Something lighter / bolder (toggles) and an occasion, carried in the URL. */
+/** Something lighter / bolder (toggles) and an occasion, carried in the URL. Shows the new choice at once. */
 export function Nudges({ nudge, occasion }: { nudge: Nudge | null; occasion: string | null }) {
   const router = useRouter();
-  const chip = (n: Nudge, text: string) => (
-    <Link
-      href={href(nudge === n ? null : n, occasion)}
-      aria-pressed={nudge === n}
-      scroll={false}
-      className={`flex min-h-11 items-center rounded-full border px-4 text-sm ${nudge === n ? 'border-oxblood bg-oxblood text-paper' : 'border-line text-ink'}`}
-    >
-      {text}
-    </Link>
-  );
+  const { startTransition } = usePending();
+  const [shown, setShown] = useOptimistic<Choice, Choice>({ nudge, occasion }, (_, next) => next);
+
+  const choose = (next: Choice) =>
+    startTransition(() => {
+      setShown(next);
+      router.push(todayHref(next.nudge, next.occasion), { scroll: false });
+    });
+
+  const chip = (n: Nudge, text: string) => {
+    const on = shown.nudge === n;
+    return (
+      <button
+        type="button"
+        aria-pressed={on}
+        onClick={() => choose({ ...shown, nudge: on ? null : n })}
+        className={`press flex min-h-11 items-center rounded-full border px-4 text-sm transition-colors duration-150 ${on ? 'border-oxblood bg-oxblood text-paper' : 'border-line text-ink'}`}
+      >
+        {text}
+      </button>
+    );
+  };
   return (
     <div className="mt-5 flex flex-wrap items-center gap-2" role="group" aria-label="Adjust the picks">
       {chip('lighter', 'Something lighter')}
@@ -35,8 +43,8 @@ export function Nudges({ nudge, occasion }: { nudge: Nudge | null; occasion: str
       </label>
       <select
         id="occasion"
-        value={occasion ?? ''}
-        onChange={(e) => router.push(href(nudge, e.target.value || null), { scroll: false })}
+        value={shown.occasion ?? ''}
+        onChange={(e) => choose({ ...shown, occasion: e.target.value || null })}
         className="min-h-11 rounded-full border border-line bg-card px-4 text-sm text-ink"
       >
         <option value="">Any occasion</option>

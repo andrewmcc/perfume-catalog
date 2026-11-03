@@ -9,7 +9,23 @@ async function ModelReason({ reasons, id, fallback }: { reasons: Promise<Record<
 }
 
 /** One of today's picks: photo, house, name, pyramid, reason and a Wear button. */
-export function PickCard({ pick, rule, reasons, collectionId }: { pick: TodayPick; rule: string; reasons: Promise<Record<string, string> | null>; collectionId: string }) {
+/**
+ * `reasonsKey` changes with Today's context: a fresh Suspense boundary shows the rule reason at
+ * once instead of holding the old screen until Claude's new line is ready.
+ */
+export function PickCard({
+  pick,
+  rule,
+  reasons,
+  reasonsKey,
+  collectionId,
+}: {
+  pick: TodayPick;
+  rule: string;
+  reasons: Promise<Record<string, string> | null>;
+  reasonsKey: string;
+  collectionId: string;
+}) {
   const c = pick.candidate;
   return (
     <li className="label-card p-4">
@@ -22,7 +38,7 @@ export function PickCard({ pick, rule, reasons, collectionId }: { pick: TodayPic
             <p className="truncate text-[12px] tracking-[0.14em] text-muted uppercase">{c.house}</p>
             <p className="font-display text-[19px] leading-snug text-ink">{c.name}</p>
             <p className="mt-0.5 text-[14px] text-muted italic">
-              <Suspense fallback={rule}>
+              <Suspense key={reasonsKey} fallback={rule}>
                 <ModelReason reasons={reasons} id={c.perfumeId} fallback={rule} />
               </Suspense>
             </p>

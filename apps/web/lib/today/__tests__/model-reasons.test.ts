@@ -53,3 +53,13 @@ describe('reasons cache key', () => {
     expect(reasonsKey([{ ...a!, candidate: { ...a!.candidate, name: 'Renamed' } }])).not.toEqual(reasonsKey([a!]));
   });
 });
+
+describe('todayHref', () => {
+  it('carries nudge and occasion; empty is plain /today', async () => {
+    const { todayHref, todayKey } = await import('../href');
+    expect(todayHref(null, null)).toBe('/today');
+    expect(todayHref('lighter', 'date')).toBe('/today?n=lighter&o=date');
+    expect(todayHref(null, 'office')).toBe('/today?o=office');
+    expect(todayKey({ ...ctx, occasion: 'date' })).not.toBe(todayKey(ctx));
+  });
+});
