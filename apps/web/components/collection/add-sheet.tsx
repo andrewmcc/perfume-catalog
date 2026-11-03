@@ -19,10 +19,30 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 }
 
 /** "Add without a photo": type a name, Claude says which perfume it is, check it, add it. */
-export function AddSheet({ defaultStatus }: { defaultStatus: Status }) {
+export type Added = { perfumeId: string; itemId: string; house: string; name: string };
+
+/**
+ * `onAdded` replaces the default (open the perfume page); `trigger` and `initialText` let another
+ * sheet open this one, e.g. the diary's "Not on your shelf? Add it".
+ */
+export function AddSheet({
+  defaultStatus,
+  onAdded,
+  trigger = '+ Add',
+  triggerClassName,
+  initialText = '',
+  ownedOnly = false,
+}: {
+  defaultStatus: Status;
+  onAdded?: (a: Added) => void;
+  trigger?: string;
+  triggerClassName?: string;
+  initialText?: string;
+  ownedOnly?: boolean;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [text, setText] = useState('');
+  const [text, setText] = useState(initialText);
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -30,7 +50,7 @@ export function AddSheet({ defaultStatus }: { defaultStatus: Status }) {
 
   const close = () => {
     setOpen(false);
-    setText('');
+    setText(initialText);
     setProposal(null);
     setNotFound(false);
     setError(null);
@@ -61,8 +81,9 @@ export function AddSheet({ defaultStatus }: { defaultStatus: Status }) {
   const add = (status: Status) =>
     run(async () => {
       if (!proposal) return;
-      const { perfumeId } = await postJson<{ perfumeId: string }>('/api/items/from-text', { ...proposal, status });
+      const { perfumeId, itemId } = await postJson<{ perfumeId: string; itemId: string }>('/api/items/from-text', { ...proposal, status });
       close();
+      if (onAdded) return onAdded({ perfumeId, itemId, house: proposal.house.trim(), name: proposal.name.trim() });
       router.push(`/collection/${perfumeId}`);
       router.refresh();
     });
@@ -70,9 +91,15 @@ export function AddSheet({ defaultStatus }: { defaultStatus: Status }) {
 
   return (
     <>
-      <Button variant="secondary" onClick={() => setOpen(true)} className="shrink-0 px-3">
-        + Add
-      </Button>
+      {triggerClassName ? (
+        <button type="button" onClick={() => setOpen(true)} className={triggerClassName}>
+          {trigger}
+        </button>
+      ) : (
+        <Button variant="secondary" onClick={() => setOpen(true)} className="shrink-0 px-3">
+          {trigger}
+        </Button>
+      )}
       {open && (
         <div role="dialog" aria-modal="true" aria-label="Add without a photo" className="fixed inset-0 z-40 flex items-end bg-ink/40" onClick={close}>
           <div
@@ -138,7 +165,7 @@ export function AddSheet({ defaultStatus }: { defaultStatus: Status }) {
                 {proposal.flanker && <p className="text-sm text-muted">Edition: {proposal.flanker}</p>}
                 {proposal.onShelf && <p className="text-sm text-ink">{proposal.onShelf === 'owned' ? 'Already on your shelf.' : 'Already on your wishlist.'}</p>}
                 <div className="flex gap-2">
-                  {(defaultStatus === 'wishlist' ? (['wishlist', 'owned'] as const) : (['owned', 'wishlist'] as const)).map((s, i) => (
+                  {(ownedOnly ? (['owned'] as const) : defaultStatus === 'wishlist' ? (['wishlist', 'owned'] as const) : (['owned', 'wishlist'] as const)).map((s, i) => (
                       <Button key={s} variant={i === 0 ? 'primary' : 'secondary'} disabled={busy || !proposal.house.trim() || !proposal.name.trim()} onClick={() => void add(s)} className="flex-1 px-3">
                         {s === 'wishlist' ? 'Add to wishlist' : 'I own it'}
                       </Button>
