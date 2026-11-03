@@ -17,3 +17,14 @@ describe('suggestFor', () => {
     expect(suggest).not.toHaveBeenCalled();
   });
 });
+
+describe('currentGap', () => {
+  it('only a gap the owned perfumes actually have', async () => {
+    const { currentGap } = await import('../suggest-core');
+    const r = (family: string, seasons: string[]) =>
+      ({ perfumeId: family + seasons.join(), house: 'H', name: 'N', concentration: null, family, sillage: null, seasons, times: [], occasions: [], accords: [], notes: { top: [], heart: [], base: [] }, weight: null, thumb: null, items: [{ id: 'i', format: 'full', size_ml: 50, status: 'owned', setId: null, setName: null }], wear: { count: 0, avgRating: null, lastWorn: null } }) as never;
+    const rows = [r('oriental', ['winter']), r('oriental', ['autumn']), r('woody', ['winter']), r('leather', ['winter']), r('spicy', ['winter'])];
+    expect(currentGap(rows, 'hot_days')).toMatchObject({ id: 'hot_days', count: 0, total: 5 });
+    expect(currentGap(rows, 'cold_days')).toBeNull();
+  });
+});
