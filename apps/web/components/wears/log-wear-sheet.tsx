@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { fold } from '@perfume/core';
+import { searchKey } from '@perfume/core';
 import { Button } from '@/components/ui/button';
 import { AddSheet } from '@/components/collection/add-sheet';
 import { label } from '@/components/collection/labels';
@@ -24,8 +24,8 @@ export function LogWearSheet({ wearables, collectionId, defaultDate }: { wearabl
     setPicked(null);
     setQ('');
   };
-  const needle = fold(q.trim());
-  const shown = needle ? wearables.filter((w) => fold(`${w.house} ${w.name}`).includes(needle)) : wearables;
+  const needle = searchKey(q);
+  const shown = needle ? wearables.filter((w) => searchKey(`${w.house} ${w.name}`).includes(needle)) : wearables;
 
   return (
     <>

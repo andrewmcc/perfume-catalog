@@ -84,6 +84,12 @@ describe('search', () => {
     expect(matchesSearch(row(), 'lavender')).toBe(true);
   });
   it('finds house case-insensitively', () => expect(matchesSearch(row(), 'XERJ')).toBe(true));
+  it('ignores apostrophe style, punctuation and spacing (iPhone types curly quotes)', () => {
+    const r = row({ house: "D'Orsay", name: 'Sweet Disruption' });
+    for (const q of ['d’orsay', "d'orsay", 'dorsay', 'D ORSAY', 'd’orsay sweet', 'sweet disruption']) expect(matchesSearch(r, q)).toBe(true);
+    expect(matchesSearch(r, 'd’orsay bitter')).toBe(false);
+  });
+  it('& and "and" match', () => expect(matchesSearch(row({ house: 'Jo Malone', name: 'Earl Grey & Cucumber' }), 'earl grey and cucumber')).toBe(true));
   it('blank query matches; no match is false', () => {
     expect(matchesSearch(row(), '  ')).toBe(true);
     expect(matchesSearch(row(), 'vetiver')).toBe(false);
