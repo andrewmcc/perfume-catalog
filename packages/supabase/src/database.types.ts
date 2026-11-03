@@ -611,6 +611,10 @@ export type Database = {
         Returns: string
       }
       normalise_name: { Args: { p_text: string }; Returns: string }
+      rename_perfume: {
+        Args: { p_house: string; p_name: string; p_perfume: string }
+        Returns: string
+      }
       review_lookup: {
         Args: { p_scan_ids: string[] }
         Returns: {

@@ -8,7 +8,7 @@ import { ScentPyramid } from '@/components/brand/pyramid';
 import { CONCENTRATION_LABEL } from '@/components/review/edits';
 import { overridePatch } from '@/lib/collection/overrides';
 import type { PerfumeDetail as Detail } from '@/lib/collection/perfume';
-import { FactsEditForm } from './facts-edit-form';
+import { FactsEditForm, type Identity } from './facts-edit-form';
 import { ItemCard } from './item-card';
 import type { ItemPatch } from './item-edit-form';
 import { label } from './labels';
@@ -59,11 +59,17 @@ export function PerfumeDetail({ detail, pairs }: { detail: Detail; pairs?: React
     if (error) throw new Error(error.message);
   };
 
-  const saveFacts = (edits: Record<FactField, unknown>) =>
+  const saveFacts = (edits: Record<FactField, unknown>, who: Identity) =>
     run(async () => {
       for (const item of detail.items) {
         const overrides = overridePatch(item.overrides, detail.facts as unknown as Record<string, unknown>, edits);
         check(await supabase.from('items').update({ overrides: overrides as never }).eq('id', item.id));
+      }
+      // A new house or name: the database renames it for this collection (or gives it its own copy of a shared one).
+      if (who.house !== detail.house || who.name !== detail.name) {
+        const { data, error: e } = await supabase.rpc('rename_perfume', { p_perfume: detail.id, p_house: who.house, p_name: who.name });
+        if (e) throw new Error(e.message === 'house and name required' ? 'A house and a name are both needed.' : 'Couldn’t rename it. Try again.');
+        if (data && data !== detail.id) router.replace(`/collection/${data}`);
       }
       setEditing(false);
     });
@@ -169,7 +175,7 @@ export function PerfumeDetail({ detail, pairs }: { detail: Detail; pairs?: React
       )}
 
       {editing ? (
-        <FactsEditForm values={v} busy={busy} onSave={saveFacts} onCancel={() => setEditing(false)} />
+        <FactsEditForm identity={{ house: detail.house, name: detail.name }} values={v} busy={busy} onSave={saveFacts} onCancel={() => setEditing(false)} />
       ) : (
         <button onClick={() => setEditing(true)} className="mt-3 min-h-11 text-sm text-oxblood underline underline-offset-4">
           Edit details
