@@ -3,6 +3,7 @@
 import type { FilterKey, Filters, filterOptions } from '@perfume/core';
 import { Button } from '@/components/ui/button';
 import { FILTER_TITLES, filterValueLabel } from './labels';
+import { Sheet } from '@/components/ui/sheet';
 
 type Options = ReturnType<typeof filterOptions>;
 
@@ -16,8 +17,7 @@ export function FilterSheet({ options, filters, onChange, onClose }: { options: 
     .map((k) => ({ k, values: k === 'set' ? options.set.map((s) => ({ v: s.id, l: s.name })) : options[k].map((v) => ({ v, l: filterValueLabel(k, v) })) }))
     .filter((g) => g.values.length > 0);
   return (
-    <div role="dialog" aria-modal="true" aria-label="Filters" className="fixed inset-0 z-40 flex items-end bg-ink/40" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="label-card mx-auto max-h-[85dvh] w-full max-w-xl overflow-y-auto rounded-b-none px-5 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+    <Sheet label="Filters" onClose={onClose}>
         <h2 className="font-display text-xl italic">Filters</h2>
         {groups.length === 0 && <p className="mt-3 text-sm text-muted">Nothing to filter by yet.</p>}
         {groups.map(({ k, values }) => (
@@ -48,7 +48,6 @@ export function FilterSheet({ options, filters, onChange, onClose }: { options: 
             Clear
           </Button>
         </div>
-      </div>
-    </div>
+    </Sheet>
   );
 }

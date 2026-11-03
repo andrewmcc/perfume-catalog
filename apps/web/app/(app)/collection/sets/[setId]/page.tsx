@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { SetDetail } from '@/components/collection/set-detail';
 import { loadSet } from '@/lib/collection/perfume';
 import { createServerClient } from '@/lib/supabase/server';
+import { LoadingFlacon } from '@/components/ui/loading-flacon';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -18,7 +19,7 @@ async function SetPage({ params }: { params: Promise<{ setId: string }> }) {
 
 export default function Page(props: PageProps<'/collection/sets/[setId]'>) {
   return (
-    <Suspense fallback={<div className="h-80" />}>
+    <Suspense fallback={<LoadingFlacon label="Opening the set…" />}>
       <SetPage params={props.params} />
     </Suspense>
   );

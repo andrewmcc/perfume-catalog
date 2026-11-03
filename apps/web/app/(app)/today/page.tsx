@@ -14,6 +14,9 @@ import { getCurrentCollectionId } from '@/lib/collections/current';
 import { createServerClient } from '@/lib/supabase/server';
 import { loadToday } from '@/lib/today/load';
 import { modelReasons } from '@/lib/today/model-reasons';
+import { LoadingFlacon } from '@/components/ui/loading-flacon';
+import { PendingProvider, PendingRegion } from '@/components/today/pending';
+import { todayKey } from '@/lib/today/href';
 
 export const metadata: Metadata = { title: 'Today' };
 
@@ -37,8 +40,10 @@ async function Picks({ searchParams }: { searchParams: Promise<Record<string, st
   const plain = t.picks.map(({ thumb: _thumb, ...p }) => p);
   const reasons = modelReasons(plain, t.ctx, t.weather?.conditions || null);
 
+  const key = todayKey(t.ctx);
   return (
-    <>
+    <PendingProvider>
+      <PendingRegion label="Choosing again…">
       <p className="text-sm text-muted">{contextLine(t.now, t.weather)}</p>
       <h1 className="mt-1 font-display text-2xl leading-tight italic">{t.headline.title}</h1>
       <p className="mt-1 text-[15px] text-ink">{t.headline.sub}</p>
@@ -49,12 +54,13 @@ async function Picks({ searchParams }: { searchParams: Promise<Record<string, st
       )}
       <ul className="mt-4 flex flex-col gap-3">
         {t.picks.map((p) => (
-          <PickCard key={p.candidate.perfumeId} pick={p} rule={reasonLine(p, t.ctx)} reasons={reasons} collectionId={collectionId} />
+          <PickCard key={p.candidate.perfumeId} pick={p} rule={reasonLine(p, t.ctx)} reasons={reasons} reasonsKey={key} collectionId={collectionId} />
         ))}
       </ul>
+      </PendingRegion>
       <Nudges nudge={t.ctx.nudge} occasion={t.ctx.occasion} />
       {t.hasLocation && <WeatherAttribution />}
-    </>
+    </PendingProvider>
   );
 }
 
@@ -65,7 +71,7 @@ export default function Page(props: PageProps<'/today'>) {
       <Suspense>
         <ReviewNotice />
       </Suspense>
-      <Suspense fallback={<h1 className="font-display text-2xl italic">Today</h1>}>
+      <Suspense fallback={<LoadingFlacon label="Choosing today’s picks…" />}>
         <Picks searchParams={props.searchParams} />
       </Suspense>
     </>

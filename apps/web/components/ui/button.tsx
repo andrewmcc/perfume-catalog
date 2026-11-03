@@ -10,7 +10,7 @@ const VARIANTS: Record<Variant, string> = {
 };
 
 const BASE =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-[4px] px-5 text-[15px] font-medium tracking-wide transition-colors disabled:opacity-60';
+  'press inline-flex min-h-11 items-center justify-center gap-2 rounded-[4px] px-5 text-[15px] font-medium tracking-wide transition-colors disabled:opacity-60';
 
 /** A link that looks like a Button. */
 export function ButtonLink({ variant = 'primary', className = '', ...props }: ComponentProps<typeof Link> & { variant?: Variant }) {

@@ -8,6 +8,7 @@ import { GapCard } from '@/components/stats/gap-card';
 import { loadCollection } from '@/lib/collection/load';
 import { loadStats } from '@/lib/stats/load';
 import { createServerClient } from '@/lib/supabase/server';
+import { LoadingFlacon } from '@/components/ui/loading-flacon';
 
 export const metadata: Metadata = { title: 'Stats' };
 
@@ -101,7 +102,7 @@ export default function Page() {
   return (
     <>
       <h1 className="font-display text-2xl italic">Stats</h1>
-      <Suspense fallback={<div className="h-96" />}>
+      <Suspense fallback={<LoadingFlacon label="Counting bottles…" />}>
         <Stats />
       </Suspense>
     </>

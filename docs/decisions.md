@@ -117,3 +117,9 @@ Running log of decisions for the perfume catalogue. Tags: **[user]** = user deci
 - Log a wear of something not on the shelf: the diary's "Log a wear" offers "Not on your shelf? Add it by name", which adds it as owned and goes straight to the wear form. [plan]
 - Delete account (Settings → Account, type "delete"): the login goes; a collection with no other member goes with everything in it, photos included; shared perfumes stay. A collection someone else is still in stays. [my call]
 - Phase 3 minors: gap suggestions only for gaps the shelf has; identify returns its answer even if the match lookup fails, and "already on your shelf" is scoped to the current collection; the year view stops at 2000 and 2100. [review]
+
+## 2026-11-03 — Phase 5 deployed (interaction design)
+- Loading: an animated flacon (scent lapping behind the glass, mist puffing from the atomiser), Seeds' swaying strawberry in this app's palette, as every page's loading state with its own line ("Choosing today’s picks…", "Uncorking…"). Still under reduced motion. [user asked; motif my call]
+- Today: changing the occasion or lighter/bolder shows the choice at once, dims the picks with "Choosing again…", and settles in about a quarter of a second; Claude's lines follow. Before, the screen froze until Claude's new lines were ready (up to 8 s): a navigation keeps already-shown Suspense boundaries, so the reasons are now keyed to the context. [user asked]
+- Nav: the tapped tab's diamond pulses until its page arrives. Buttons, chips and tabs press slightly. [my call]
+- One Sheet for every bottom sheet: slides up, Escape and backdrop close it (not while saving), focus goes in and back to the button that opened it, the page behind doesn't scroll; portalled to the body so nested sheets (add by name inside Log a wear) behave. Sheets animate in only. [my call]
