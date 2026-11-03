@@ -68,7 +68,7 @@ export function PerfumeDetail({ detail, pairs }: { detail: Detail; pairs?: React
       setEditing(false);
     });
   const saveItem = (id: string, p: ItemPatch) => run(async () => check(await supabase.from('items').update(p).eq('id', id)));
-  const setStatus = (id: string, status: 'owned' | 'gone') => run(async () => check(await supabase.from('items').update({ status }).eq('id', id)));
+  const setStatus = (id: string, status: 'owned' | 'gone' | 'wishlist') => run(async () => check(await supabase.from('items').update({ status }).eq('id', id)));
   const remove = (id: string) =>
     run(async () => {
       check(await supabase.from('items').delete().eq('id', id));
@@ -76,6 +76,7 @@ export function PerfumeDetail({ detail, pairs }: { detail: Detail; pairs?: React
     });
 
   const wishOnly = detail.items.every((i) => i.status === 'wishlist');
+  const triedOnly = detail.items.every((i) => i.status === 'tried');
   const notes = [
     ['Top', v.notes_top, s.notes_top],
     ['Heart', v.notes_heart, s.notes_heart],
@@ -108,6 +109,7 @@ export function PerfumeDetail({ detail, pairs }: { detail: Detail; pairs?: React
       <p className="text-[12px] tracking-[0.16em] text-muted uppercase">{detail.house}</p>
       <h1 className="font-display text-3xl leading-tight italic">{detail.name}</h1>
       {wishOnly && <p className="mt-1 w-fit rounded-full border border-gold-deep px-2 py-px text-[12px] text-gold-deep">On your wishlist</p>}
+      {triedOnly && <p className="mt-1 w-fit rounded-full border border-line px-2 py-px text-[12px] text-muted">Tried, not owned</p>}
       {Boolean(v.concentration || v.flanker) && (
         <p className="mt-1 flex flex-wrap items-center gap-2 text-muted">
           {[v.concentration && (CONCENTRATION_LABEL[v.concentration as string] ?? (v.concentration as string)), v.flanker].filter(Boolean).join(' · ')}
@@ -115,7 +117,7 @@ export function PerfumeDetail({ detail, pairs }: { detail: Detail; pairs?: React
         </p>
       )}
 
-      {!(wishOnly && detail.wear.count === 0) && (
+      {!((wishOnly || triedOnly) && detail.wear.count === 0) && (
       <section aria-label="Your stats" className="mt-4">
         <p className="text-[15px] text-ink">
           {detail.wear.count === 0
