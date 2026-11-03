@@ -6,6 +6,7 @@ import { LocationForm } from '@/components/settings/location-form';
 import { WeatherAttribution } from '@/components/today/attribution';
 import { Button } from '@/components/ui/button';
 import { createServerClient } from '@/lib/supabase/server';
+import { LoadingFlacon } from '@/components/ui/loading-flacon';
 
 export const metadata: Metadata = { title: 'Settings' };
 
@@ -31,7 +32,7 @@ export default function Page() {
         <h2 id="location-h" className="mb-3 font-display text-lg italic">
           Location
         </h2>
-        <Suspense fallback={<div className="h-40" />}>
+        <Suspense fallback={<LoadingFlacon size="sm" label="Finding your weather…" />}>
           <Location />
         </Suspense>
       </section>

@@ -5,6 +5,7 @@ import { CaptureView } from '@/components/scan/capture-view';
 import { ProcessPending } from '@/components/scan/process-pending';
 import { getCurrentCollectionId } from '@/lib/collections/current';
 import { createServerClient } from '@/lib/supabase/server';
+import { LoadingFlacon } from '@/components/ui/loading-flacon';
 
 export const metadata: Metadata = { title: 'Scan' };
 
@@ -34,7 +35,7 @@ async function Scanner() {
 
 export default function Page() {
   return (
-    <Suspense fallback={<div className="fixed inset-0 z-50 bg-paper" />}>
+    <Suspense fallback={<div className="fixed inset-0 z-50 bg-paper"><LoadingFlacon label="Warming up the camera…" className="pt-40" /></div>}>
       <Scanner />
     </Suspense>
   );

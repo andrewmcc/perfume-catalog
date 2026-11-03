@@ -5,6 +5,7 @@ import { RATING_OPTIONS, WORN_OPTIONS, type Filters } from '@perfume/core';
 import { CollectionView } from '@/components/collection/collection-view';
 import { loadCollection } from '@/lib/collection/load';
 import { createServerClient } from '@/lib/supabase/server';
+import { LoadingFlacon } from '@/components/ui/loading-flacon';
 
 export const metadata: Metadata = { title: 'Collection' };
 
@@ -28,7 +29,7 @@ async function Collection({ searchParams }: { searchParams: Promise<Record<strin
 
 export default function Page(props: PageProps<'/collection'>) {
   return (
-    <Suspense fallback={<h1 className="font-display text-2xl italic">Collection</h1>}>
+    <Suspense fallback={<LoadingFlacon label="Opening your shelf…" />}>
       <Collection searchParams={props.searchParams} />
     </Suspense>
   );

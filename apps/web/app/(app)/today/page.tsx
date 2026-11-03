@@ -14,6 +14,7 @@ import { getCurrentCollectionId } from '@/lib/collections/current';
 import { createServerClient } from '@/lib/supabase/server';
 import { loadToday } from '@/lib/today/load';
 import { modelReasons } from '@/lib/today/model-reasons';
+import { LoadingFlacon } from '@/components/ui/loading-flacon';
 
 export const metadata: Metadata = { title: 'Today' };
 
@@ -65,7 +66,7 @@ export default function Page(props: PageProps<'/today'>) {
       <Suspense>
         <ReviewNotice />
       </Suspense>
-      <Suspense fallback={<h1 className="font-display text-2xl italic">Today</h1>}>
+      <Suspense fallback={<LoadingFlacon label="Choosing today’s picks…" />}>
         <Picks searchParams={props.searchParams} />
       </Suspense>
     </>

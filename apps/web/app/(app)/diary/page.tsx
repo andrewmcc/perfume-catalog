@@ -11,6 +11,7 @@ import { LogWearSheet } from '@/components/wears/log-wear-sheet';
 import { getCurrentCollectionId } from '@/lib/collections/current';
 import { createServerClient } from '@/lib/supabase/server';
 import { loadMonth, loadWearables, loadYearCounts } from '@/lib/wears/load';
+import { LoadingFlacon } from '@/components/ui/loading-flacon';
 
 export const metadata: Metadata = { title: 'Diary' };
 
@@ -58,7 +59,7 @@ export default function Page(props: PageProps<'/diary'>) {
   return (
     <>
       <h1 className="sr-only">Diary</h1>
-      <Suspense fallback={<div className="h-96" />}>
+      <Suspense fallback={<LoadingFlacon label="Turning the pages…" />}>
         <Diary searchParams={props.searchParams} />
       </Suspense>
     </>

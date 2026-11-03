@@ -49,3 +49,41 @@ body {
   border-radius: 2px;
   pointer-events: none;
 }
+
+/* LoadingFlacon: the scent laps and settles; mist puffs from the atomiser one after another */
+.flacon-wave {
+  animation: flacon-wave 1.6s linear infinite;
+}
+.flacon-level {
+  animation: flacon-level 3.2s ease-in-out infinite;
+}
+.flacon-mist {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: flacon-mist 1.8s ease-out infinite;
+}
+@keyframes flacon-wave {
+  from { transform: translateX(0); }
+  to { transform: translateX(-40px); }
+}
+@keyframes flacon-level {
+  0%, 100% { transform: translateY(2px); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes flacon-mist {
+  0% { opacity: 0; transform: translate(-3px, 3px) scale(0.6); }
+  30% { opacity: 0.9; }
+  100% { opacity: 0; transform: translate(3px, -3px) scale(1.25); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flacon-wave,
+  .flacon-level,
+  .flacon-mist {
+    animation: none;
+  }
+  .flacon-mist {
+    opacity: 0.6;
+  }
+}
