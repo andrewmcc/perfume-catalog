@@ -5,6 +5,7 @@ import { useState } from 'react';
 import type { CollectionItem, CollectionRow } from '@perfume/core';
 import { ScentPyramid } from '@/components/brand/pyramid';
 import { label } from './labels';
+import { NoPhoto } from '@/components/ui/no-photo';
 
 const itemLine = (i: CollectionItem) => [label(i.format), i.size_ml && `${i.size_ml} ml`, i.setName && `from ${i.setName}`].filter(Boolean).join(' · ');
 
@@ -16,7 +17,7 @@ export function PerfumeRow({ row, items, line }: { row: CollectionRow; items: Co
       <div className="flex items-center gap-3 py-3">
         <Link href={`/collection/${row.perfumeId}`} className="flex min-w-0 flex-1 items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          {row.thumb ? <img src={row.thumb} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-[3px] object-cover" /> : <div className="h-14 w-14 shrink-0 rounded-[3px] bg-line-soft" />}
+          {row.thumb ? <img src={row.thumb} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-[3px] object-cover" /> : <NoPhoto className="h-14 w-14" />}
           <div className="min-w-0 flex-1">
             <p className="truncate text-[12px] tracking-[0.14em] text-muted uppercase">{row.house}</p>
             <p className="font-display text-[18px] leading-snug text-ink">{row.name}</p>

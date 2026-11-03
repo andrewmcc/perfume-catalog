@@ -123,3 +123,10 @@ Running log of decisions for the perfume catalogue. Tags: **[user]** = user deci
 - Today: changing the occasion or lighter/bolder shows the choice at once, dims the picks with "Choosing again…", and settles in about a quarter of a second; Claude's lines follow. Before, the screen froze until Claude's new lines were ready (up to 8 s): a navigation keeps already-shown Suspense boundaries, so the reasons are now keyed to the context. [user asked]
 - Nav: the tapped tab's diamond pulses until its page arrives. Buttons, chips and tabs press slightly. [my call]
 - One Sheet for every bottom sheet: slides up, Escape and backdrop close it (not while saving), focus goes in and back to the button that opened it, the page behind doesn't scroll; portalled to the body so nested sheets (add by name inside Log a wear) behave. Sheets animate in only. [my call]
+
+## 2026-11-03 — UX round 2
+- Sheets: the card stays still and only its body scrolls, so the card's inner rule no longer cuts across the content (the line through the filter chips); Filters keeps Done / Clear fixed at the bottom. The inner rule draws above content. [user reported]
+- Missing photos show a drawn flacon instead of a blank square. [review]
+- Perfume page: one source badge per section (its most common source); a row is tagged only when it differs. [review]
+- Today: lighter/bolder and the occasion sit above the picks (they were below the fold); the picks' Wear buttons are outlined so three don't compete. [review]
+- Gap cards: the gap as a heading with "None of your 8 perfumes" under it. Search placeholder "Search". The diary no longer says "nothing logged" twice. [review]

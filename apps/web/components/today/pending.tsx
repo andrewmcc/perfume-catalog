@@ -15,7 +15,8 @@ export function PendingProvider({ children }: { children: ReactNode }) {
 export const usePending = () => useContext(PendingContext);
 
 /** Dims what is about to change (no layout shift) and says so while the new picks load. */
-export function PendingRegion({ children, label }: { children: ReactNode; label: string }) {
+/** `label` is announced and shown over this region; leave it out for a region that only dims. */
+export function PendingRegion({ children, label }: { children: ReactNode; label?: string }) {
   const { isPending } = usePending();
   return (
     <div className="relative">
@@ -23,10 +24,12 @@ export function PendingRegion({ children, label }: { children: ReactNode; label:
         {children}
       </div>
       {/* Always mounted, outside the busy region, so changing its text is announced. */}
-      <p role="status" className="sr-only">
-        {isPending ? label : ''}
-      </p>
-      {isPending && (
+      {label && (
+        <p role="status" className="sr-only">
+          {isPending ? label : ''}
+        </p>
+      )}
+      {isPending && label && (
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[45%] flex justify-center">
           <span className="inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-sm text-muted shadow-sm">
             <FlaconMark />

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import type { QueueResult } from '@/lib/scans/queue';
 import { FlagChips } from './flag-chips';
 import { PerfumeLines } from './perfume-lines';
+import { NoPhoto } from '@/components/ui/no-photo';
 
 /** One bottle scan: photo, the read, and Approve / Edit / Discard. */
 export function BottleCard({
@@ -42,7 +43,7 @@ export function BottleCard({
             <img src={photo} alt="" className="h-24 w-24 rounded-[3px] object-cover" />
           </button>
         ) : (
-          <div className="h-24 w-24 shrink-0 rounded-[3px] bg-line-soft" />
+          <NoPhoto className="h-24 w-24" />
         )}
         <div className="min-w-0 flex-1">
           <PerfumeLines read={read} />

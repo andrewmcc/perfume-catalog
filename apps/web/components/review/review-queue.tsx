@@ -11,6 +11,7 @@ import { GroupCard } from './group-card';
 import { PhotoViewer } from './photo-viewer';
 import { ReadEditor } from './read-editor';
 import { applyEdits } from './edits';
+import { NoPhoto } from '@/components/ui/no-photo';
 
 type SetFields = { set_house: string; set_name: string };
 type Notice = { text: string; failures: string[] };
@@ -176,7 +177,7 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
             {couldntRead.map((s) => (
               <li key={s.id} className="label-card flex gap-3 p-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                {s.photos[0] ? <img src={s.photos[0]} alt="" className="h-16 w-16 shrink-0 rounded-[3px] object-cover" /> : <div className="h-16 w-16 shrink-0 rounded-[3px] bg-line-soft" />}
+                {s.photos[0] ? <img src={s.photos[0]} alt="" className="h-16 w-16 shrink-0 rounded-[3px] object-cover" /> : <NoPhoto className="h-16 w-16" />}
                 <div className="min-w-0 flex-1">
                   <p className="text-[12px] tracking-[0.14em] text-muted uppercase">{s.mode}</p>
                   <p className="text-sm break-words text-danger">{s.error ?? 'Nothing could be read from this photo.'}</p>

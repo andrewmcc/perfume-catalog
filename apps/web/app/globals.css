@@ -48,6 +48,8 @@ body {
   border: 1px solid var(--color-line-soft);
   border-radius: 2px;
   pointer-events: none;
+  /* Above the content, so a scrolling body passes under the frame rather than over it. */
+  z-index: 1;
 }
 
 /* LoadingFlacon: the scent laps and settles; mist puffs from the atomiser one after another */

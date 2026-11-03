@@ -13,6 +13,7 @@ import { ItemCard } from './item-card';
 import type { ItemPatch } from './item-edit-form';
 import { label } from './labels';
 import { SourceBadge } from './source-badge';
+import { groupSources } from './sources';
 import { LookupNotes } from './lookup-notes';
 import Link from 'next/link';
 import { StarRating } from '@/components/wears/star-rating';
@@ -95,6 +96,8 @@ export function PerfumeDetail({ detail, pairs }: { detail: Detail; pairs?: React
       ['Released', 'release_year', year ? String(year) : ''],
     ] as [string, FactField, string][]
   ).filter(([, , text]) => text);
+  const noteSources = groupSources(notes.map(([, n, src]) => ((n as string[]).length ? (src as Source | null) : null)));
+  const factSources = groupSources(facts.map(([, k]) => s[k]));
 
   return (
     <article>
@@ -126,27 +129,41 @@ export function PerfumeDetail({ detail, pairs }: { detail: Detail; pairs?: React
       <section aria-label="Scent pyramid" className="label-card mt-5 flex gap-4 p-4">
         <ScentPyramid weight={detail.weight} size={64} />
         {hasNotes ? (
-          <dl className="min-w-0 flex-1 text-sm">
-            {notes.map(([tier, n, src]) => (
-              <div key={tier} className="py-0.5">
-                <dt className="inline text-muted">{tier}: </dt>
-                <dd className="inline text-ink">{(n as string[]).join(', ') || '—'}</dd> <SourceBadge source={src} />
-              </div>
-            ))}
-          </dl>
+          <div className="min-w-0 flex-1 text-sm">
+            <dl>
+              {notes.map(([tier, n], i) => (
+                <div key={tier} className="py-0.5">
+                  <dt className="inline text-muted">{tier}: </dt>
+                  <dd className="inline text-ink">{(n as string[]).join(', ') || '—'}</dd> <SourceBadge source={noteSources.row[i] ?? null} />
+                </div>
+              ))}
+            </dl>
+            {noteSources.section && (
+              <p className="mt-1.5">
+                <SourceBadge source={noteSources.section} />
+              </p>
+            )}
+          </div>
         ) : (
           <LookupNotes perfumeId={detail.id} />
         )}
       </section>
 
       {facts.length > 0 && (
-        <dl className="label-card mt-4 px-4 py-1">
-          {facts.map(([title, k, text]) => (
-            <Fact key={k} title={title} source={s[k]}>
-              {text}
-            </Fact>
-          ))}
-        </dl>
+        <section aria-label="Details" className="label-card mt-4 px-4 pt-3 pb-1">
+          {factSources.section && (
+            <p className="flex justify-end">
+              <SourceBadge source={factSources.section} />
+            </p>
+          )}
+          <dl>
+            {facts.map(([title, k, text], i) => (
+              <Fact key={k} title={title} source={factSources.row[i] ?? null}>
+                {text}
+              </Fact>
+            ))}
+          </dl>
+        </section>
       )}
 
       {editing ? (

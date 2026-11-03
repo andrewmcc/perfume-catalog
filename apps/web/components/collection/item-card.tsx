@@ -6,6 +6,7 @@ import type { ItemDetail } from '@/lib/collection/perfume';
 import { ConfirmButton } from './confirm-button';
 import { ItemEditForm, type ItemPatch } from './item-edit-form';
 import { label } from './labels';
+import { NoPhoto } from '@/components/ui/no-photo';
 
 const money = (n: number) => `£${n.toFixed(2).replace(/\.00$/, '')}`;
 
@@ -30,7 +31,7 @@ export function ItemCard({
     <li className="label-card p-4">
       <div className="flex gap-3">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        {item.photo ? <img src={item.photo} alt="" className="h-16 w-16 shrink-0 rounded-[3px] object-cover" /> : <div className="h-16 w-16 shrink-0 rounded-[3px] bg-line-soft" />}
+        {item.photo ? <img src={item.photo} alt="" className="h-16 w-16 shrink-0 rounded-[3px] object-cover" /> : <NoPhoto className="h-16 w-16" />}
         <div className="min-w-0 flex-1 text-sm">
           <p className="text-[15px] text-ink">
             {line}

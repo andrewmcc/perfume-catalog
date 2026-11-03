@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { summarise } from '@/lib/scans/summarise';
 import type { ScanItem } from './use-scan-queue';
+import { NoPhoto } from '@/components/ui/no-photo';
 
 function status(item: ScanItem): { label: string; tone: 'muted' | 'danger' | 'ok' } {
   if (item.stage === 'failed') return { label: 'Not sent', tone: 'danger' };
@@ -26,7 +27,7 @@ function Row({ item, onRetry }: { item: ScanItem; onRetry: (i: ScanItem) => void
   return (
     <li className="flex gap-3 border-b border-line-soft py-3 last:border-0">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      {item.thumb ? <img src={item.thumb} alt="" className="h-14 w-14 shrink-0 rounded-[3px] object-cover" /> : <div className="h-14 w-14 shrink-0 rounded-[3px] bg-line-soft" />}
+      {item.thumb ? <img src={item.thumb} alt="" className="h-14 w-14 shrink-0 rounded-[3px] object-cover" /> : <NoPhoto className="h-14 w-14" />}
       <div className="min-w-0 flex-1">
         <p className="text-xs tracking-wide text-muted uppercase">
           {item.mode} ·{' '}
