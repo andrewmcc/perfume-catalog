@@ -7,12 +7,11 @@ export async function proxy(request: NextRequest) {
 
   const { supabase, getResponse } = createProxyClient(request);
   // Refresh the session before any redirect; read the response only afterwards.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims refreshes an expired session, then verifies the JWT locally (ES256 signing keys).
+  const { data } = await supabase.auth.getClaims();
   const response = getResponse();
 
-  if (user || isPublicPath(pathname)) return response;
+  if (data?.claims?.sub || isPublicPath(pathname)) return response;
 
   if (pathname.startsWith('/api/')) return new NextResponse('Unauthorized', { status: 401 });
   const redirect = NextResponse.redirect(new URL(loginRedirect(pathname, search), request.url));

@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 /**
  * Supabase client for proxy.ts that threads cookies through the request/response.
  * A session refresh inside auth calls replaces the response, so read it via
- * getResponse() only after calling supabase.auth.getUser().
+ * getResponse() only after calling supabase.auth.getClaims().
  */
 export function createProxyClient(request: NextRequest) {
   let response = NextResponse.next({ request });
