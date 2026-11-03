@@ -6,3 +6,7 @@ export * from './time/index.js';
 export * from './today/index.js';
 export * from './diary/index.js';
 export * from './stats/index.js';
+export * from './pairs/index.js';
+export * from './gaps/index.js';
+export * from './identify/index.js';
+export { fence, oneLine } from './ai/fence.js';
