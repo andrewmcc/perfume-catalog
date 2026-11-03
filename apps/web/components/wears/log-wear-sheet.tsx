@@ -9,6 +9,7 @@ import { label } from '@/components/collection/labels';
 import type { Wearable } from '@/lib/wears/load';
 import { useWears } from './use-wears';
 import { WearForm } from './wear-form';
+import { Sheet } from '@/components/ui/sheet';
 
 /** "Log a wear": search the shelf, pick an item, then date, time, stars and notes. */
 export function LogWearSheet({ wearables, collectionId, defaultDate }: { wearables: Wearable[]; collectionId: string; defaultDate: string }) {
@@ -32,11 +33,7 @@ export function LogWearSheet({ wearables, collectionId, defaultDate }: { wearabl
         Log a wear
       </Button>
       {open && (
-        <div role="dialog" aria-modal="true" aria-label="Log a wear" className="fixed inset-0 z-40 flex items-end bg-ink/40" onClick={close}>
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="label-card mx-auto max-h-[85dvh] w-full max-w-xl overflow-y-auto rounded-b-none px-5 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"
-          >
+        <Sheet label="Log a wear" onClose={close}>
             <h2 className="font-display text-xl italic">{picked ? `${picked.name}` : 'What did you wear?'}</h2>
             {picked ? (
               <>
@@ -99,8 +96,7 @@ export function LogWearSheet({ wearables, collectionId, defaultDate }: { wearabl
                 />
               </>
             )}
-          </div>
-        </div>
+        </Sheet>
       )}
     </>
   );

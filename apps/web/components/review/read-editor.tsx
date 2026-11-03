@@ -5,6 +5,7 @@ import type { PerfumeRead, ReadEdits } from '@perfume/core';
 import { Button } from '@/components/ui/button';
 import { Field } from '@/components/ui/field';
 import { CONCENTRATION_LABEL } from './edits';
+import { Sheet } from '@/components/ui/sheet';
 
 const FORMATS = { full: 'Full bottle', travel: 'Travel', decant: 'Decant', sample: 'Sample' } as const;
 
@@ -48,12 +49,8 @@ export function ReadEditor({
 
   const select = 'min-h-11 rounded-[3px] border border-line bg-card px-3 text-[16px] text-ink focus:border-oxblood focus:outline-none';
   return (
-    <div role="dialog" aria-modal="true" aria-label="Edit details" className="fixed inset-0 z-40 flex items-end bg-ink/40" onClick={onCancel}>
-      <form
-        onSubmit={submit}
-        onClick={(e) => e.stopPropagation()}
-        className="label-card mx-auto max-h-[90dvh] w-full max-w-xl overflow-y-auto rounded-b-none px-5 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"
-      >
+    <Sheet label="Edit details" onClose={onCancel}>
+      <form onSubmit={submit}>
         <h2 className="font-display text-xl italic">Edit details</h2>
         <div className="mt-4 flex flex-col gap-3">
           <Field label="House" value={house} onChange={(e) => setHouse(e.target.value)} hint={!house.trim() ? 'Needed' : undefined} />
@@ -96,6 +93,6 @@ export function ReadEditor({
           </Button>
         </div>
       </form>
-    </div>
+    </Sheet>
   );
 }

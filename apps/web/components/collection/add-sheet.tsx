@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { label } from './labels';
 import { editProposal, type Proposal } from './proposal';
+import { Sheet } from '@/components/ui/sheet';
 
 type Status = 'owned' | 'wishlist';
 
@@ -101,11 +102,7 @@ export function AddSheet({
         </Button>
       )}
       {open && (
-        <div role="dialog" aria-modal="true" aria-label="Add without a photo" className="fixed inset-0 z-40 flex items-end bg-ink/40" onClick={close}>
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="label-card mx-auto max-h-[85dvh] w-full max-w-xl overflow-y-auto rounded-b-none px-5 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"
-          >
+        <Sheet label="Add without a photo" onClose={close} busy={busy}>
             <h2 className="font-display text-xl italic">Add without a photo</h2>
             {!proposal ? (
               <form
@@ -181,8 +178,7 @@ export function AddSheet({
                 {error}
               </p>
             )}
-          </div>
-        </div>
+        </Sheet>
       )}
     </>
   );
