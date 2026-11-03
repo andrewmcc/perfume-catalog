@@ -1,10 +1,11 @@
 import type { Source } from '@perfume/core';
 
-const COPY: Record<Source, string> = { label: 'From label', ai: 'AI-suggested', edited: 'Edited' };
+const COPY: Record<Source, string> = { label: 'From label', ai: 'AI-suggested', edited: 'Edited', text: 'From text' };
 const TONE: Record<Source, string> = {
   label: 'border-line text-muted',
   ai: 'border-gold-deep/60 text-gold-deep',
   edited: 'border-oxblood/60 text-oxblood',
+  text: 'border-line text-muted italic',
 };
 
 /** Where a shown value came from. */

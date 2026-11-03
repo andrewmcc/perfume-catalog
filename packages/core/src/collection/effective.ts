@@ -39,7 +39,7 @@ export type PerfumeFacts = {
   sources: Record<string, string>;
 };
 
-export type Source = 'label' | 'ai' | 'edited';
+export type Source = 'label' | 'ai' | 'edited' | 'text';
 
 const blank = (v: unknown) => v === null || v === undefined || (Array.isArray(v) && v.length === 0);
 
@@ -58,7 +58,7 @@ export function effectivePerfume(
     }
     values[f] = p[f] ?? null;
     const s = p.sources[f];
-    source[f] = blank(values[f]) ? null : s === 'ai' ? 'ai' : s === 'edited' ? 'edited' : 'label';
+    source[f] = blank(values[f]) ? null : s === 'ai' ? 'ai' : s === 'edited' ? 'edited' : s === 'text' ? 'text' : 'label';
   }
   return { values, source };
 }

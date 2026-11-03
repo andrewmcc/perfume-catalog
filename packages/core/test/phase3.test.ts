@@ -175,7 +175,10 @@ describe('model helpers', () => {
   it('acceptPairReasons keeps known keys only', () => {
     const got = acceptPairReasons({ reasons: [{ id: 'like:p1', reason: 'Same smoky vanilla' }, { id: 'like:zz', reason: 'nope' }, { id: 'layer:p2', reason: '' }] }, new Set(['like:p1', 'layer:p2']));
     expect([...got]).toEqual([['like:p1', 'Same smoky vanilla']]);
-    const t = pairFromRow(row({ name: 'Target <b>', base: ['vanilla'] }));
-    expect(pairReasonsPrompt(t, [], [])).not.toContain('<b>');
+    const t = pairFromRow(row({ name: 'Target <b>', base: ['vanilla', '<i>x</i>'] }));
+    const o = pairFromRow(row({ base: ['vanilla', '<i>x</i>'] }));
+    const prompt = pairReasonsPrompt(t, smellsLike(t, [o]), []);
+    expect(prompt).toContain('like:');
+    expect(prompt).not.toMatch(/<\/?[bi]>/);
   });
 });
