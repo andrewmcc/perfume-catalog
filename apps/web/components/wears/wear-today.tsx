@@ -18,12 +18,15 @@ export function WearToday({
   label = 'Wear today',
   className = '',
   refresh = true,
+  variant = 'primary',
 }: {
   collectionId: string;
   itemId: string;
   label?: string;
   className?: string;
   refresh?: boolean;
+  /** Today shows three picks: outlined buttons there so they don't shout over each other. */
+  variant?: 'primary' | 'secondary';
 }) {
   const router = useRouter();
   const api = useWears(collectionId);
@@ -50,8 +53,8 @@ export function WearToday({
   if (state === 'idle' || state === 'busy')
     return (
       <div className={className}>
-        <Button onClick={wear} disabled={state === 'busy'}>
-          {label}
+        <Button variant={variant} onClick={wear} disabled={state === 'busy'}>
+          {state === 'busy' ? 'Logging…' : label}
         </Button>
         {error && <p role="alert" className="mt-1 text-sm text-danger">{error}</p>}
       </div>

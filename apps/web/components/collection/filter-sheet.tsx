@@ -17,7 +17,20 @@ export function FilterSheet({ options, filters, onChange, onClose }: { options: 
     .map((k) => ({ k, values: k === 'set' ? options.set.map((s) => ({ v: s.id, l: s.name })) : options[k].map((v) => ({ v, l: filterValueLabel(k, v) })) }))
     .filter((g) => g.values.length > 0);
   return (
-    <Sheet label="Filters" onClose={onClose}>
+    <Sheet
+      label="Filters"
+      onClose={onClose}
+      footer={
+        <div className="flex gap-3">
+          <Button onClick={onClose} className="flex-1">
+            Done
+          </Button>
+          <Button variant="secondary" onClick={() => onChange({})}>
+            Clear
+          </Button>
+        </div>
+      }
+    >
         <h2 className="font-display text-xl italic">Filters</h2>
         {groups.length === 0 && <p className="mt-3 text-sm text-muted">Nothing to filter by yet.</p>}
         {groups.map(({ k, values }) => (
@@ -40,14 +53,6 @@ export function FilterSheet({ options, filters, onChange, onClose }: { options: 
             </div>
           </fieldset>
         ))}
-        <div className="mt-6 flex gap-3">
-          <Button onClick={onClose} className="flex-1">
-            Done
-          </Button>
-          <Button variant="secondary" onClick={() => onChange({})}>
-            Clear
-          </Button>
-        </div>
     </Sheet>
   );
 }

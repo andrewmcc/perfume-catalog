@@ -10,7 +10,22 @@ import { sheets } from './sheet-stack';
  * page behind doesn't scroll. Nested sheets: only the top one answers Escape. Portalled to <body>
  * so a nested sheet is never positioned inside another sheet's animated panel.
  */
-export function Sheet({ label, onClose, busy = false, children, className = '' }: { label: string; onClose: () => void; busy?: boolean; children: ReactNode; className?: string }) {
+export function Sheet({
+  label,
+  onClose,
+  busy = false,
+  children,
+  footer,
+  className = '',
+}: {
+  label: string;
+  onClose: () => void;
+  busy?: boolean;
+  children: ReactNode;
+  /** Stays at the bottom of the sheet while the body scrolls (e.g. Done / Clear). */
+  footer?: ReactNode;
+  className?: string;
+}) {
   const panel = useRef<HTMLDivElement>(null);
   // Captured during render: autoFocus inside the sheet moves focus before effects run.
   const [opener] = useState(() => (typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null)));
@@ -54,12 +69,10 @@ export function Sheet({ label, onClose, busy = false, children, className = '' }
         if (e.target === e.currentTarget && !isBusy.current) close.current();
       }}
     >
-      <div
-        ref={panel}
-        tabIndex={-1}
-        className={`sheet-panel label-card mx-auto max-h-[85dvh] w-full max-w-xl overflow-y-auto overscroll-contain rounded-b-none px-5 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] outline-none ${className}`}
-      >
-        {children}
+      {/* The card (and its fine inner rule) stays put; only the body scrolls inside it. */}
+      <div ref={panel} tabIndex={-1} className={`sheet-panel label-card mx-auto flex max-h-[85dvh] w-full max-w-xl flex-col rounded-b-none outline-none ${className}`}>
+        <div className={`min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pt-5 ${footer ? 'pb-4' : 'pb-[calc(1.25rem+env(safe-area-inset-bottom))]'}`}>{children}</div>
+        {footer && <div className="border-t border-line-soft px-5 pt-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">{footer}</div>}
       </div>
     </div>,
     document.body,

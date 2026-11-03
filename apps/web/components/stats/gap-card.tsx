@@ -30,9 +30,8 @@ export function GapCard({ gap }: { gap: Gap }) {
 
   return (
     <li className="label-card p-4">
-      <p className="text-[15px] text-ink">
-        {gap.title} — {gap.count} in {gap.total}.
-      </p>
+      <p className="font-display text-[17px] leading-snug text-ink">{gap.title}</p>
+      <p className="text-[13px] text-muted">{gap.count === 0 ? `None of your ${gap.total} perfumes` : `Only 1 of your ${gap.total} perfumes`}</p>
       {state.kind === 'idle' && (
         <Button variant="secondary" onClick={() => void load()} className="mt-3 px-3">
           See suggestions

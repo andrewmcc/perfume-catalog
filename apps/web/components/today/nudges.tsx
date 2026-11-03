@@ -35,7 +35,7 @@ export function Nudges({ nudge, occasion }: { nudge: Nudge | null; occasion: str
     );
   };
   return (
-    <div className="mt-5 flex flex-wrap items-center gap-2" role="group" aria-label="Adjust the picks">
+    <div className="mt-4 flex flex-wrap items-center gap-2" role="group" aria-label="Adjust the picks">
       {chip('lighter', 'Something lighter')}
       {chip('bolder', 'Something bolder')}
       <label className="sr-only" htmlFor="occasion">

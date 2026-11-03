@@ -43,22 +43,24 @@ async function Picks({ searchParams }: { searchParams: Promise<Record<string, st
   const key = todayKey(t.ctx);
   return (
     <PendingProvider>
-      <PendingRegion label="Choosing again…">
-      <p className="text-sm text-muted">{contextLine(t.now, t.weather)}</p>
-      <h1 className="mt-1 font-display text-2xl leading-tight italic">{t.headline.title}</h1>
-      <p className="mt-1 text-[15px] text-ink">{t.headline.sub}</p>
-      {!t.hasLocation && (
-        <Link href="/settings" className="mt-2 inline-block text-sm text-oxblood underline underline-offset-4">
-          Set your location for weather-aware picks →
-        </Link>
-      )}
-      <ul className="mt-4 flex flex-col gap-3">
-        {t.picks.map((p) => (
-          <PickCard key={p.candidate.perfumeId} pick={p} rule={reasonLine(p, t.ctx)} reasons={reasons} reasonsKey={key} collectionId={collectionId} />
-        ))}
-      </ul>
+      <PendingRegion>
+        <p className="text-sm text-muted">{contextLine(t.now, t.weather)}</p>
+        <h1 className="mt-1 font-display text-2xl leading-tight italic">{t.headline.title}</h1>
+        <p className="mt-1 text-[15px] text-ink">{t.headline.sub}</p>
+        {!t.hasLocation && (
+          <Link href="/settings" className="mt-2 inline-block text-sm text-oxblood underline underline-offset-4">
+            Set your location for weather-aware picks →
+          </Link>
+        )}
       </PendingRegion>
       <Nudges nudge={t.ctx.nudge} occasion={t.ctx.occasion} />
+      <PendingRegion label="Choosing again…">
+        <ul className="mt-4 flex flex-col gap-3">
+          {t.picks.map((p) => (
+            <PickCard key={p.candidate.perfumeId} pick={p} rule={reasonLine(p, t.ctx)} reasons={reasons} reasonsKey={key} collectionId={collectionId} />
+          ))}
+        </ul>
+      </PendingRegion>
       {t.hasLocation && <WeatherAttribution />}
     </PendingProvider>
   );

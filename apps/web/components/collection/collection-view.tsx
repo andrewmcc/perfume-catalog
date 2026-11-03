@@ -8,6 +8,7 @@ import { AddSheet } from './add-sheet';
 import { FilterSheet } from './filter-sheet';
 import { PerfumeRow } from './perfume-row';
 import { ViewSwitch, type View } from './view-switch';
+import { NoPhoto } from '@/components/ui/no-photo';
 
 export function CollectionView({ rows, sets, initialFilters = {} }: { rows: CollectionRow[]; sets: SetRow[]; initialFilters?: Filters }) {
   const [view, setView] = useState<View>('owned');
@@ -49,7 +50,7 @@ export function CollectionView({ rows, sets, initialFilters = {} }: { rows: Coll
               <li key={s.id} className="border-b border-line-soft last:border-0">
                 <Link href={`/collection/sets/${s.id}`} className="flex items-center gap-3 py-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {s.thumb ? <img src={s.thumb} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-[3px] object-cover" /> : <div className="h-14 w-14 shrink-0 rounded-[3px] bg-line-soft" />}
+                  {s.thumb ? <img src={s.thumb} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-[3px] object-cover" /> : <NoPhoto className="h-14 w-14" />}
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[12px] tracking-[0.14em] text-muted uppercase">{s.house ?? 'Discovery set'}</p>
                     <p className="font-display text-[18px] leading-snug text-ink">{s.name ?? 'Unnamed set'}</p>
@@ -78,7 +79,7 @@ export function CollectionView({ rows, sets, initialFilters = {} }: { rows: Coll
               type="search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Search house, name, notes"
+              placeholder="Search"
               aria-label="Search"
               className="min-h-11 min-w-0 flex-1 rounded-[3px] border border-line bg-card px-3 text-[16px] text-ink placeholder:text-muted/70 focus:border-oxblood focus:outline-none"
             />

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { connection } from 'next/server';
 import { redirect } from 'next/navigation';
 import { Suspense } from 'react';
-import { isDate, isMonth, isYear, londonNow, monthLabel } from '@perfume/core';
+import { isDate, isMonth, isYear, londonNow } from '@perfume/core';
 import { DayEntries } from '@/components/diary/day-entries';
 import { MonthView } from '@/components/diary/month-view';
 import { ViewToggle } from '@/components/diary/view-toggle';
@@ -46,7 +46,7 @@ async function Diary({ searchParams }: { searchParams: Promise<Record<string, st
     <>
       <ViewToggle view="month" monthHref={`/diary?m=${ym}`} yearHref={`/diary?y=${ym.slice(0, 4)}`} />
       <MonthView ym={ym} wears={wears} selected={selected} today={today} />
-      {wears.length === 0 && <p className="mt-3 text-sm text-muted">No wears logged in {monthLabel(ym).split(' ')[0]}.</p>}
+      
       <div className="mt-4">
         <LogWearSheet wearables={wearables} collectionId={collectionId} defaultDate={selected ?? today} />
       </div>

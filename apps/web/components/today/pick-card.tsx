@@ -3,6 +3,7 @@ import { Suspense } from 'react';
 import { ScentPyramid } from '@/components/brand/pyramid';
 import { WearToday } from '@/components/wears/wear-today';
 import type { TodayPick } from '@/lib/today/load';
+import { NoPhoto } from '@/components/ui/no-photo';
 
 async function ModelReason({ reasons, id, fallback }: { reasons: Promise<Record<string, string> | null>; id: string; fallback: string }) {
   return <>{(await reasons)?.[id] ?? fallback}</>;
@@ -32,7 +33,7 @@ export function PickCard({
       <div className="flex gap-3">
         <Link href={`/collection/${c.perfumeId}`} className="flex min-w-0 flex-1 gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          {pick.thumb ? <img src={pick.thumb} alt="" className="h-16 w-16 shrink-0 rounded-[3px] object-cover" /> : <div className="h-16 w-16 shrink-0 rounded-[3px] bg-line-soft" />}
+          {pick.thumb ? <img src={pick.thumb} alt="" className="h-16 w-16 shrink-0 rounded-[3px] object-cover" /> : <NoPhoto className="h-16 w-16" />}
           <div className="min-w-0">
             {c.sample && <p className="text-[12px] text-muted">Sample{c.setName ? ` · ${c.setName}` : ''}</p>}
             <p className="truncate text-[12px] tracking-[0.14em] text-muted uppercase">{c.house}</p>
@@ -46,7 +47,7 @@ export function PickCard({
         </Link>
         <ScentPyramid weight={c.weight} size={30} />
       </div>
-      <WearToday collectionId={collectionId} itemId={c.itemId} label="Wear" refresh={false} className="mt-3" />
+      <WearToday collectionId={collectionId} itemId={c.itemId} label="Wear" refresh={false} variant="secondary" className="mt-3" />
     </li>
   );
 }
