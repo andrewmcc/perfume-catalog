@@ -22,3 +22,17 @@ describe('sheet stack', () => {
     expect(s.isTop(b)).toBe(true);
   });
 });
+
+describe('scroll lock', () => {
+  it('locks on the first sheet and restores the original value only after the last closes, in any order', () => {
+    const body = { overflow: 'scroll' };
+    const s = createSheetStack({ lock: () => { const was = body.overflow; body.overflow = 'hidden'; return () => { body.overflow = was; }; } });
+    const parent = s.open();
+    const child = s.open();
+    expect(body.overflow).toBe('hidden');
+    s.close(parent); // parent's cleanup runs first when a tree unmounts
+    expect(body.overflow).toBe('hidden');
+    s.close(child);
+    expect(body.overflow).toBe('scroll');
+  });
+});

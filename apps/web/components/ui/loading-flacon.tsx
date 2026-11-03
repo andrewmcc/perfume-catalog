@@ -10,37 +10,44 @@ const MIST = [
   [27, -63, 1.6],
 ] as const;
 
+/** The animated flacon alone (decorative); `sm` is the inline size. */
+export function FlaconMark({ size = 'sm' }: { size?: 'sm' | 'md' }) {
+  const clip = useId();
+  const sm = size === 'sm';
+  return (
+    <svg viewBox="-36 -70 72 116" width={sm ? 22 : 56} height={sm ? 35 : 90} aria-hidden="true" className="overflow-visible">
+      <defs>
+        <clipPath id={clip}>
+          <path d={GLASS} />
+        </clipPath>
+      </defs>
+      {MIST.map(([cx, cy, r], i) => (
+        <circle key={i} cx={cx} cy={cy} r={r} className="flacon-mist fill-gold-deep" style={{ animationDelay: `${i * 0.28}s` }} />
+      ))}
+      <rect x="-11" y="-48" width="22" height="14" rx="2.5" className="fill-gold" />
+      <rect x="-11" y="-48" width="22" height="14" rx="2.5" fill="none" strokeWidth="1.5" className="stroke-gold-deep" />
+      <path d="M11 -43H15" strokeWidth="2" strokeLinecap="round" className="stroke-gold-deep" />
+      <rect x="-6" y="-34" width="12" height="8" className="fill-gold-deep" />
+      <path d={GLASS} className="fill-card" />
+      <g clipPath={`url(#${clip})`}>
+        <g className="flacon-level">
+          <path d={WAVE} className="flacon-wave fill-oxblood" opacity="0.85" />
+        </g>
+      </g>
+      <path d={GLASS} fill="none" strokeWidth="2.5" className="stroke-ink" />
+      <path d="M-15 -14V22" strokeWidth="2.5" strokeLinecap="round" className="stroke-card" opacity="0.7" />
+    </svg>);
+}
+
 /**
  * Suspense fallback and pending marker: a flacon whose scent laps behind the glass while mist
  * puffs from the atomiser in turn. `sm` is the inline size; the label is the accessible status.
  */
 export function LoadingFlacon({ label, size = 'md', className = '' }: { label: string; size?: 'sm' | 'md'; className?: string }) {
-  const clip = useId();
   const sm = size === 'sm';
   return (
     <div role="status" className={sm ? `inline-flex items-center gap-2 text-sm text-muted ${className}` : `flex flex-col items-center gap-3 pt-16 text-muted ${className}`}>
-      <svg viewBox="-36 -70 72 116" width={sm ? 22 : 56} height={sm ? 35 : 90} aria-hidden="true" className="overflow-visible">
-        <defs>
-          <clipPath id={clip}>
-            <path d={GLASS} />
-          </clipPath>
-        </defs>
-        {MIST.map(([cx, cy, r], i) => (
-          <circle key={i} cx={cx} cy={cy} r={r} className="flacon-mist fill-gold-deep" style={{ animationDelay: `${i * 0.28}s` }} />
-        ))}
-        <rect x="-11" y="-48" width="22" height="14" rx="2.5" className="fill-gold" />
-        <rect x="-11" y="-48" width="22" height="14" rx="2.5" fill="none" strokeWidth="1.5" className="stroke-gold-deep" />
-        <path d="M11 -43H15" strokeWidth="2" strokeLinecap="round" className="stroke-gold-deep" />
-        <rect x="-6" y="-34" width="12" height="8" className="fill-gold-deep" />
-        <path d={GLASS} className="fill-card" />
-        <g clipPath={`url(#${clip})`}>
-          <g className="flacon-level">
-            <path d={WAVE} className="flacon-wave fill-oxblood" opacity="0.85" />
-          </g>
-        </g>
-        <path d={GLASS} fill="none" strokeWidth="2.5" className="stroke-ink" />
-        <path d="M-15 -14V22" strokeWidth="2.5" strokeLinecap="round" className="stroke-card" opacity="0.7" />
-      </svg>
+      <FlaconMark size={size} />
       <p className={sm ? '' : 'text-sm'}>{label}</p>
     </div>
   );

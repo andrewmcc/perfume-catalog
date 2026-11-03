@@ -1,15 +1,19 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { sheets } from './sheet-stack';
 
 /**
  * Bottom sheet: the backdrop fades in and the panel slides up. Escape or a tap on the backdrop
  * closes it (not while `busy`); focus moves into the panel and back to the trigger on close; the
- * page behind doesn't scroll. Nested sheets: only the top one answers Escape.
+ * page behind doesn't scroll. Nested sheets: only the top one answers Escape. Portalled to <body>
+ * so a nested sheet is never positioned inside another sheet's animated panel.
  */
 export function Sheet({ label, onClose, busy = false, children, className = '' }: { label: string; onClose: () => void; busy?: boolean; children: ReactNode; className?: string }) {
   const panel = useRef<HTMLDivElement>(null);
+  // Captured during render: autoFocus inside the sheet moves focus before effects run.
+  const [opener] = useState(() => (typeof document === 'undefined' ? null : (document.activeElement as HTMLElement | null)));
   const close = useRef(onClose);
   const isBusy = useRef(busy);
   close.current = onClose;
@@ -17,11 +21,11 @@ export function Sheet({ label, onClose, busy = false, children, className = '' }
 
   useEffect(() => {
     const id = sheets.open();
-    const opener = document.activeElement as HTMLElement | null;
-    const { overflow } = document.body.style;
-    document.body.style.overflow = 'hidden';
-    const first = panel.current?.querySelector<HTMLElement>('[autofocus], input, select, textarea, button, a[href]');
-    (first ?? panel.current)?.focus({ preventScroll: true });
+    // Leave focus where autoFocus put it; otherwise move it to the first control.
+    if (!panel.current?.contains(document.activeElement)) {
+      const first = panel.current?.querySelector<HTMLElement>('input, select, textarea, button, a[href]');
+      (first ?? panel.current)?.focus({ preventScroll: true });
+    }
 
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && sheets.isTop(id) && !isBusy.current) {
@@ -33,12 +37,13 @@ export function Sheet({ label, onClose, busy = false, children, className = '' }
     return () => {
       document.removeEventListener('keydown', onKey);
       sheets.close(id);
-      if (sheets.size() === 0) document.body.style.overflow = overflow;
-      opener?.focus?.({ preventScroll: true });
+      // An opener inside a sheet that's also closing is gone; only return to one still on the page.
+      if (opener?.isConnected) opener.focus({ preventScroll: true });
     };
-  }, []);
+  }, [opener]);
 
-  return (
+  if (typeof document === 'undefined') return null;
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -56,6 +61,7 @@ export function Sheet({ label, onClose, busy = false, children, className = '' }
       >
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

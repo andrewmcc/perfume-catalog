@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useTransition, type ReactNode, type TransitionStartFunction } from 'react';
-import { LoadingFlacon } from '@/components/ui/loading-flacon';
+import { FlaconMark } from '@/components/ui/loading-flacon';
 
 type Pending = { isPending: boolean; startTransition: TransitionStartFunction };
 const PendingContext = createContext<Pending>({ isPending: false, startTransition: (f) => void f() });
@@ -18,11 +18,20 @@ export const usePending = () => useContext(PendingContext);
 export function PendingRegion({ children, label }: { children: ReactNode; label: string }) {
   const { isPending } = usePending();
   return (
-    <div aria-busy={isPending} className="relative">
-      <div className={`transition-opacity duration-200 ${isPending ? 'opacity-40' : 'opacity-100'}`}>{children}</div>
+    <div className="relative">
+      <div aria-busy={isPending} className={`transition-opacity duration-200 ${isPending ? 'opacity-40' : 'opacity-100'}`}>
+        {children}
+      </div>
+      {/* Always mounted, outside the busy region, so changing its text is announced. */}
+      <p role="status" className="sr-only">
+        {isPending ? label : ''}
+      </p>
       {isPending && (
-        <div className="pointer-events-none absolute inset-x-0 top-[45%] flex justify-center">
-          <LoadingFlacon size="sm" label={label} className="rounded-full bg-card px-3 py-1.5 shadow-sm" />
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-[45%] flex justify-center">
+          <span className="inline-flex items-center gap-2 rounded-full bg-card px-3 py-1.5 text-sm text-muted shadow-sm">
+            <FlaconMark />
+            {label}
+          </span>
         </div>
       )}
     </div>
