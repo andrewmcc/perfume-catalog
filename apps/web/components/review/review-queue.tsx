@@ -138,6 +138,8 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
                 onApprove={() => act(() => 'Approved.', () => one(() => approve(scan, r)))}
                 onEdit={() => setEditing({ scan, result: r })}
                 onDiscard={() => act(() => 'Discarded.', () => one(() => discard(r)))}
+                wishlist={edits[r.id]?.status === 'wishlist'}
+                onWishlist={(on) => setEdits((e) => ({ ...e, [r.id]: { ...e[r.id], status: on ? 'wishlist' : undefined } }))}
               />
             ))
           ) : (

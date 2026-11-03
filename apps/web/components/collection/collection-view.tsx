@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import { applyFilters, filterOptions, londonNow, matchesSearch, type CollectionRow, type Filters } from '@perfume/core';
+import { applyFilters, filterOptions, londonNow, matchesSearch, wishLine, type CollectionRow, type Filters } from '@perfume/core';
 import type { SetRow } from '@/lib/collection/load';
+import { AddSheet } from './add-sheet';
 import { FilterSheet } from './filter-sheet';
 import { PerfumeRow } from './perfume-row';
 import { ViewSwitch, type View } from './view-switch';
@@ -55,9 +56,16 @@ export function CollectionView({ rows, sets, initialFilters = {} }: { rows: Coll
           </ul>
         )
       ) : inView.length === 0 ? (
-        <p className="mt-6 text-muted">
-          {view === 'wishlist' ? 'Your wishlist is empty. Adding to it arrives in a later update.' : 'Nothing here yet. Scan a bottle from the icon at the top, then approve it in Review.'}
-        </p>
+        <>
+          <p className="mt-6 text-muted">
+            {view === 'wishlist'
+              ? 'Your wishlist is empty. Add by typing a name, scanning a tester (tick “Wishlist” in Review), or “Want this” on a gap suggestion in Stats.'
+              : 'Nothing here yet. Scan a bottle from the icon at the top, then approve it in Review, or add one by name.'}
+          </p>
+          <div className="mt-4">
+            <AddSheet defaultStatus={view === 'wishlist' ? 'wishlist' : 'owned'} />
+          </div>
+        </>
       ) : (
         <>
           <div className="mt-4 flex gap-2">
@@ -72,13 +80,14 @@ export function CollectionView({ rows, sets, initialFilters = {} }: { rows: Coll
             <button onClick={() => setSheet(true)} className="min-h-11 shrink-0 rounded-[3px] border border-oxblood px-3 text-sm text-oxblood">
               Filters{active > 0 ? ` (${active})` : ''}
             </button>
+            <AddSheet defaultStatus={view === 'wishlist' ? 'wishlist' : 'owned'} />
           </div>
           {shown.length === 0 ? (
             <p className="mt-6 text-muted">Nothing matches. Try fewer filters or another word.</p>
           ) : (
             <ul className="label-card mt-4 px-4">
               {shown.map((r) => (
-                <PerfumeRow key={r.perfumeId} row={r} items={r.items} />
+                <PerfumeRow key={r.perfumeId} row={r} items={r.items} line={view === 'wishlist' ? wishLine(r) : undefined} />
               ))}
             </ul>
           )}

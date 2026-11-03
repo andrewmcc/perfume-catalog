@@ -35,6 +35,7 @@ export function ItemCard({
           <p className="text-[15px] text-ink">
             {line}
             {item.status === 'gone' && <span className="ml-2 rounded-full border border-line px-2 py-px text-[12px] text-muted">Gone</span>}
+            {item.status === 'wishlist' && <span className="ml-2 rounded-full border border-gold-deep px-2 py-px text-[12px] text-gold-deep">Wishlist</span>}
           </p>
           {item.setName && item.setId && (
             <p className="text-muted">
@@ -46,6 +47,7 @@ export function ItemCard({
           )}
           {bought && <p className="text-muted">{bought}</p>}
           {item.batch_code && <p className="text-muted">Batch {item.batch_code}</p>}
+          {item.wish_reason && <p className="text-muted italic">{item.wish_reason}</p>}
           {item.notes && <p className="mt-1 text-ink">{item.notes}</p>}
         </div>
       </div>
@@ -56,8 +58,8 @@ export function ItemCard({
           <button onClick={() => setEditing(true)} disabled={busy} className="min-h-11 px-1 text-sm text-oxblood underline underline-offset-4">
             Edit
           </button>
-          <button onClick={() => onStatus(item.status === 'gone' ? 'owned' : 'gone')} disabled={busy} className="min-h-11 px-1 text-sm text-oxblood underline underline-offset-4">
-            {item.status === 'gone' ? 'Back on the shelf' : 'Mark gone'}
+          <button onClick={() => onStatus(item.status === 'owned' ? 'gone' : 'owned')} disabled={busy} className="min-h-11 px-1 text-sm text-oxblood underline underline-offset-4">
+            {item.status === 'wishlist' ? 'Move to owned' : item.status === 'gone' ? 'Back on the shelf' : 'Mark gone'}
           </button>
           <ConfirmButton label="Delete" confirm="Delete this item?" disabled={busy} onConfirm={onDelete} />
         </div>

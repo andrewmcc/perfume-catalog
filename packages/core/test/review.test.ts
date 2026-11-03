@@ -38,6 +38,9 @@ describe('reviewFlags', () => {
 });
 
 describe('approveInput', () => {
+  it('a wishlist choice is sent as status, not as an edit', () => {
+    expect(approveInput(read(), { status: 'wishlist' })).toEqual({ status: 'wishlist', edited_fields: [] });
+  });
   it('unchanged read sends nothing', () => {
     expect(approveInput(read(), {})).toEqual({ edited_fields: [] });
     expect(approveInput(read(), { name: 'Naxos', house: 'Xerjoff' })).toEqual({ edited_fields: [] });

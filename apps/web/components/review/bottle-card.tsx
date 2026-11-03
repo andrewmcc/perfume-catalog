@@ -17,6 +17,8 @@ export function BottleCard({
   onApprove,
   onEdit,
   onDiscard,
+  wishlist,
+  onWishlist,
 }: {
   photo: string | undefined;
   result: QueueResult;
@@ -27,6 +29,8 @@ export function BottleCard({
   onApprove: () => void;
   onEdit: () => void;
   onDiscard: () => void;
+  wishlist: boolean;
+  onWishlist: (on: boolean) => void;
 }) {
   const alternatives = result.read.alternatives.filter((a) => a !== read.name);
   return (
@@ -55,7 +59,11 @@ export function BottleCard({
           )}
         </div>
       </div>
-      <div className="mt-3 flex gap-2">
+      <label className="mt-2 flex min-h-11 items-center gap-2 text-sm text-ink">
+        <input type="checkbox" checked={wishlist} onChange={(e) => onWishlist(e.target.checked)} className="size-5 accent-oxblood" />
+        A tester: add to my wishlist, not my shelf
+      </label>
+      <div className="mt-1 flex gap-2">
         <Button onClick={onApprove} disabled={busy} className="flex-1">
           Approve
         </Button>

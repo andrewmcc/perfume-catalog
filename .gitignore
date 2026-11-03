@@ -11,3 +11,4 @@ supabase/.temp/
 .env*
 !.env.example
 apps/web/scripts/tmp/
+apps/web/scripts/*.local.mts
