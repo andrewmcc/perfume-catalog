@@ -69,3 +69,12 @@ export async function loadWearables(supabase: Client): Promise<Wearable[]> {
     .map((i) => ({ itemId: i.id, perfumeId: i.perfume_id, house: i.perfumes?.house ?? '', name: i.perfumes?.name ?? '', format: i.format, setName: i.sets?.name ?? null }))
     .sort((a, b) => a.house.localeCompare(b.house) || a.name.localeCompare(b.name));
 }
+
+/** Wears per London date in a year. */
+export async function loadYearCounts(supabase: Client, year: number): Promise<Map<string, number>> {
+  const { data, error } = await supabase.from('wears').select('worn_on').gte('worn_on', `${year}-01-01`).lte('worn_on', `${year}-12-31`);
+  if (error) throw error;
+  const counts = new Map<string, number>();
+  for (const w of data) counts.set(w.worn_on, (counts.get(w.worn_on) ?? 0) + 1);
+  return counts;
+}
