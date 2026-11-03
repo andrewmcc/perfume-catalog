@@ -33,7 +33,8 @@ function Fact({ title, source, children }: { title: string; source: Source | nul
   );
 }
 
-export function PerfumeDetail({ detail }: { detail: Detail }) {
+/** `pairs` is the server-rendered Smells like / Layer with block. */
+export function PerfumeDetail({ detail, pairs }: { detail: Detail; pairs?: ReactNode }) {
   const router = useRouter();
   const supabase = useMemo(() => createBrowserClient(), []);
   const [editing, setEditing] = useState(false);
@@ -155,6 +156,8 @@ export function PerfumeDetail({ detail }: { detail: Detail }) {
           Edit details
         </button>
       )}
+
+      {pairs}
 
       {detail.notes.length > 0 && (
         <section aria-label="Your notes" className="mt-6">
