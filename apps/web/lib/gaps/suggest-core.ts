@@ -1,4 +1,4 @@
-import type { Gap, GapSuggestion } from '@perfume/core';
+import { findGaps, type CollectionRow, type Gap, type GapId, type GapSuggestion } from '@perfume/core';
 
 export class QuotaError extends Error {}
 
@@ -9,4 +9,9 @@ export type SuggestDeps = { claim: () => Promise<boolean>; suggest: (gap: Gap, o
 export async function suggestFor(gap: Gap, owned: Named[], deps: SuggestDeps): Promise<GapSuggestion[]> {
   if (!(await deps.claim())) throw new QuotaError('gap suggestions quota used up');
   return deps.suggest(gap, owned);
+}
+
+/** The gap as it stands in the owned perfumes, or null when the collection doesn't have it now. */
+export function currentGap(rows: CollectionRow[], id: GapId): Gap | null {
+  return findGaps(rows.filter((r) => r.items.some((i) => i.status === 'owned'))).find((g) => g.id === id) ?? null;
 }

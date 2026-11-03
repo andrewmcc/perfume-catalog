@@ -36,10 +36,14 @@ export async function POST(request: Request) {
     p_conc: proposal.concentration ?? '',
     p_flanker: proposal.flanker ?? '',
   });
-  if (error) throw error;
+  // The answer is already paid for: on a lookup error, return it without the match.
+  if (error) {
+    console.error('identify match', error.message);
+    return Response.json({ proposal: { ...proposal, perfumeId: null, onShelf: null } });
+  }
   let onShelf: string | null = null;
   if (perfumeId) {
-    const { data: items } = await supabase.from('items').select('status').eq('perfume_id', perfumeId);
+    const { data: items } = await supabase.from('items').select('status').eq('perfume_id', perfumeId).eq('collection_id', collectionId);
     onShelf = items?.some((i) => i.status === 'owned') ? 'owned' : items?.some((i) => i.status === 'wishlist') ? 'wishlist' : null;
   }
   return Response.json({ proposal: { ...proposal, perfumeId: (perfumeId as string | null) ?? null, onShelf } });

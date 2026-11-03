@@ -108,3 +108,12 @@ Running log of decisions for the perfume catalogue. Tags: **[user]** = user deci
 - Gaps (≥ 5 owned; a rule met by fewer than 2): hot days, cold days, date night, office, spring; at most 3. Suggestions exclude everything the collection has, wishlist and gone included. [plan, ruling]
 - Diary year view: `/diary?y=YYYY`, wears per day in one oxblood ramp (#D9A397, #A44E47, #5A1F1F; validated against the card surface). [plan]
 - Phase 2 minors fixed: wears can't be dated in the future (form); averages are exact and shown rounded down (3.95 → ★3.9, not a 4★ match); "£1k" not "£1.0k"; Stats shows zero tiles when empty; diary entries for perfumes no longer on the shelf aren't links; URL-seeded filters stop being sticky; "your location" casing; Today reasons cache key narrowed to what the prompt reads. [review]
+
+## 2026-11-03 — Phase 4 deployed (loose ends, speed)
+- Functions run in Paris (`cdg1`, root `vercel.json`), next to Supabase (eu-west-3); they were in Washington (`iad1`). [my call]
+- Sessions are verified with `getClaims()` (the project signs with ES256, so it's a local check) in the proxy and the collection lookup, instead of a `getUser()` round trip to Supabase Auth. [my call]
+- AI answers (Today reasons, pair reasons, gap suggestions) and weather use `'use cache: remote'`: the in-memory default missed across instances, so pages waited on Claude and spent quota on every view. Pages that show no photos skip signing URLs. [my call]
+- Production timings, median full page load (ms), before → after: Today 2273 → 228, Collection 609 → 174, perfume page 2707 → 327, Stats 489 → 357, Diary 670 → 524. [measured]
+- Log a wear of something not on the shelf: the diary's "Log a wear" offers "Not on your shelf? Add it by name", which adds it as owned and goes straight to the wear form. [plan]
+- Delete account (Settings → Account, type "delete"): the login goes; a collection with no other member goes with everything in it, photos included; shared perfumes stay. A collection someone else is still in stays. [my call]
+- Phase 3 minors: gap suggestions only for gaps the shelf has; identify returns its answer even if the match lookup fails, and "already on your shelf" is scoped to the current collection; the year view stops at 2000 and 2100. [review]

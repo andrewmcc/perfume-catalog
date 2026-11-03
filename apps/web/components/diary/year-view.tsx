@@ -12,13 +12,21 @@ export function YearView({ year, counts, today }: { year: number; counts: Map<st
   return (
     <section aria-label={`${year}`}>
       <div className="flex items-center justify-between">
-        <Link href={`/diary?y=${year - 1}`} aria-label="Previous year" className="flex h-11 w-11 items-center justify-center text-2xl text-oxblood">
-          ‹
-        </Link>
+        {year > 2000 ? (
+          <Link href={`/diary?y=${year - 1}`} aria-label="Previous year" className="flex h-11 w-11 items-center justify-center text-2xl text-oxblood">
+            ‹
+          </Link>
+        ) : (
+          <span className="h-11 w-11" />
+        )}
         <h2 className="font-display text-xl italic">{year}</h2>
-        <Link href={`/diary?y=${year + 1}`} aria-label="Next year" className="flex h-11 w-11 items-center justify-center text-2xl text-oxblood">
-          ›
-        </Link>
+        {year < 2100 ? (
+          <Link href={`/diary?y=${year + 1}`} aria-label="Next year" className="flex h-11 w-11 items-center justify-center text-2xl text-oxblood">
+            ›
+          </Link>
+        ) : (
+          <span className="h-11 w-11" />
+        )}
       </div>
       <p className="text-center text-sm text-muted">{total === 0 ? `No wears logged in ${year}.` : `${wearsLabel(total)} in ${year}`}</p>
       <div className="label-card mt-2 grid grid-cols-3 gap-x-3 gap-y-4 p-3">

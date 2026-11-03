@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { fold } from '@perfume/core';
 import { Button } from '@/components/ui/button';
+import { AddSheet } from '@/components/collection/add-sheet';
 import { label } from '@/components/collection/labels';
 import type { Wearable } from '@/lib/wears/load';
 import { useWears } from './use-wears';
@@ -52,7 +53,16 @@ export function LogWearSheet({ wearables, collectionId, defaultDate }: { wearabl
                 />
               </>
             ) : wearables.length === 0 ? (
-              <p className="mt-3 text-sm text-muted">Nothing on your shelf yet. Scan a bottle from the icon at the top.</p>
+              <>
+                <p className="mt-3 text-sm text-muted">Nothing on your shelf yet. Scan a bottle from the icon at the top, or add one by name.</p>
+                <AddSheet
+                  defaultStatus="owned"
+                  ownedOnly
+                  trigger="Add it by name"
+                  triggerClassName="mt-2 min-h-11 text-sm text-oxblood underline underline-offset-4"
+                  onAdded={(a) => setPicked({ itemId: a.itemId, perfumeId: a.perfumeId, house: a.house, name: a.name, format: 'full', setName: null })}
+                />
+              </>
             ) : (
               <>
                 <input
@@ -78,6 +88,15 @@ export function LogWearSheet({ wearables, collectionId, defaultDate }: { wearabl
                   ))}
                   {shown.length === 0 && <li className="py-3 text-sm text-muted">Nothing matches “{q}”.</li>}
                 </ul>
+                <AddSheet
+                  key={q}
+                  defaultStatus="owned"
+                  ownedOnly
+                  initialText={q.trim()}
+                  trigger="Not on your shelf? Add it by name"
+                  triggerClassName="mt-2 min-h-11 text-sm text-oxblood underline underline-offset-4"
+                  onAdded={(a) => setPicked({ itemId: a.itemId, perfumeId: a.perfumeId, house: a.house, name: a.name, format: 'full', setName: null })}
+                />
               </>
             )}
           </div>

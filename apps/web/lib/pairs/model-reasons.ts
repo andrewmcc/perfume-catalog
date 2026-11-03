@@ -21,7 +21,8 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
  * miss; a refused claim throws, so nothing is cached and the rule reasons stay.
  */
 async function cachedPairReasons(collectionId: string, pairs: Pairs): Promise<Record<string, string>> {
-  'use cache';
+  // Shared across instances: a cold instance shouldn't re-ask (and re-pay for) an answer already cached.
+  'use cache: remote';
   cacheLife('days');
   if (!(await claimAi(createServiceClient(), collectionId, 'pair_reasons'))) throw new Error('pair reasons quota used up');
   const client = new Anthropic({ timeout: PAIR_REASONS_TIMEOUT_MS, maxRetries: 0 });

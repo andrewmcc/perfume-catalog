@@ -1,7 +1,8 @@
-import { findGaps, gapRule, isGapId, type Gap } from '@perfume/core';
+import { isGapId } from '@perfume/core';
 import { loadCollection } from '@/lib/collection/load';
 import { getCurrentCollectionId } from '@/lib/collections/current';
 import { QuotaError, gapSuggestions } from '@/lib/gaps/suggest';
+import { currentGap } from '@/lib/gaps/suggest-core';
 import { createServerClient } from '@/lib/supabase/server';
 
 export const maxDuration = 60;
@@ -14,9 +15,9 @@ export async function GET(_request: Request, ctx: RouteContext<'/api/gaps/[id]'>
   if (!collectionId) return Response.json({ error: 'unauthorized' }, { status: 401 });
   if (!isGapId(id)) return Response.json({ error: 'not found' }, { status: 404 });
 
-  const { rows } = await loadCollection(supabase);
-  const owned = rows.filter((r) => r.items.some((i) => i.status === 'owned'));
-  const gap: Gap = findGaps(owned).find((g) => g.id === id) ?? { id, title: gapRule(id).title, count: 0, total: owned.length };
+  const { rows } = await loadCollection(supabase, { thumbs: false });
+  const gap = currentGap(rows, id);
+  if (!gap) return Response.json({ error: 'That gap is filled now.' }, { status: 404 });
   // Wishlist perfumes are left out of suggestions too.
   const known = rows.map((r) => ({ house: r.house, name: r.name })).sort((a, b) => `${a.house}|${a.name}`.localeCompare(`${b.house}|${b.name}`));
   try {

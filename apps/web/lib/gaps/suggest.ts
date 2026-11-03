@@ -13,7 +13,8 @@ export { QuotaError } from './suggest-core';
  * The quota is claimed only on a miss; errors (including QuotaError) aren't cached.
  */
 export async function gapSuggestions(collectionId: string, gap: Gap, owned: { house: string; name: string }[]): Promise<GapSuggestion[]> {
-  'use cache';
+  // Shared across instances: a cold instance shouldn't re-ask (and re-pay for) an answer already cached.
+  'use cache: remote';
   cacheLife('days');
   return suggestFor(gap, owned, {
     claim: () => claimAi(createServiceClient(), collectionId, 'gap_suggest'),
