@@ -52,6 +52,21 @@ describe('addFromText', () => {
   });
 });
 
+describe('adding what the collection already has', () => {
+  it('the same status again returns the existing item; owned flips a wishlist item', async () => {
+    const wished = await addFromText(as(user), cid, parseFromText({ house, name: 'Wanted Then Bought', status: 'wishlist', reason: 'Fills your hot-days gap' })!);
+    const again = await addFromText(as(user), cid, parseFromText({ house, name: 'Wanted Then Bought', status: 'wishlist' })!);
+    expect(again.itemId).toBe(wished.itemId);
+    const bought = await addFromText(as(user), cid, parseFromText({ house, name: 'Wanted Then Bought', status: 'owned' })!);
+    expect(bought.itemId).toBe(wished.itemId);
+    const items = (await admin.from('items').select('status').eq('perfume_id', wished.perfumeId)).data!;
+    expect(items).toEqual([{ status: 'owned' }]);
+    const wishAfterOwned = await addFromText(as(user), cid, parseFromText({ house, name: 'Wanted Then Bought', status: 'wishlist' })!);
+    expect(wishAfterOwned.itemId).toBe(wished.itemId);
+    expect((await admin.from('items').select('id').eq('perfume_id', wished.perfumeId)).data).toHaveLength(1);
+  });
+});
+
 describe('parseFromText', () => {
   it('validates the body', () => {
     expect(parseFromText({ house: 'A', name: 'B', status: 'gone' })).toBeNull();

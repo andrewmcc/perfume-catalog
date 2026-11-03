@@ -70,6 +70,23 @@ export async function addFromText(db: Client, collectionId: string, input: FromT
     if (!perfumeId) throw new Error('perfume not created');
   }
 
+  if (!created) {
+    // Already in the collection: reuse rather than add a second item. Buying something wished
+    // for moves the wishlist item to owned; wishing for something owned keeps the owned item.
+    const { data: have, error: hErr } = await db.from('items').select('id, status').eq('collection_id', collectionId).eq('perfume_id', perfumeId);
+    if (hErr) throw hErr;
+    const same = have.find((i) => i.status === input.status);
+    if (same) return { perfumeId, itemId: same.id, created };
+    const wished = have.find((i) => i.status === 'wishlist');
+    if (input.status === 'owned' && wished) {
+      const { error: uErr } = await db.from('items').update({ status: 'owned', wish_reason: null }).eq('id', wished.id);
+      if (uErr) throw uErr;
+      return { perfumeId, itemId: wished.id, created };
+    }
+    const owned = have.find((i) => i.status === 'owned');
+    if (input.status === 'wishlist' && owned) return { perfumeId, itemId: owned.id, created };
+  }
+
   const { data: item, error } = await db
     .from('items')
     .insert({ collection_id: collectionId, perfume_id: perfumeId, status: input.status, format: 'full', wish_reason: input.reason })

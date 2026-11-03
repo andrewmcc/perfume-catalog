@@ -4,8 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { label } from './labels';
+import { editProposal, type Proposal } from './proposal';
 
-type Proposal = { house: string; name: string; concentration: string | null; flanker: string | null; perfumeId: string | null; onShelf: 'owned' | 'wishlist' | null };
 type Status = 'owned' | 'wishlist';
 
 const CONCENTRATIONS = ['', 'edt', 'edp', 'parfum', 'extrait', 'edc', 'cologne', 'other'] as const;
@@ -66,7 +66,7 @@ export function AddSheet({ defaultStatus }: { defaultStatus: Status }) {
       router.push(`/collection/${perfumeId}`);
       router.refresh();
     });
-  const edit = (k: 'house' | 'name' | 'concentration', v: string) => proposal && setProposal({ ...proposal, [k]: k === 'concentration' ? v || null : v, perfumeId: null, onShelf: null });
+  const edit = (k: 'house' | 'name' | 'concentration', v: string) => proposal && setProposal(editProposal(proposal, k, v));
 
   return (
     <>
