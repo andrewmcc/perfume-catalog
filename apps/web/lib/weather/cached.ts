@@ -3,7 +3,8 @@ import { cacheLife } from 'next/cache';
 import { fetchCurrent, type Weather } from './current';
 
 async function cachedWeather(lat: number, lon: number): Promise<Weather> {
-  'use cache';
+  // Shared across instances, so a cold instance doesn't refetch what another already has.
+  'use cache: remote';
   cacheLife({ stale: 300, revalidate: 900, expire: 3600 });
   const w = await fetchCurrent(lat, lon);
   if (!w) throw new Error('weather unavailable'); // thrown results aren't cached

@@ -32,7 +32,8 @@ export function reasonsKey(picks: Pick[]): Pick[] {
 
 /** Cached per day and context: the arguments (date, daypart, nudge, occasion, weather, picks) are the key. */
 async function cachedReasons(picks: Pick[], ctx: TodayContext, conditions: string | null): Promise<Record<string, string>> {
-  'use cache';
+  // Shared across instances: a cold instance shouldn't re-ask (and re-pay for) an answer already cached.
+  'use cache: remote';
   cacheLife('days');
   return Object.fromEntries(await withTimeout(defaultSuggest(picks, ctx, conditions)));
 }

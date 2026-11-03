@@ -26,7 +26,8 @@ export const listPath = (photos: Photo[]): string | null => {
 
 export { latestOverrides } from './overrides';
 
-export async function loadCollection(supabase: Client): Promise<{ rows: CollectionRow[]; sets: SetRow[] }> {
+/** `thumbs: false` skips signing photo URLs (thumb is null) for pages that show no photos. */
+export async function loadCollection(supabase: Client, { thumbs = true }: { thumbs?: boolean } = {}): Promise<{ rows: CollectionRow[]; sets: SetRow[] }> {
   const [{ data: items, error }, { data: sets, error: sErr }, { data: wears, error: wErr }] = await Promise.all([
     supabase
       .from('items')
@@ -40,7 +41,7 @@ export async function loadCollection(supabase: Client): Promise<{ rows: Collecti
   if (wErr) throw wErr;
   const worn = wearSummary(wears.map((w) => ({ id: w.id, perfumeId: w.perfume_id, wornOn: w.worn_on, rating: w.rating })));
 
-  const url = await signPaths(supabase, items.map((i) => listPath(i.item_photos)));
+  const url = thumbs ? await signPaths(supabase, items.map((i) => listPath(i.item_photos))) : new Map<string, string>();
 
   const byPerfume = new Map<string, typeof items>();
   for (const i of items) byPerfume.set(i.perfume_id, [...(byPerfume.get(i.perfume_id) ?? []), i]);

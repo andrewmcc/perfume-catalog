@@ -14,7 +14,7 @@ export async function GET(_request: Request, ctx: RouteContext<'/api/gaps/[id]'>
   if (!collectionId) return Response.json({ error: 'unauthorized' }, { status: 401 });
   if (!isGapId(id)) return Response.json({ error: 'not found' }, { status: 404 });
 
-  const { rows } = await loadCollection(supabase);
+  const { rows } = await loadCollection(supabase, { thumbs: false });
   const owned = rows.filter((r) => r.items.some((i) => i.status === 'owned'));
   const gap: Gap = findGaps(owned).find((g) => g.id === id) ?? { id, title: gapRule(id).title, count: 0, total: owned.length };
   // Wishlist perfumes are left out of suggestions too.

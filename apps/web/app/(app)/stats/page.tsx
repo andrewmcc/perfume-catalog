@@ -24,7 +24,7 @@ function Tile({ value, label, note }: { value: string; label: string; note?: str
 async function Stats() {
   await connection();
   const supabase = await createServerClient();
-  const [s, { rows }] = await Promise.all([loadStats(supabase), loadCollection(supabase)]);
+  const [s, { rows }] = await Promise.all([loadStats(supabase), loadCollection(supabase, { thumbs: false })]);
   const gaps = findGaps(rows.filter((r) => r.items.some((i) => i.status === 'owned')));
   const empty = s.bottles + s.samples === 0;
   return (

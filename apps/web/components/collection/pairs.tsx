@@ -51,7 +51,7 @@ function PairList({ title, kind, pairs, reasons }: { title: string; kind: 'like'
 /** "Smells like — on your shelf" and "Layer with", from the perfumes the collection owns. */
 export async function Pairs({ perfumeId }: { perfumeId: string }) {
   const supabase = await createServerClient();
-  const [{ rows }, collectionId] = await Promise.all([loadCollection(supabase), getCurrentCollectionId(supabase)]);
+  const [{ rows }, collectionId] = await Promise.all([loadCollection(supabase, { thumbs: false }), getCurrentCollectionId(supabase)]);
   const pairs = pairsFor(rows, perfumeId);
   if (!pairs || !collectionId || (!pairs.likes.length && !pairs.layers.length)) return null;
   const reasons = pairReasons(collectionId, pairs);
