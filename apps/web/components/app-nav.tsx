@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import Link, { useLinkStatus } from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const TABS = [
@@ -9,6 +9,12 @@ const TABS = [
   { href: '/diary', label: 'Diary' },
   { href: '/stats', label: 'Stats' },
 ] as const;
+
+/** The tab's diamond: gold when current; pulses on the tapped tab until its page arrives. */
+function TabMark({ active }: { active: boolean }) {
+  const { pending } = useLinkStatus();
+  return <span aria-hidden="true" className={`h-1.5 w-1.5 rotate-45 ${pending ? 'tab-pending bg-gold-deep' : active ? 'bg-gold-deep' : 'bg-transparent'}`} />;
+}
 
 export function AppNav() {
   const pathname = usePathname();
@@ -22,9 +28,9 @@ export function AppNav() {
               key={href}
               href={href}
               aria-current={active ? 'page' : undefined}
-              className={`flex min-h-14 flex-col items-center justify-center gap-1 text-[13px] ${active ? 'font-semibold text-oxblood' : 'text-muted'}`}
+              className={`press flex min-h-14 flex-col items-center justify-center gap-1 text-[13px] ${active ? 'font-semibold text-oxblood' : 'text-muted'}`}
             >
-              <span className={`h-1.5 w-1.5 rotate-45 ${active ? 'bg-gold-deep' : 'bg-transparent'}`} />
+              <TabMark active={active} />
               {label}
             </Link>
           );

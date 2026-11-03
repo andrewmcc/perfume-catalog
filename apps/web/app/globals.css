@@ -93,7 +93,13 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 .press {
-  transition: transform 100ms ease-out;
+  /* Unlayered, so it wins over Tailwind's transition utilities: keep their colour fades too. */
+  transition:
+    transform 100ms ease-out,
+    background-color 150ms ease-out,
+    color 150ms ease-out,
+    border-color 150ms ease-out,
+    opacity 150ms ease-out;
 }
 .press:active:not(:disabled) {
   transform: scale(0.97);
@@ -102,4 +108,16 @@ html {
   .press:active:not(:disabled) {
     transform: none;
   }
+}
+
+/* Nav: the tapped tab's diamond pulses until its page arrives */
+.tab-pending {
+  animation: tab-pending 0.9s ease-in-out infinite;
+}
+@keyframes tab-pending {
+  0%, 100% { opacity: 0.35; transform: rotate(45deg) scale(0.8); }
+  50% { opacity: 1; transform: rotate(45deg) scale(1.3); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tab-pending { animation: none; }
 }
