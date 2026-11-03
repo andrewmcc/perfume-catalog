@@ -21,7 +21,7 @@ export function ItemCard({
   item: ItemDetail;
   busy: boolean;
   onSave: (p: ItemPatch) => Promise<void>;
-  onStatus: (s: 'owned' | 'gone') => void;
+  onStatus: (s: 'owned' | 'gone' | 'wishlist') => void;
   onDelete: () => void;
 }) {
   const [editing, setEditing] = useState(false);
@@ -36,6 +36,7 @@ export function ItemCard({
           <p className="text-[15px] text-ink">
             {line}
             {item.status === 'gone' && <span className="ml-2 rounded-full border border-line px-2 py-px text-[12px] text-muted">Gone</span>}
+            {item.status === 'tried' && <span className="ml-2 rounded-full border border-line px-2 py-px text-[12px] text-muted">Tried</span>}
             {item.status === 'wishlist' && <span className="ml-2 rounded-full border border-gold-deep px-2 py-px text-[12px] text-gold-deep">Wishlist</span>}
           </p>
           {item.setName && item.setId && (
@@ -60,8 +61,13 @@ export function ItemCard({
             Edit
           </button>
           <button onClick={() => onStatus(item.status === 'owned' ? 'gone' : 'owned')} disabled={busy} className="min-h-11 px-1 text-sm text-oxblood underline underline-offset-4">
-            {item.status === 'wishlist' ? 'Move to owned' : item.status === 'gone' ? 'Back on the shelf' : 'Mark gone'}
+            {item.status === 'wishlist' || item.status === 'tried' ? 'Move to owned' : item.status === 'gone' ? 'Back on the shelf' : 'Mark gone'}
           </button>
+          {item.status === 'tried' && (
+            <button onClick={() => onStatus('wishlist')} disabled={busy} className="min-h-11 px-1 text-sm text-oxblood underline underline-offset-4">
+              Add to wishlist
+            </button>
+          )}
           <ConfirmButton label="Delete" confirm="Delete this item?" disabled={busy} onConfirm={onDelete} />
         </div>
       )}

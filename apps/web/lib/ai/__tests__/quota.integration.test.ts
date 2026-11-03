@@ -39,3 +39,11 @@ describe('claimAi', () => {
     expect(ok.error).toBeNull();
   });
 });
+
+describe('item statuses', () => {
+  it('tried is a status; anything unknown is refused', async () => {
+    const p = (await db.from('perfumes').insert({ house: `Zztest Tried ${crypto.randomUUID().slice(0, 8)}`, name: 'T', collection_id: cid }).select('id').single()).data!.id;
+    expect((await db.from('items').insert({ collection_id: cid, perfume_id: p, status: 'tried' })).error).toBeNull();
+    expect((await db.from('items').insert({ collection_id: cid, perfume_id: p, status: 'smelled' })).error).not.toBeNull();
+  });
+});

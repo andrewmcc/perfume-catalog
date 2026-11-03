@@ -21,7 +21,7 @@ export function CollectionView({ rows, sets, initialFilters = {} }: { rows: Coll
   };
   const [sheet, setSheet] = useState(false);
 
-  const status = view === 'wishlist' ? 'wishlist' : 'owned';
+  const status = view === 'wishlist' || view === 'tried' ? view : 'owned';
   const inView = useMemo(
     () => rows.map((r) => ({ ...r, items: r.items.filter((i) => i.status === status) })).filter((r) => r.items.length > 0),
     [rows, status],
@@ -64,12 +64,14 @@ export function CollectionView({ rows, sets, initialFilters = {} }: { rows: Coll
       ) : inView.length === 0 ? (
         <>
           <p className="mt-6 text-muted">
-            {view === 'wishlist'
+            {view === 'tried'
+              ? 'Nothing here. Perfumes you’ve smelled in a shop but don’t own show up here.'
+              : view === 'wishlist'
               ? 'Your wishlist is empty. Add by typing a name, scanning a tester (tick “Wishlist” in Review), or “Want this” on a gap suggestion in Stats.'
               : 'Nothing here yet. Scan a bottle from the icon at the top, then approve it in Review, or add one by name.'}
           </p>
           <div className="mt-4">
-            <AddSheet defaultStatus={view === 'wishlist' ? 'wishlist' : 'owned'} />
+            {view !== 'tried' && <AddSheet defaultStatus={view === 'wishlist' ? 'wishlist' : 'owned'} />}
           </div>
         </>
       ) : (
@@ -86,14 +88,14 @@ export function CollectionView({ rows, sets, initialFilters = {} }: { rows: Coll
             <button onClick={() => setSheet(true)} className="min-h-11 shrink-0 rounded-[3px] border border-oxblood px-3 text-sm text-oxblood">
               Filters{active > 0 ? ` (${active})` : ''}
             </button>
-            <AddSheet defaultStatus={view === 'wishlist' ? 'wishlist' : 'owned'} />
+            {view !== 'tried' && <AddSheet defaultStatus={view === 'wishlist' ? 'wishlist' : 'owned'} />}
           </div>
           {shown.length === 0 ? (
             <p className="mt-6 text-muted">Nothing matches. Try fewer filters or another word.</p>
           ) : (
             <ul className="label-card mt-4 px-4">
               {shown.map((r) => (
-                <PerfumeRow key={r.perfumeId} row={r} items={r.items} line={view === 'wishlist' ? wishLine(r) : undefined} />
+                <PerfumeRow key={r.perfumeId} row={r} items={r.items} line={view === 'wishlist' ? wishLine(r) : view === 'tried' ? (r.items[0]?.notes ?? 'Tried, not owned') : undefined} />
               ))}
             </ul>
           )}

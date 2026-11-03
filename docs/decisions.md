@@ -130,3 +130,8 @@ Running log of decisions for the perfume catalogue. Tags: **[user]** = user deci
 - Perfume page: one source badge per section (its most common source); a row is tagged only when it differs. [review]
 - Today: lighter/bolder and the occasion sit above the picks (they were below the fold); the picks' Wear buttons are outlined so three don't compete. [review]
 - Gap cards: the gap as a heading with "None of your 8 perfumes" under it. Search placeholder "Search". The diary no longer says "nothing logged" twice. [review]
+
+## 2026-11-03 — Sniffy import, Tried status, renaming
+- Imported Jacqui's Sniffy spreadsheet (sheet 1) into "Our collection": 436 new private perfumes, 59 matched (spelling-tolerant: & / and, Thierry Mugler / Mugler, EDT/EDP, typos), seasons/accords/notes/perfumers (family guessed from the first accord), 168 dated reviews as diary entries, undated reviews in item notes, position as the item's note. Matched shared perfumes got her values as collection overrides; shared rows untouched. Manifest of every change: .superpowers/sniffy-import-manifest.json. [user asked]
+- Status "tried" (migration 00020): smelled in a shop, never owned or wished for; its own Collection tab; out of Today, Stats and pairings like the wishlist. Nothing in the collection is "gone" after the import; reviewed rows with no position became owned samples. [user]
+- Renaming (migration 00021, `rename_perfume`): House and Name are editable in Edit details. Private perfumes are renamed in place; a shared perfume gives the collection its own copy with its items and wears moved (the shared row is never edited); a name the collection already has merges into it. [user reported]

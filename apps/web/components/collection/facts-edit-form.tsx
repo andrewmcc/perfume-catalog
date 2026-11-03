@@ -14,8 +14,23 @@ const CHIPS = { seasons: SEASONS, times_of_day: TIMES_OF_DAY, occasions: OCCASIO
 
 const split = (s: string) => [...new Set(s.split(',').map((x) => x.trim()).filter(Boolean))];
 
-/** Edits the shown facts; the caller turns them into per-item overrides. */
-export function FactsEditForm({ values, busy, onSave, onCancel }: { values: Record<FactField, unknown>; busy: boolean; onSave: (edits: Record<FactField, unknown>) => void; onCancel: () => void }) {
+export type Identity = { house: string; name: string };
+
+/** Edits the house, name and shown facts; the caller renames the perfume and turns facts into per-item overrides. */
+export function FactsEditForm({
+  identity,
+  values,
+  busy,
+  onSave,
+  onCancel,
+}: {
+  identity: Identity;
+  values: Record<FactField, unknown>;
+  busy: boolean;
+  onSave: (edits: Record<FactField, unknown>, identity: Identity) => void;
+  onCancel: () => void;
+}) {
+  const [who, setWho] = useState(identity);
   const str = (k: FactField) => (values[k] as string | null) ?? '';
   const [single, setSingle] = useState({ concentration: str('concentration'), family: str('family'), subfamily: str('subfamily'), longevity: str('longevity'), sillage: str('sillage'), flanker: str('flanker') });
   const [lists, setLists] = useState(Object.fromEntries(LISTS.map((k) => [k, ((values[k] as string[]) ?? []).join(', ')])) as Record<(typeof LISTS)[number], string>);
@@ -25,12 +40,13 @@ export function FactsEditForm({ values, busy, onSave, onCancel }: { values: Reco
   function submit(e: FormEvent) {
     e.preventDefault();
     const y = Number(year);
+    if (!who.house.trim() || !who.name.trim()) return;
     onSave({
       ...Object.fromEntries(Object.entries(single).map(([k, v]) => [k, v.trim() || null])),
       ...Object.fromEntries(LISTS.map((k) => [k, split(lists[k])])),
       ...chips,
       release_year: year.trim() && Number.isInteger(y) && y > 1700 && y < 2100 ? y : null,
-    } as Record<FactField, unknown>);
+    } as Record<FactField, unknown>, { house: who.house.trim(), name: who.name.trim() });
   }
 
   const select = 'min-h-11 rounded-[3px] border border-line bg-card px-3 text-[16px] text-ink focus:border-oxblood focus:outline-none';
@@ -54,6 +70,8 @@ export function FactsEditForm({ values, busy, onSave, onCancel }: { values: Reco
     <form onSubmit={submit} className="label-card mt-4 flex flex-col gap-3 p-4">
       <h2 className="font-display text-xl italic">Edit details</h2>
       <p className="text-sm text-muted">Your changes apply to your collection only.</p>
+      <Field label="House" value={who.house} required maxLength={80} onChange={(e) => setWho((w) => ({ ...w, house: e.target.value }))} />
+      <Field label="Name" value={who.name} required maxLength={80} onChange={(e) => setWho((w) => ({ ...w, name: e.target.value }))} />
       <Select k="concentration" title="Concentration" options={Object.keys(CONCENTRATION_LABEL)} labels={CONCENTRATION_LABEL} />
       <Field label="Flanker or edition" value={single.flanker} onChange={(e) => setSingle((s) => ({ ...s, flanker: e.target.value }))} />
       <Select k="family" title="Family" options={FAMILIES} />
