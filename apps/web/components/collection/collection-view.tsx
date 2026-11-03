@@ -12,7 +12,12 @@ import { ViewSwitch, type View } from './view-switch';
 export function CollectionView({ rows, sets, initialFilters = {} }: { rows: CollectionRow[]; sets: SetRow[]; initialFilters?: Filters }) {
   const [view, setView] = useState<View>('owned');
   const [q, setQ] = useState('');
-  const [filters, setFilters] = useState<Filters>(initialFilters);
+  const [filters, setFiltersState] = useState<Filters>(initialFilters);
+  // Filters seeded from the URL (?worn=neglected) stop being sticky once changed here.
+  const setFilters = (f: Filters) => {
+    setFiltersState(f);
+    if (window.location.search) window.history.replaceState(null, '', '/collection');
+  };
   const [sheet, setSheet] = useState(false);
 
   const status = view === 'wishlist' ? 'wishlist' : 'owned';

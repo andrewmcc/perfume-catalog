@@ -27,10 +27,17 @@ export function DayEntries({ date, wears, collectionId }: { date: string; wears:
           {wears.map((w) => (
             <li key={w.id} className="label-card p-4">
               <div className="flex items-start justify-between gap-3">
-                <Link href={`/collection/${w.perfumeId}`} className="min-w-0">
-                  <p className="truncate text-[12px] tracking-[0.14em] text-muted uppercase">{w.house}</p>
-                  <p className="font-display text-[18px] leading-snug text-ink">{w.name}</p>
-                </Link>
+                {w.onShelf ? (
+                  <Link href={`/collection/${w.perfumeId}`} className="min-w-0">
+                    <p className="truncate text-[12px] tracking-[0.14em] text-muted uppercase">{w.house}</p>
+                    <p className="font-display text-[18px] leading-snug text-ink">{w.name}</p>
+                  </Link>
+                ) : (
+                  <div className="min-w-0">
+                    <p className="truncate text-[12px] tracking-[0.14em] text-muted uppercase">{w.house}</p>
+                    <p className="font-display text-[18px] leading-snug text-ink">{w.name}</p>
+                  </div>
+                )}
                 {editing !== w.id && (
                   <button onClick={() => setEditing(w.id)} className="min-h-11 shrink-0 px-1 text-sm text-oxblood underline underline-offset-4">
                     Edit

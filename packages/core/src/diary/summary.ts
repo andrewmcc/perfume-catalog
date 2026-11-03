@@ -17,6 +17,9 @@ export function wearSummary(wears: WearLite[]): Map<string, WearStats> {
     acc.set(w.perfumeId, a);
   }
   return new Map(
-    [...acc].map(([id, a]) => [id, { count: a.count, avgRating: a.rated ? Math.round((a.sum / a.rated) * 10) / 10 : null, ratedCount: a.rated, lastWorn: a.last }]),
+    [...acc].map(([id, a]) => [id, { count: a.count, avgRating: a.rated ? a.sum / a.rated : null, ratedCount: a.rated, lastWorn: a.last }]),
   );
 }
+
+/** An average rating for display: one decimal, rounded down (3.95 → "3.9", so it never shows a star it hasn't earned); "4", not "4.0". */
+export const formatAvg = (n: number): string => (Math.floor(n * 10 + 1e-9) / 10).toFixed(1).replace(/\.0$/, '');

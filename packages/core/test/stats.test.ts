@@ -52,6 +52,15 @@ describe('collectionStats', () => {
 
 describe('formatGbp', () => {
   it('rounds to pounds, then thousands from £1,000', () => {
-    expect([0, 839.6, 999, 1000, 3249, 12500].map(formatGbp)).toEqual(['£0', '£840', '£999', '£1.0k', '£3.2k', '£12.5k']);
+    expect([0, 839.6, 999, 1000, 3249, 12500].map(formatGbp)).toEqual(['£0', '£840', '£999', '£1k', '£3.2k', '£12.5k']);
+  });
+});
+
+describe('formatGbp thousands', () => {
+  it('drops a trailing .0', () => {
+    expect(formatGbp(1000)).toBe('£1k');
+    expect(formatGbp(1050)).toBe('£1.1k');
+    expect(formatGbp(3200)).toBe('£3.2k');
+    expect(formatGbp(999)).toBe('£999');
   });
 });

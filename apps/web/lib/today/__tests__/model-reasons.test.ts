@@ -43,3 +43,13 @@ describe('Today params and candidates', () => {
     expect(out.map((c) => [c.perfumeId, c.itemId, c.sample])).toEqual([['bottle', 'f', false], ['vial', 'v', true]]);
   });
 });
+
+describe('reasons cache key', () => {
+  it('keeps only what the prompt reads', async () => {
+    const { reasonsKey } = await import('../model-reasons');
+    const [a] = pickToday([cand('a')], ctx);
+    const b = { ...a!, score: a!.score + 1, candidate: { ...a!.candidate, itemId: 'other', sizeMl: 100, setName: 'Set', times: ['day'] } };
+    expect(reasonsKey([b])).toEqual(reasonsKey([a!]));
+    expect(reasonsKey([{ ...a!, candidate: { ...a!.candidate, name: 'Renamed' } }])).not.toEqual(reasonsKey([a!]));
+  });
+});

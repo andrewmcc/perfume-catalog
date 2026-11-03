@@ -9,7 +9,7 @@ describe('resolveLocation', () => {
     expect(await resolveLocation({ postcode: 'sw1a 1aa' }, found)).toEqual({ ok: true, lat: 51.5, lon: -0.14, place: 'SW1A' });
   });
   it('coordinates from the browser are rounded; place says so', async () => {
-    expect(await resolveLocation({ lat: 53.48095, lon: -2.23743 }, found)).toEqual({ ok: true, lat: 53.48, lon: -2.24, place: 'Your location' });
+    expect(await resolveLocation({ lat: 53.48095, lon: -2.23743 }, found)).toEqual({ ok: true, lat: 53.48, lon: -2.24, place: 'your location' });
   });
   it('bad input gives user-facing errors with a status', async () => {
     expect(await resolveLocation({ postcode: '12345' }, found)).toEqual({ ok: false, status: 400, error: "That doesn't look like a UK postcode." });

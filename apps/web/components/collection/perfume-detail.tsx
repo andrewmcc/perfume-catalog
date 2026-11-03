@@ -3,7 +3,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@perfume/supabase';
-import type { FactField, Source } from '@perfume/core';
+import { formatAvg, type FactField, type Source } from '@perfume/core';
 import { ScentPyramid } from '@/components/brand/pyramid';
 import { CONCENTRATION_LABEL } from '@/components/review/edits';
 import { overridePatch } from '@/lib/collection/overrides';
@@ -117,7 +117,7 @@ export function PerfumeDetail({ detail, pairs }: { detail: Detail; pairs?: React
         <p className="text-[15px] text-ink">
           {detail.wear.count === 0
             ? 'Not worn yet'
-            : [`Worn ${detail.wear.count}×`, detail.wear.avgRating != null && `avg ★${detail.wear.avgRating}`, detail.wear.lastWorn && `last worn ${dayAndMonth(detail.wear.lastWorn)}`].filter(Boolean).join(' · ')}
+            : [`Worn ${detail.wear.count}×`, detail.wear.avgRating != null && `avg ★${formatAvg(detail.wear.avgRating)}`, detail.wear.lastWorn && `last worn ${dayAndMonth(detail.wear.lastWorn)}`].filter(Boolean).join(' · ')}
         </p>
         {detail.wearItemId && <WearToday collectionId={detail.collectionId} itemId={detail.wearItemId} className="mt-3" />}
       </section>
@@ -162,7 +162,7 @@ export function PerfumeDetail({ detail, pairs }: { detail: Detail; pairs?: React
       {detail.notes.length > 0 && (
         <section aria-label="Your notes" className="mt-6">
           <h2 className="font-display text-xl italic">
-            Your notes{detail.wear.avgRating != null && <span className="ml-2 font-sans text-sm text-muted not-italic">avg ★{detail.wear.avgRating}</span>}
+            Your notes{detail.wear.avgRating != null && <span className="ml-2 font-sans text-sm text-muted not-italic">avg ★{formatAvg(detail.wear.avgRating)}</span>}
           </h2>
           <ul className="label-card mt-3 px-4">
             {detail.notes.map((n) => (
