@@ -218,6 +218,11 @@ export function CaptureView({ collectionId, userId }: { collectionId: string; us
     if (result.fire) void onCapture();
   };
 
+  // A reopened camera starts with the torch off.
+  useEffect(() => {
+    if (status !== 'live') setTorchOn(false);
+  }, [status]);
+
   useEffect(() => {
     if (status !== 'live') return;
     const id = setInterval(() => tickRef.current(), TICK_MS);
