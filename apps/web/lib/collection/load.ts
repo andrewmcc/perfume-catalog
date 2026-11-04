@@ -2,20 +2,10 @@ import 'server-only';
 import { NO_WEARS, effectivePerfume, pyramidWeight, wearSummary, type CollectionRow, type PerfumeFacts } from '@perfume/core';
 import type { createServerClient } from '@perfume/supabase';
 import { latestOverrides } from './overrides';
+import { signDisplay } from '@/lib/photos/variants';
 
 type Client = ReturnType<typeof createServerClient>;
 export type SetRow = { id: string; house: string | null; name: string | null; count: number; thumb: string | null };
-
-export const PHOTO_TTL_S = 3600;
-
-/** Signed URLs for many storage paths at once (nulls skipped). */
-export async function signPaths(supabase: Client, paths: (string | null | undefined)[]): Promise<Map<string, string>> {
-  const unique = [...new Set(paths.filter((p): p is string => !!p))];
-  if (!unique.length) return new Map();
-  const { data, error } = await supabase.storage.from('photos').createSignedUrls(unique, PHOTO_TTL_S);
-  if (error) throw error;
-  return new Map(data.flatMap((d) => (d.signedUrl && d.path ? [[d.path, d.signedUrl] as const] : [])));
-}
 
 type Photo = { storage_path: string; thumb_path: string | null; position: number };
 /** The list image for an item: its first photo's thumbnail, else the photo itself. */
@@ -41,7 +31,8 @@ export async function loadCollection(supabase: Client, { thumbs = true }: { thum
   if (wErr) throw wErr;
   const worn = wearSummary(wears.map((w) => ({ id: w.id, perfumeId: w.perfume_id, wornOn: w.worn_on, rating: w.rating })));
 
-  const url = thumbs ? await signPaths(supabase, items.map((i) => listPath(i.item_photos))) : new Map<string, string>();
+  // A photo with no recorded thumbnail still gets its thumb-n if one is stored beside it; the full photo only as a last resort.
+  const url = thumbs ? await signDisplay(supabase, items.map((i) => listPath(i.item_photos)), 'thumb') : new Map<string, string>();
 
   const byPerfume = new Map<string, typeof items>();
   for (const i of items) byPerfume.set(i.perfume_id, [...(byPerfume.get(i.perfume_id) ?? []), i]);

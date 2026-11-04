@@ -1,7 +1,8 @@
 import 'server-only';
 import { NO_WEARS, effectivePerfume, pyramidWeight, wearSummary, type FactField, type PerfumeFacts, type Source, type Weight, type WearStats } from '@perfume/core';
 import type { createServerClient } from '@perfume/supabase';
-import { latestOverrides, signPaths } from './load';
+import { latestOverrides } from './load';
+import { signDisplay } from '@/lib/photos/variants';
 import { notesOf, wearItemFor, type WearNote } from './wear-helpers';
 
 type Client = ReturnType<typeof createServerClient>;
@@ -55,7 +56,8 @@ export async function loadPerfume(supabase: Client, perfumeId: string): Promise<
   if (wErr) throw wErr;
 
   const firstPhoto = (i: (typeof items)[number]) => [...i.item_photos].sort((a, b) => a.position - b.position)[0]?.storage_path ?? null;
-  const url = await signPaths(supabase, items.map(firstPhoto));
+  // ~1024 px previews: the hero is full width, the item tiles small; neither needs the original.
+  const url = await signDisplay(supabase, items.map(firstPhoto), 'preview');
   const facts = { ...p, sources: (p.sources ?? {}) as Record<string, string> } as PerfumeFacts;
   const { values, source } = effectivePerfume(facts, latestOverrides(items));
   const owned = items.find((i) => i.status === 'owned') ?? items[0]!;
