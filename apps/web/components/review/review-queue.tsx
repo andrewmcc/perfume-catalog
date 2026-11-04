@@ -178,8 +178,18 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
           <ul className="flex flex-col gap-3">
             {couldntRead.map((s) => (
               <li key={s.id} className="label-card flex gap-3 p-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                {s.photos[0] ? <img src={s.photos[0].src} alt="" loading="lazy" decoding="async" className="h-16 w-16 shrink-0 rounded-[3px] object-cover" /> : <NoPhoto className="h-16 w-16" />}
+                {s.photos.length > 0 ? (
+                  <div className="flex shrink-0 flex-col gap-1.5">
+                    {s.photos.map(({ src, full }, i) => (
+                      <button key={full} onClick={() => setViewing(full)} aria-label={`View photo ${i + 1}`} className="press">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={src} alt="" loading="lazy" decoding="async" className="h-16 w-16 rounded-[3px] object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <NoPhoto className="h-16 w-16" />
+                )}
                 <div className="min-w-0 flex-1">
                   <p className="text-[12px] tracking-[0.14em] text-muted uppercase">{s.mode}</p>
                   <p className="text-sm break-words text-danger">{s.error ?? 'Nothing could be read from this photo.'}</p>
