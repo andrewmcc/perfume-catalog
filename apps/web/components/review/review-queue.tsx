@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@perfume/supabase';
-import { approveInput, runBatch, type ReadEdits } from '@perfume/core';
+import { approveInput, runBatch, setHouseEdits, type ReadEdits } from '@perfume/core';
 import { Button } from '@/components/ui/button';
 import type { QueueResult, QueueScan } from '@/lib/scans/queue';
 import { BottleCard } from './bottle-card';
@@ -42,13 +42,15 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
   const confident = toReview.flatMap((g) => g.results.filter((r) => r.flags.length === 0 && !unticked.has(r.id)).map((r) => ({ scan: g.scan, result: r })));
   const total = toReview.reduce((n, g) => n + g.results.length, 0) + couldntRead.length;
 
-  const readOf = (r: QueueResult) => applyEdits(r.read, edits[r.id]);
   const setFieldsOf = (s: QueueScan): SetFields => setEditsByScan[s.id] ?? { set_house: s.set?.house ?? '', set_name: s.set?.name ?? '' };
+  // A set's vials with no house of their own take the set's house (as shown in its House field).
+  const editsOf = (s: QueueScan, r: QueueResult): ReadEdits => (s.mode === 'set' ? setHouseEdits(r.read, edits[r.id] ?? {}, setFieldsOf(s).set_house) : (edits[r.id] ?? {}));
+  const readOf = (s: QueueScan, r: QueueResult) => applyEdits(r.read, editsOf(s, r));
   const markGone = (ids: string[]) => setGone((g) => new Set([...g, ...ids]));
 
   async function approve(scan: QueueScan, r: QueueResult) {
     const setFields = scan.mode === 'set' ? setFieldsOf(scan) : {};
-    await post(`/api/scan-results/${r.id}/approve`, { input: approveInput(r.read, { ...edits[r.id], ...setFields }) });
+    await post(`/api/scan-results/${r.id}/approve`, { input: approveInput(r.read, { ...editsOf(scan, r), ...setFields }) });
     markGone([r.id]);
   }
   async function discard(r: QueueResult) {
@@ -132,7 +134,7 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
                 key={r.id}
                 photo={scan.photos[0]}
                 result={r}
-                read={readOf(r)}
+                read={readOf(scan, r)}
                 busy={busy}
                 onView={setViewing}
                 onPickName={(name) => setEdits((e) => ({ ...e, [r.id]: { ...e[r.id], name } }))}
@@ -148,7 +150,7 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
               key={scan.id}
               scan={scan}
               results={results}
-              readOf={readOf}
+              readOf={(r) => readOf(scan, r)}
               ticked={(id) => !unticked.has(id)}
               setFields={scan.mode === 'set' ? setFieldsOf(scan) : null}
               busy={busy}
@@ -177,7 +179,7 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
             {couldntRead.map((s) => (
               <li key={s.id} className="label-card flex gap-3 p-3">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                {s.photos[0] ? <img src={s.photos[0]} alt="" className="h-16 w-16 shrink-0 rounded-[3px] object-cover" /> : <NoPhoto className="h-16 w-16" />}
+                {s.photos[0] ? <img src={s.photos[0].src} alt="" loading="lazy" decoding="async" className="h-16 w-16 shrink-0 rounded-[3px] object-cover" /> : <NoPhoto className="h-16 w-16" />}
                 <div className="min-w-0 flex-1">
                   <p className="text-[12px] tracking-[0.14em] text-muted uppercase">{s.mode}</p>
                   <p className="text-sm break-words text-danger">{s.error ?? 'Nothing could be read from this photo.'}</p>
@@ -198,7 +200,7 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
 
       {editing && (
         <ReadEditor
-          read={readOf(editing.result)}
+          read={readOf(editing.scan, editing.result)}
           edits={edits[editing.result.id] ?? {}}
           bottle={editing.scan.bottle}
           onCancel={() => setEditing(null)}
