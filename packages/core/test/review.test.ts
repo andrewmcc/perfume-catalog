@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { approveInput, reviewFlags, runBatch, type PerfumeRead } from '../src/index.js';
+import { approveInput, reviewFlags, runBatch, setHouseEdits, type PerfumeRead } from '../src/index.js';
 
 const read = (over: Partial<PerfumeRead> = {}): PerfumeRead => ({
   house: 'Xerjoff',
@@ -74,5 +74,24 @@ describe('runBatch', () => {
       { item: 2, error: 'bad 2' },
       { item: 4, error: 'bad 4' },
     ]);
+  });
+});
+
+describe('setHouseEdits', () => {
+  const vial = (house: string | null) =>
+    ({ house, name: 'Myth', concentration: 'edp', flanker_or_edition: null, size_ml: 2, status: { house: house ? 'clear' : 'absent', name: 'clear', concentration: 'clear' }, alternatives: [], identified_from: 'label' }) as PerfumeRead;
+
+  it('a vial with no house of its own takes the set’s house', () => {
+    expect(setHouseEdits(vial(null), {}, 'Björk & Berries')).toEqual({ house: 'Björk & Berries' });
+  });
+  it('leaves a vial that has its own house, or a house the reviewer typed', () => {
+    expect(setHouseEdits(vial('Penhaligon’s'), {}, 'Other')).toEqual({});
+    expect(setHouseEdits(vial(null), { house: 'Typed' }, 'Set')).toEqual({ house: 'Typed' });
+  });
+  it('does nothing without a set house', () => {
+    expect(setHouseEdits(vial(null), {}, '  ')).toEqual({});
+  });
+  it('approves: the filled house reaches the approve input', () => {
+    expect(approveInput(vial(null), setHouseEdits(vial(null), {}, 'Set House')).house).toBe('Set House');
   });
 });

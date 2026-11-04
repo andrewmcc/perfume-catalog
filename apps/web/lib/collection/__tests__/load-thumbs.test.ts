@@ -32,3 +32,24 @@ describe('loadCollection thumbs option', () => {
     expect(createSignedUrls).not.toHaveBeenCalled();
   });
 });
+
+describe('loadCollection without a recorded thumbnail', () => {
+  it('uses the stored thumb-n beside the photo instead of the full-size photo', async () => {
+    const noThumb = { ...item, item_photos: [{ storage_path: 'c/s/photo-1.jpg', thumb_path: null, position: 0 }] };
+    const createSignedUrls = vi.fn(async (paths: string[]) => ({
+      data: paths.map((p) => (p === 'c/s/thumb-1.jpg' ? { path: p, signedUrl: 'https://thumb', error: null } : { path: p, signedUrl: null, error: 'Object not found' })),
+      error: null,
+    }));
+    const q = (data: unknown) => {
+      const r: Record<string, unknown> = {};
+      r.select = () => r;
+      r.order = () => r;
+      r.then = (res: (v: unknown) => void) => res({ data, error: null });
+      return r;
+    };
+    const tables: Record<string, unknown> = { items: [noThumb], sets: [], wears: [] };
+    const client = { from: (t: string) => q(tables[t]), storage: { from: () => ({ createSignedUrls }) } };
+    const { rows } = await loadCollection(client as never);
+    expect(rows[0]!.thumb).toBe('https://thumb');
+  });
+});

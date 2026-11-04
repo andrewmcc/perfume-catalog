@@ -39,10 +39,10 @@ export function GroupCard({
   return (
     <article className="label-card p-4">
       <p className="text-[12px] tracking-[0.14em] text-muted uppercase">{scan.mode === 'set' ? 'Discovery set' : 'Samples'}</p>
-      {scan.photos.map((src, i) => (
-        <button key={src} onClick={() => onView(src)} aria-label={`View photo ${i + 1}`} className="mt-2 block w-full">
+      {scan.photos.map(({ src, full }, i) => (
+        <button key={full} onClick={() => onView(full)} aria-label={`View photo ${i + 1}`} className="mt-2 block w-full">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt="" className="max-h-72 w-full rounded-[3px] object-contain bg-line-soft" />
+          <img src={src} alt="" loading="lazy" decoding="async" className="max-h-72 w-full rounded-[3px] object-contain bg-line-soft" />
         </button>
       ))}
       {setFields && (

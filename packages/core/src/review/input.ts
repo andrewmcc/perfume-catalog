@@ -41,3 +41,13 @@ export function approveInput(read: PerfumeRead, edits: ReadEdits): Record<string
   }
   return { ...input, edited_fields: edited };
 }
+
+/**
+ * Discovery-set vials often carry only the scent name; the house is on the box. A vial with no
+ * house of its own (and none typed by the reviewer) takes the set's house.
+ */
+export function setHouseEdits(read: PerfumeRead, edits: ReadEdits, setHouse: string | null | undefined): ReadEdits {
+  const house = setHouse?.trim();
+  if (!house || norm(read.house) || edits.house !== undefined) return edits;
+  return { ...edits, house };
+}

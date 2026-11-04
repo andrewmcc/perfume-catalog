@@ -21,7 +21,7 @@ export function BottleCard({
   wishlist,
   onWishlist,
 }: {
-  photo: string | undefined;
+  photo: { src: string; full: string } | undefined;
   result: QueueResult;
   read: PerfumeRead;
   busy: boolean;
@@ -38,9 +38,9 @@ export function BottleCard({
     <article className="label-card p-4">
       <div className="flex gap-3">
         {photo ? (
-          <button onClick={() => onView(photo)} aria-label="View photo" className="shrink-0">
+          <button onClick={() => onView(photo.full)} aria-label="View photo" className="shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={photo} alt="" className="h-24 w-24 rounded-[3px] object-cover" />
+            <img src={photo.src} alt="" loading="lazy" decoding="async" className="h-24 w-24 rounded-[3px] object-cover" />
           </button>
         ) : (
           <NoPhoto className="h-24 w-24" />
