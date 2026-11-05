@@ -3,6 +3,7 @@ import { applyEdits } from '@/components/review/edits';
 import { reviewFlags, setHouseEdits, type Flag, type Mode, type PerfumeRead } from '@perfume/core';
 import type { createServerClient } from '@perfume/supabase';
 import { signDisplay } from '@/lib/photos/variants';
+import { countToReview } from './count';
 
 type Client = ReturnType<typeof createServerClient>;
 
@@ -85,11 +86,13 @@ export async function loadQueue(supabase: Client): Promise<QueueScan[]> {
   return queue.sort((x, y) => Number(flagged(y)) - Number(flagged(x)) || x.created_at.localeCompare(y.created_at));
 }
 
-/** How many things wait in review: pending results plus scans that couldn't be read. */
+/** How many things wait in review, as the Review page counts them. */
 export async function reviewCount(supabase: Client): Promise<number> {
-  const [results, failed] = await Promise.all([
-    supabase.from('scan_results').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('scans').select('id', { count: 'exact', head: true }).eq('status', 'failed'),
-  ]);
-  return (results.count ?? 0) + (failed.count ?? 0);
+  const { data, error } = await supabase.from('scans').select('status, scan_results(status)').in('status', ['extracted', 'failed']);
+  // A banner, not a page: on a query error show nothing rather than break Today.
+  if (error) {
+    console.error('reviewCount', error.message);
+    return 0;
+  }
+  return countToReview(data);
 }
