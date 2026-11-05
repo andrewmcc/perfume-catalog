@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@perfume/supabase';
-import { approveInput, runBatch, setHouseEdits, type ReadEdits } from '@perfume/core';
+import { approveInput, runBatch, setHouseEdits, type PerfumeRead, type ReadEdits } from '@perfume/core';
 import { Button } from '@/components/ui/button';
 import type { QueueResult, QueueScan } from '@/lib/scans/queue';
 import { BottleCard } from './bottle-card';
@@ -15,6 +15,18 @@ import { NoPhoto } from '@/components/ui/no-photo';
 
 type SetFields = { set_house: string; set_name: string };
 type Notice = { text: string; failures: string[] };
+
+/** An empty read for typing a perfume in by hand; a set's vials start with the set's house. */
+const blankRead = (house: string): PerfumeRead => ({
+  house: house.trim() || null,
+  name: null,
+  concentration: null,
+  flanker_or_edition: null,
+  size_ml: null,
+  status: { house: 'absent', name: 'absent', concentration: 'absent' },
+  alternatives: [],
+  identified_from: 'none',
+});
 
 async function post(url: string, body?: unknown): Promise<void> {
   const res = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
@@ -35,6 +47,7 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
   const [notice, setNotice] = useState<Notice | null>(null);
   const [editing, setEditing] = useState<{ scan: QueueScan; result: QueueResult } | null>(null);
   const [viewing, setViewing] = useState<string | null>(null);
+  const [adding, setAdding] = useState<QueueScan | null>(null);
 
   const live = scans.filter((s) => !gone.has(s.id));
   const toReview = live.filter((s) => !s.couldntRead).map((s) => ({ scan: s, results: s.results.filter((r) => !gone.has(r.id)) })).filter((g) => g.results.length > 0);
@@ -77,6 +90,18 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
     act(
       (n) => `Done: ${n} of ${results.length}.`,
       () => runBatch(results, (r) => (unticked.has(r.id) ? discard(r) : approve(scan, r))),
+    );
+  // Typed by hand: works with no AI credits. Bottle format and batch ride along as edits for approval.
+  const addManual = (scan: QueueScan, e: ReadEdits) =>
+    act(
+      () => 'Added. Check it, then approve.',
+      () =>
+        one(async () => {
+          const { house, name, concentration, flanker, size_ml, format, batch_code } = e;
+          const { data, error } = await supabase.rpc('add_manual_result', { p_scan_id: scan.id, p_input: { house, name, concentration, flanker, size_ml } });
+          if (error) throw new Error(error.message);
+          if (scan.mode === 'bottle') setEdits((all) => ({ ...all, [data]: { format, batch_code } }));
+        }),
     );
   const dismiss = (scan: QueueScan) =>
     act(
@@ -167,6 +192,7 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
               onSetField={(k, v) => setSetEdits((e) => ({ ...e, [scan.id]: { ...setFieldsOf(scan), [k]: v } }))}
               onApprove={() => approveGroup(scan, results)}
               onDismiss={() => dismiss(scan)}
+              onAdd={() => setAdding(scan)}
             />
           ),
         )}
@@ -193,7 +219,10 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
                 <div className="min-w-0 flex-1">
                   <p className="text-[12px] tracking-[0.14em] text-muted uppercase">{s.mode}</p>
                   <p className="text-sm break-words text-danger">{s.error ?? 'Nothing could be read from this photo.'}</p>
-                  <div className="mt-1 flex gap-4">
+                  <div className="mt-1 flex flex-wrap gap-x-4">
+                    <button onClick={() => setAdding(s)} disabled={busy} className="min-h-11 text-sm text-oxblood underline underline-offset-4">
+                      {s.mode === 'bottle' ? 'Type it in' : 'Add a scent'}
+                    </button>
                     <button onClick={() => readAgain(s)} disabled={busy} className="min-h-11 text-sm text-oxblood underline underline-offset-4">
                       Read again
                     </button>
@@ -217,6 +246,20 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
           onSave={(e) => {
             setEdits((all) => ({ ...all, [editing.result.id]: e }));
             setEditing(null);
+          }}
+        />
+      )}
+      {adding && (
+        <ReadEditor
+          title={adding.mode === 'bottle' ? 'Type it in' : 'Add a scent'}
+          read={blankRead(adding.mode === 'set' ? setFieldsOf(adding).set_house : '')}
+          edits={{}}
+          bottle={adding.bottle}
+          onCancel={() => setAdding(null)}
+          onSave={(e) => {
+            const scan = adding;
+            setAdding(null);
+            void addManual(scan, e);
           }}
         />
       )}

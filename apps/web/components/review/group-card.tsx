@@ -20,6 +20,7 @@ export function GroupCard({
   onSetField,
   onApprove,
   onDismiss,
+  onAdd,
 }: {
   scan: QueueScan;
   results: QueueResult[];
@@ -33,6 +34,7 @@ export function GroupCard({
   onSetField: (k: 'set_house' | 'set_name', v: string) => void;
   onApprove: () => void;
   onDismiss: () => void;
+  onAdd: () => void;
 }) {
   const n = results.filter((r) => ticked(r.id)).length;
   const input = 'min-h-11 w-full rounded-[3px] border border-line bg-card px-3 text-[16px] text-ink focus:border-oxblood focus:outline-none';
@@ -77,6 +79,9 @@ export function GroupCard({
           </li>
         ))}
       </ul>
+      <button onClick={onAdd} disabled={busy} className="min-h-11 text-sm text-oxblood underline underline-offset-4">
+        Add a scent it missed
+      </button>
       <div className="mt-3 flex gap-2">
         <Button onClick={onApprove} disabled={busy} className="flex-1">
           {n === 0 ? 'Discard all' : `Approve ${n}`}

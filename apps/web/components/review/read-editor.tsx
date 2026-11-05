@@ -14,12 +14,14 @@ export function ReadEditor({
   read,
   edits,
   bottle,
+  title = 'Edit details',
   onSave,
   onCancel,
 }: {
   read: PerfumeRead;
   edits: ReadEdits;
   bottle: { format: string; batch_code: string | null } | null;
+  title?: string;
   onSave: (e: ReadEdits) => void;
   onCancel: () => void;
 }) {
@@ -49,9 +51,9 @@ export function ReadEditor({
 
   const select = 'min-h-11 rounded-[3px] border border-line bg-card px-3 text-[16px] text-ink focus:border-oxblood focus:outline-none';
   return (
-    <Sheet label="Edit details" onClose={onCancel}>
+    <Sheet label={title} onClose={onCancel}>
       <form onSubmit={submit}>
-        <h2 className="font-display text-xl italic">Edit details</h2>
+        <h2 className="font-display text-xl italic">{title}</h2>
         <div className="mt-4 flex flex-col gap-3">
           <Field label="House" value={house} onChange={(e) => setHouse(e.target.value)} hint={!house.trim() ? 'Needed' : undefined} />
           <Field label="Name" value={name} onChange={(e) => setName(e.target.value)} hint={!name.trim() ? 'Needed' : undefined} />

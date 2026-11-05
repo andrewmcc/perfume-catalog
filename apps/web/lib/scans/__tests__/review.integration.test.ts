@@ -310,3 +310,40 @@ describe('claim_scan', () => {
     expect((await scanRow(s.id)).status).toBe('processing');
   });
 });
+
+describe('add_manual_result', () => {
+  const add = (client: Db, scanId: string, input: Read) => client.rpc('add_manual_result', { p_scan_id: scanId, p_input: input as never });
+
+  it('adds a typed set scent to a set scan read with no scents; it approves into the set, kept private', async () => {
+    const s = await extracted(ca, 'set', []);
+    const { data: id, error } = await add(a, s.id, { house: ' ', name: 'Typed Vial', size_ml: 2 });
+    expect(error).toBeNull();
+    const r = await resultRow(id!);
+    expect(r).toMatchObject({ scan_id: s.id, kind: 'set_scent', status: 'pending', position: 0 });
+    expect(r.read).toMatchObject({ house: null, name: 'Typed Vial', size_ml: 2, identified_from: 'none', alternatives: [] });
+    const { data: second } = await add(a, s.id, { house, name: 'Typed Two' });
+    expect((await resultRow(second!)).position).toBe(1);
+
+    const { data: ok, error: aErr } = await approve(a, id!, { house, set_house: house, set_name: 'Typed Set' });
+    expect(aErr).toBeNull();
+    expect((await item(ok![0]!.item_id)).perfumes!.collection_id).toBe(ca);
+  });
+
+  it('a failed scan takes a typed bottle and becomes extracted', async () => {
+    const s = await extracted(ca, 'bottle', []);
+    await admin.from('scans').update({ status: 'failed', error: 'Could not read' }).eq('id', s.id);
+    const { data: id, error } = await add(a, s.id, { house, name: 'Typed Bottle', concentration: 'edt' });
+    expect(error).toBeNull();
+    expect(await resultRow(id!)).toMatchObject({ kind: 'bottle' });
+    expect((await resultRow(id!)).read).toMatchObject({ concentration: 'edt', status: { house: 'clear', name: 'clear', concentration: 'clear' } });
+    expect(await scanRow(s.id)).toMatchObject({ status: 'extracted', error: null });
+  });
+
+  it('refuses a name-less entry, another collection, and a reviewed scan', async () => {
+    const s = await extracted(ca, 'samples', []);
+    expect((await add(a, s.id, { house, name: '  ' })).error?.message).toMatch(/name required/);
+    expect((await add(b, s.id, { name: 'X' })).error?.message).toMatch(/not awaiting review/);
+    await admin.from('scans').update({ status: 'reviewed' }).eq('id', s.id);
+    expect((await add(a, s.id, { name: 'X' })).error?.message).toMatch(/not awaiting review/);
+  });
+});

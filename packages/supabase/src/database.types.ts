@@ -549,6 +549,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_manual_result: {
+        Args: { p_input: Json; p_scan_id: string }
+        Returns: string
+      }
       approve_result: {
         Args: { p_input: Json; p_result_id: string }
         Returns: {
