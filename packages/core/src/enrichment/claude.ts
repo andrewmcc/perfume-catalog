@@ -24,7 +24,11 @@ export async function suggestPerfume(client: Anthropic, p: Identity, opts: { sea
     betas: ['server-side-fallback-2026-07-01'],
     fallbacks: 'default' as const,
     output_config: { format: betaZodOutputFormat(PerfumeSuggestionSchema) },
-    ...(opts.search ? { tools: [{ type: 'web_search_20260209' as const, name: 'web_search' as const, max_uses: ENRICH_MAX_SEARCHES }] } : {}),
+    // A search lookup re-reads its growing search results on every iteration (and again on a pause_turn resume):
+    // caching lets those re-reads come from cache. A plain lookup is one short prompt, so it skips the write.
+    ...(opts.search
+      ? { tools: [{ type: 'web_search_20260209' as const, name: 'web_search' as const, max_uses: ENRICH_MAX_SEARCHES }], cache_control: { type: 'ephemeral' as const } }
+      : {}),
   };
   const prompt = { role: 'user' as const, content: enrichmentPrompt(p, opts) };
   let response = await client.beta.messages.parse({ ...base, messages: [prompt] });
