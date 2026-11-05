@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createBrowserClient } from '@perfume/supabase';
 import { approveInput, runBatch, setHouseEdits, type PerfumeRead, type ReadEdits } from '@perfume/core';
@@ -12,9 +12,20 @@ import { PhotoViewer } from './photo-viewer';
 import { ReadEditor } from './read-editor';
 import { applyEdits } from './edits';
 import { NoPhoto } from '@/components/ui/no-photo';
+import { readingOutcome, type ReadingOutcome } from '@/lib/scans/reading';
+import { couldntRead as whyCouldntRead } from '@/lib/scans/couldnt-read';
 
 type SetFields = { set_house: string; set_name: string };
 type Notice = { text: string; failures: string[] };
+/** A scan sent to Read again: kept on screen (the server list drops it while processing) until it's back. */
+type Reading = { scan: QueueScan; started: number; outcome: ReadingOutcome };
+const POLL_MS = 3000;
+const READING_COPY: Record<ReadingOutcome, string> = {
+  reading: 'Reading again…',
+  done: 'Read again.',
+  failed: 'Still couldn’t read it. Add the details yourself.',
+  slow: 'Still reading. It will show here when it’s done.',
+};
 
 /** An empty read for typing a perfume in by hand; a set's vials start with the set's house. */
 const blankRead = (house: string): PerfumeRead => ({
@@ -48,10 +59,45 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
   const [editing, setEditing] = useState<{ scan: QueueScan; result: QueueResult } | null>(null);
   const [viewing, setViewing] = useState<string | null>(null);
   const [adding, setAdding] = useState<QueueScan | null>(null);
+  const [reading, setReading] = useState<Record<string, Reading>>({});
 
-  const live = scans.filter((s) => !gone.has(s.id));
+  const onServer = new Set(scans.map((s) => s.id));
+  const busyReading = (id: string) => reading[id]?.outcome === 'reading' || reading[id]?.outcome === 'slow';
+  // While reading, our copy stands in for the server's; once settled the server's (fresh) copy wins.
+  const live = scans.filter((s) => !gone.has(s.id) && !busyReading(s.id));
+  const readingRows = Object.values(reading).filter((r) => busyReading(r.scan.id) || !onServer.has(r.scan.id));
   const toReview = live.filter((s) => !s.couldntRead).map((s) => ({ scan: s, results: s.results.filter((r) => !gone.has(r.id)) })).filter((g) => g.results.length > 0);
-  const couldntRead = live.filter((s) => s.couldntRead);
+  const couldntRead = [...live.filter((s) => s.couldntRead), ...readingRows.filter((r) => !live.some((s) => s.id === r.scan.id)).map((r) => r.scan)].sort((x, y) => x.created_at.localeCompare(y.created_at)); // rows hold their place while reading
+  const pollIds = Object.values(reading)
+    .filter((r) => r.outcome === 'reading')
+    .map((r) => r.scan.id)
+    .join(',');
+
+  useEffect(() => {
+    if (!pollIds) return;
+    const ids = pollIds.split(',');
+    const timer = setInterval(async () => {
+      const { data, error } = await supabase.from('scans').select('id, status, updated_at').in('id', ids);
+      if (error) return; // try again next tick
+      const rows = new Map(data.map((r) => [r.id, r]));
+      let settled = false;
+      setReading((all) => {
+        const next = { ...all };
+        for (const id of ids) {
+          const r = next[id];
+          if (!r || r.outcome !== 'reading') continue;
+          const outcome = readingOutcome(rows.get(id) ?? null, r.scan.updated_at, Date.now() - r.started);
+          if (outcome !== 'reading') {
+            next[id] = { ...r, outcome };
+            settled ||= outcome !== 'slow';
+          }
+        }
+        return next;
+      });
+      if (settled) router.refresh();
+    }, POLL_MS);
+    return () => clearInterval(timer);
+  }, [pollIds, supabase, router]);
   const confident = toReview.flatMap((g) => g.results.filter((r) => r.flags.length === 0 && !unticked.has(r.id)).map((r) => ({ scan: g.scan, result: r })));
   const total = toReview.reduce((n, g) => n + g.results.length, 0) + couldntRead.length;
 
@@ -113,15 +159,16 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
           markGone([scan.id]);
         }),
     );
-  const readAgain = (scan: QueueScan) =>
-    act(
-      () => 'Reading again. It will be back here shortly.',
-      () =>
-        one(async () => {
-          await post(`/api/scans/${scan.id}/extract`);
-          markGone([scan.id]);
-        }),
-    );
+  async function readAgain(scan: QueueScan) {
+    setNotice(null);
+    setReading((all) => ({ ...all, [scan.id]: { scan, started: Date.now(), outcome: 'reading' } }));
+    try {
+      await post(`/api/scans/${scan.id}/extract`);
+    } catch (e) {
+      setReading(({ [scan.id]: _, ...rest }) => rest);
+      setNotice({ text: '', failures: [`Couldn’t start reading again: ${(e as Error).message}`] });
+    }
+  }
 
   return (
     <>
@@ -218,18 +265,31 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="text-[12px] tracking-[0.14em] text-muted uppercase">{s.mode}</p>
-                  <p className="text-sm break-words text-danger">{s.error ?? 'Nothing could be read from this photo.'}</p>
+                  {busyReading(s.id) ? (
+                    <p role="status" className="mt-1 flex items-center gap-2 text-sm text-ink">
+                      {reading[s.id]!.outcome === 'reading' && <span aria-hidden className="size-2 animate-pulse rounded-full bg-oxblood" />}
+                      {READING_COPY[reading[s.id]!.outcome]}
+                    </p>
+                  ) : (
+                    <>
+                  <p className="text-sm break-words text-danger">
+                    {reading[s.id]?.outcome === 'failed' ? READING_COPY.failed : whyCouldntRead(s).text}
+                  </p>
                   <div className="mt-1 flex flex-wrap gap-x-4">
                     <button onClick={() => setAdding(s)} disabled={busy} className="min-h-11 text-sm text-oxblood underline underline-offset-4">
                       {s.mode === 'bottle' ? 'Type it in' : 'Add a scent'}
                     </button>
-                    <button onClick={() => readAgain(s)} disabled={busy} className="min-h-11 text-sm text-oxblood underline underline-offset-4">
-                      Read again
-                    </button>
+                    {whyCouldntRead(s).readAgain && (
+                      <button onClick={() => readAgain(s)} disabled={busy} className="min-h-11 text-sm text-oxblood underline underline-offset-4">
+                        Read again
+                      </button>
+                    )}
                     <button onClick={() => dismiss(s)} disabled={busy} className="min-h-11 text-sm text-muted underline underline-offset-4">
                       Dismiss
                     </button>
                   </div>
+                    </>
+                  )}
                 </div>
               </li>
             ))}

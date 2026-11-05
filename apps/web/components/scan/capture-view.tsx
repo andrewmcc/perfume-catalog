@@ -25,12 +25,12 @@ const IDLE_MS = 20_000;
 // Bottle and Set take one photo, then offer an optional second; Samples is one full-frame shot.
 const SECOND_PHOTO: Partial<Record<Mode, { add: string; done: string; hint: string }>> = {
   bottle: { add: '+ back / box', done: 'Next bottle', hint: 'Tap the shutter for the back or box' },
-  set: { add: '+ insert card', done: 'Done', hint: 'Tap the shutter for the insert card' },
+  set: { add: '+ scents inside', done: 'Done', hint: 'Now open the box and photograph the vials or scent card' },
 };
 const HINTS: Record<Mode, string> = {
   bottle: 'Hold the bottle in the square. It captures when steady.',
   samples: 'Lay the vials out, labels up, and tap the shutter.',
-  set: 'Photograph the box, then add the insert card if there is one.',
+  set: 'Photograph the box, then open it and photograph the vials or scent card.',
 };
 
 /** `sig` is the detection view at the first photo, learned as background if the server says "not a perfume". */

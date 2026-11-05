@@ -21,6 +21,8 @@ export type QueueScan = {
   bottle: { format: string; batch_code: string | null } | null;
   results: QueueResult[];
   created_at: string;
+  /** Row version at load; Read again waits for it to change. */
+  updated_at: string;
 };
 
 const PHOTO_TTL_S = 3600;
@@ -29,7 +31,7 @@ const PHOTO_TTL_S = 3600;
 export async function loadQueue(supabase: Client): Promise<QueueScan[]> {
   const { data: scans, error } = await supabase
     .from('scans')
-    .select('id, mode, status, error, photo_paths, extraction, created_at, scan_results(id, kind, read, status, position)')
+    .select('id, mode, status, error, photo_paths, extraction, created_at, updated_at, scan_results(id, kind, read, status, position)')
     .in('status', ['extracted', 'failed'])
     .order('created_at', { ascending: true });
   if (error) throw error;
@@ -80,6 +82,7 @@ export async function loadQueue(supabase: Client): Promise<QueueScan[]> {
       bottle: s.mode === 'bottle' ? { format: ext.format ?? 'full', batch_code: ext.batch_code ?? null } : null,
       results,
       created_at: s.created_at,
+      updated_at: s.updated_at,
     };
   });
   const flagged = (s: QueueScan) => s.results.some((r) => r.flags.length > 0);
