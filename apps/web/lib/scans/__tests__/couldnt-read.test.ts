@@ -16,4 +16,10 @@ describe('couldntRead', () => {
   it('an extracted photo with nothing in it: same photo, same answer, so no re-read', () => {
     expect(couldntRead({ mode: 'samples', status: 'extracted', error: null, set: null })).toEqual({ text: 'Nothing could be read from this photo.', readAgain: false });
   });
+  it('a set nothing named (logo only, unlabelled vials): ask for the house', () => {
+    expect(couldntRead({ mode: 'set', status: 'extracted', error: null, set: { house: null, name: null } })).toEqual({
+      text: 'Couldn’t tell which set this is. Type its house, then suggest the usual scents or add them.',
+      readAgain: false,
+    });
+  });
 });
