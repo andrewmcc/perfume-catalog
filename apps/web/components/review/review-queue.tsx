@@ -59,6 +59,7 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
   const [editing, setEditing] = useState<{ scan: QueueScan; result: QueueResult } | null>(null);
   const [viewing, setViewing] = useState<string | null>(null);
   const [adding, setAdding] = useState<QueueScan | null>(null);
+  const [suggesting, setSuggesting] = useState<string | null>(null);
   const [reading, setReading] = useState<Record<string, Reading>>({});
 
   const onServer = new Set(scans.map((s) => s.id));
@@ -118,12 +119,12 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
     markGone([r.id]);
   }
 
-  async function act(label: (okCount: number) => string, run: () => Promise<{ ok: unknown[]; failed: { error: string }[] }>) {
+  async function act(label: (okCount: number) => string, run: () => Promise<{ ok: unknown[]; failed: { error: string }[] }>, failPrefix = 'Not approved: ') {
     setBusy(true);
     setNotice(null);
     try {
       const out = await run();
-      setNotice({ text: label(out.ok.length), failures: out.failed.map((f) => f.error) });
+      setNotice({ text: label(out.ok.length), failures: out.failed.map((f) => failPrefix + f.error) });
     } finally {
       setBusy(false);
       router.refresh();
@@ -148,6 +149,23 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
           if (error) throw new Error(error.message);
           if (scan.mode === 'bottle') setEdits((all) => ({ ...all, [data]: { format, batch_code } }));
         }),
+      'Not added: ',
+    );
+  const suggestScents = (scan: QueueScan) =>
+    act(
+      (n) => (n ? 'Here are the scents this set usually holds. Untick any not in your box.' : 'Couldn’t tell what this set holds. Add the scents yourself.'),
+      async () => {
+        setSuggesting(scan.id);
+        try {
+          const res = await fetch(`/api/scans/${scan.id}/suggest-scents`, { method: 'POST' });
+          const j = (await res.json().catch(() => ({}))) as { added?: number; error?: string };
+          if (!res.ok) return { ok: [], failed: [{ error: j.error ?? `Request failed (${res.status})` }] };
+          return { ok: j.added ? [j.added] : [], failed: [] };
+        } finally {
+          setSuggesting(null);
+        }
+      },
+      '',
     );
   const dismiss = (scan: QueueScan) =>
     act(
@@ -158,6 +176,7 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
           if (error) throw new Error(error.message);
           markGone([scan.id]);
         }),
+      'Not dismissed: ',
     );
   async function readAgain(scan: QueueScan) {
     setNotice(null);
@@ -189,7 +208,7 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
           {notice.failures.length > 0 && (
             <ul className="mt-1 text-danger">
               {notice.failures.map((f, i) => (
-                <li key={i}>Not approved: {f}</li>
+                <li key={i}>{f}</li>
               ))}
             </ul>
           )}
@@ -276,6 +295,11 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
                     {reading[s.id]?.outcome === 'failed' ? READING_COPY.failed : whyCouldntRead(s).text}
                   </p>
                   <div className="mt-1 flex flex-wrap gap-x-4">
+                    {s.mode === 'set' && s.status === 'extracted' && s.set?.house && (
+                      <button onClick={() => suggestScents(s)} disabled={busy} className="min-h-11 text-sm text-oxblood underline underline-offset-4">
+                        {suggesting === s.id ? 'Looking it up…' : 'Suggest the usual scents'}
+                      </button>
+                    )}
                     <button onClick={() => setAdding(s)} disabled={busy} className="min-h-11 text-sm text-oxblood underline underline-offset-4">
                       {s.mode === 'bottle' ? 'Type it in' : 'Add a scent'}
                     </button>
