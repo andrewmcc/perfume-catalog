@@ -7,7 +7,7 @@ import { approveInput, runBatch, setHouseEdits, type PerfumeRead, type ReadEdits
 import { Button } from '@/components/ui/button';
 import type { QueueResult, QueueScan } from '@/lib/scans/queue';
 import { BottleCard } from './bottle-card';
-import { GroupCard } from './group-card';
+import { GroupCard, SetFieldsInputs } from './group-card';
 import { PhotoViewer } from './photo-viewer';
 import { ReadEditor } from './read-editor';
 import { applyEdits } from './edits';
@@ -157,7 +157,11 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
       async () => {
         setSuggesting(scan.id);
         try {
-          const res = await fetch(`/api/scans/${scan.id}/suggest-scents`, { method: 'POST' });
+          const res = await fetch(`/api/scans/${scan.id}/suggest-scents`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(setFieldsOf(scan)),
+          });
           const j = (await res.json().catch(() => ({}))) as { added?: number; error?: string };
           if (!res.ok) return { ok: [], failed: [{ error: j.error ?? `Request failed (${res.status})` }] };
           return { ok: j.added ? [j.added] : [], failed: [] };
@@ -294,8 +298,15 @@ export function ReviewQueue({ scans }: { scans: QueueScan[] }) {
                   <p className="text-sm break-words text-danger">
                     {reading[s.id]?.outcome === 'failed' ? READING_COPY.failed : whyCouldntRead(s).text}
                   </p>
+                  {s.mode === 'set' && (
+                    <SetFieldsInputs
+                      fields={setFieldsOf(s)}
+                      onChange={(k, v) => setSetEdits((e) => ({ ...e, [s.id]: { ...setFieldsOf(s), [k]: v } }))}
+                      className="mt-2"
+                    />
+                  )}
                   <div className="mt-1 flex flex-wrap gap-x-4">
-                    {s.mode === 'set' && s.status === 'extracted' && s.set?.house && (
+                    {s.mode === 'set' && s.status === 'extracted' && setFieldsOf(s).set_house.trim() && (
                       <button onClick={() => suggestScents(s)} disabled={busy} className="min-h-11 text-sm text-oxblood underline underline-offset-4">
                         {suggesting === s.id ? 'Looking it up…' : 'Suggest the usual scents'}
                       </button>

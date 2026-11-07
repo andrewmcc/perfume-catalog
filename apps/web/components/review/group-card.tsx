@@ -6,6 +6,31 @@ import type { QueueResult, QueueScan } from '@/lib/scans/queue';
 import { FlagChips } from './flag-chips';
 import { PerfumeLines } from './perfume-lines';
 
+/** The set's house and name, editable: the box read can be wrong (e.g. a sister brand). */
+export function SetFieldsInputs({
+  fields,
+  onChange,
+  className = '',
+}: {
+  fields: { set_house: string; set_name: string };
+  onChange: (k: 'set_house' | 'set_name', v: string) => void;
+  className?: string;
+}) {
+  const input = 'min-h-11 w-full rounded-[3px] border border-line bg-card px-3 text-[16px] text-ink focus:border-oxblood focus:outline-none';
+  return (
+    <div className={`grid grid-cols-2 gap-2 ${className}`}>
+      <label className="flex flex-col gap-1 text-sm text-muted">
+        Set house
+        <input className={input} value={fields.set_house} onChange={(e) => onChange('set_house', e.target.value)} />
+      </label>
+      <label className="flex flex-col gap-1 text-sm text-muted">
+        Set name
+        <input className={input} value={fields.set_name} onChange={(e) => onChange('set_name', e.target.value)} />
+      </label>
+    </div>
+  );
+}
+
 /** A samples or set photo: the whole photo, then one tickable row per read. */
 export function GroupCard({
   scan,
@@ -37,7 +62,6 @@ export function GroupCard({
   onAdd: () => void;
 }) {
   const n = results.filter((r) => ticked(r.id)).length;
-  const input = 'min-h-11 w-full rounded-[3px] border border-line bg-card px-3 text-[16px] text-ink focus:border-oxblood focus:outline-none';
   return (
     <article className="label-card p-4">
       <p className="text-[12px] tracking-[0.14em] text-muted uppercase">{scan.mode === 'set' ? 'Discovery set' : 'Samples'}</p>
@@ -47,18 +71,7 @@ export function GroupCard({
           <img src={src} alt="" loading="lazy" decoding="async" className="max-h-72 w-full rounded-[3px] object-contain bg-line-soft" />
         </button>
       ))}
-      {setFields && (
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <label className="flex flex-col gap-1 text-sm text-muted">
-            Set house
-            <input className={input} value={setFields.set_house} onChange={(e) => onSetField('set_house', e.target.value)} />
-          </label>
-          <label className="flex flex-col gap-1 text-sm text-muted">
-            Set name
-            <input className={input} value={setFields.set_name} onChange={(e) => onSetField('set_name', e.target.value)} />
-          </label>
-        </div>
-      )}
+      {setFields && <SetFieldsInputs fields={setFields} onChange={onSetField} className="mt-3" />}
       <ul className="mt-3">
         {results.map((r) => (
           <li key={r.id} className="flex items-start gap-3 border-b border-line-soft py-2.5 last:border-0">
