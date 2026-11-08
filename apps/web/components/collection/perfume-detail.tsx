@@ -18,7 +18,7 @@ import { LookupNotes } from './lookup-notes';
 import Link from 'next/link';
 import { StarRating } from '@/components/wears/star-rating';
 import { WearToday } from '@/components/wears/wear-today';
-import { dayAndMonth, shortDay } from '@/lib/dates';
+import { dayAndMonth, shortDayYear } from '@/lib/dates';
 
 const list = (v: unknown) => ((v as string[] | null) ?? []).map(label).join(', ');
 
@@ -194,7 +194,7 @@ export function PerfumeDetail({ detail, pairs }: { detail: Detail; pairs?: React
               <li key={n.id} className="border-b border-line-soft py-3 last:border-0">
                 <Link href={`/diary?m=${n.wornOn.slice(0, 7)}&d=${n.wornOn}`} className="block">
                   <p className="flex items-center gap-2 text-[12px] tracking-[0.14em] text-muted uppercase">
-                    {shortDay(n.wornOn)} <StarRating value={n.rating} className="text-[13px] tracking-normal" />
+                    {shortDayYear(n.wornOn)} <StarRating value={n.rating} className="text-[13px] tracking-normal" />
                   </p>
                   {n.notes && <p className="mt-1 text-[15px] whitespace-pre-line text-ink">{n.notes}</p>}
                 </Link>
