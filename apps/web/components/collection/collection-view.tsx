@@ -9,7 +9,7 @@ import { FilterSheet } from './filter-sheet';
 import { PerfumeRow } from './perfume-row';
 import { ViewSwitch, type View } from './view-switch';
 import { NoPhoto } from '@/components/ui/no-photo';
-import { shownItemCount } from '@/lib/collection/url-filters';
+import { collectionCountLabel, shownItemCount } from '@/lib/collection/url-filters';
 
 export function CollectionView({
   rows,
@@ -53,7 +53,7 @@ export function CollectionView({
     <>
       <div className="flex items-baseline justify-between">
         <h1 className="font-display text-2xl italic">Collection</h1>
-        {view !== 'sets' && itemCount > 0 && <p className="text-sm text-muted">{itemCount === 1 ? '1 item' : `${itemCount} items`}</p>}
+        {view !== 'sets' && itemCount > 0 && <p className="text-sm text-muted">{collectionCountLabel(shown.length, itemCount)}</p>}
       </div>
       <div className="mt-4">
         <ViewSwitch view={view} onChange={setView} />

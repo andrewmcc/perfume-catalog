@@ -89,8 +89,8 @@ async function Stats() {
       </section>
 
       <div className="mt-4 flex flex-col gap-4">
-        <Breakdown title="By scent family" rows={s.byFamily} swatch />
-        <Breakdown title="By season" rows={s.bySeason} />
+        <Breakdown title="By scent family" rows={s.byFamily} swatch href={(k) => (k === 'unknown' ? null : collectionHref({ family: [k] }))} />
+        <Breakdown title="By season" rows={s.bySeason} href={(k) => collectionHref({ season: [k] })} />
         <Breakdown title="By house" rows={s.byHouse} raw />
         <Breakdown title="By format" rows={s.byFormat} />
       </div>

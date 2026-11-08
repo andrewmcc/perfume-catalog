@@ -1,4 +1,4 @@
-import { RATING_OPTIONS, WORN_OPTIONS, type CollectionRow, type Filters } from '@perfume/core';
+import { FAMILIES, RATING_OPTIONS, SEASONS, WORN_OPTIONS, type CollectionRow, type Filters } from '@perfume/core';
 
 export type CollectionView = 'owned' | 'sets' | 'wishlist' | 'tried';
 type Params = Record<string, string | string[] | undefined>;
@@ -18,9 +18,13 @@ export function parseCollectionUrl(sp: Params): { view: CollectionView; filters:
   const worn = known(one(sp.worn), WORN_OPTIONS);
   const rating = known(one(sp.rating), RATING_OPTIONS);
   const format = known(sp.format, FORMATS);
+  const family = known(sp.family, FAMILIES);
+  const season = known(sp.season, SEASONS);
   if (worn.length) filters.worn = worn;
   if (rating.length) filters.rating = rating;
   if (format.length) filters.format = format;
+  if (family.length) filters.family = family;
+  if (season.length) filters.season = season;
   const v = one(sp.view);
   return { view: v && VIEWS.includes(v as CollectionView) ? (v as CollectionView) : 'owned', filters };
 }
@@ -38,4 +42,11 @@ export function collectionHref(filters: Filters, view: CollectionView = 'owned')
 export function shownItemCount(rows: CollectionRow[], filters: Filters): number {
   const formats = filters.format?.length ? filters.format : null;
   return rows.reduce((n, r) => n + (formats ? r.items.filter((i) => formats.includes(i.format)).length : r.items.length), 0);
+}
+
+const n = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : 's'}`;
+
+/** "7 items", or "30 perfumes · 33 items" when some perfumes have several items (Stats counts perfumes by family and season). */
+export function collectionCountLabel(perfumes: number, items: number): string {
+  return perfumes === items ? n(items, 'item') : `${n(perfumes, 'perfume')} · ${n(items, 'item')}`;
 }
