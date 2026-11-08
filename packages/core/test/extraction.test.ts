@@ -161,6 +161,13 @@ describe('promptFor', () => {
     expect(p).toContain('alternatives');
     expect(p).toMatch(/Logos, monograms, crests/);
   });
+  it('bottle prompt defines each format', () => {
+    const p = promptFor('bottle');
+    expect(p).toMatch(/sample: a small vial, usually 1.2 ?ml/i);
+    expect(p).toMatch(/decant: perfume poured by a shop or person into their own atomiser/i);
+    expect(p).toMatch(/travel: a brand-made small bottle, about 5.15 ?ml/i);
+    expect(p).toMatch(/full: a full-size retail bottle/i);
+  });
   it('set prompt never lists scents from memory', () => {
     expect(promptFor('set')).toMatch(/never list scents from memory/i);
   });

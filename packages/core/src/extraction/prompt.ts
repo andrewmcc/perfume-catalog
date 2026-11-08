@@ -13,7 +13,12 @@ const PREAMBLE = `You read perfume photos and fill in the schema from what is vi
 const BOTTLE = `${PREAMBLE}
 
 These photos show one perfume bottle (photo 2, if present, is another angle or the box).
-- format is full, travel, decant or sample.
+- format is one of:
+  - sample: a small vial, usually 1–2 ml, made by the brand or from a discovery set;
+  - decant: perfume poured by a shop or person into their own atomiser (plain or third-party labelled, often 2–10 ml);
+  - travel: a brand-made small bottle, about 5–15 ml, in the brand's own design;
+  - full: a full-size retail bottle.
+  A printed size helps: 1–2 ml is a sample unless it is a third-party atomiser.
 - batch_code is the printed batch code, "" if none; other_text is any other relevant printed text.
 - If the photo does not show a perfume, set is_perfume to false and leave the rest empty.`;
 
