@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: 'Stats' };
 /** A headline number; tapping it opens the collection showing what it counts. */
 function Tile({ value, label, note, href }: { value: string; label: string; note?: string; href: string }) {
   return (
-    <Link href={href} className="label-card flex flex-col items-center px-2 py-3 text-center hover:border-oxblood">
+    <Link href={href} className="label-card flex flex-col items-center justify-center px-2 py-3 text-center hover:border-oxblood">
       <span className="font-display text-3xl leading-none text-ink">{value}</span>
       <span className="mt-1 text-[12px] tracking-[0.12em] text-muted uppercase">{label}</span>
       {note && <span className="mt-0.5 text-[11px] text-muted">{note}</span>}
