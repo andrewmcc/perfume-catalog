@@ -6,19 +6,21 @@ import { findGaps, formatAvg, formatGbp } from '@perfume/core';
 import { Breakdown } from '@/components/stats/breakdown';
 import { GapCard } from '@/components/stats/gap-card';
 import { loadCollection } from '@/lib/collection/load';
+import { BOTTLE_FORMATS, collectionHref } from '@/lib/collection/url-filters';
 import { loadStats } from '@/lib/stats/load';
 import { createServerClient } from '@/lib/supabase/server';
 import { LoadingFlacon } from '@/components/ui/loading-flacon';
 
 export const metadata: Metadata = { title: 'Stats' };
 
-function Tile({ value, label, note }: { value: string; label: string; note?: string }) {
+/** A headline number; tapping it opens the collection showing what it counts. */
+function Tile({ value, label, note, href }: { value: string; label: string; note?: string; href: string }) {
   return (
-    <div className="label-card flex flex-col items-center px-2 py-3 text-center">
+    <Link href={href} className="label-card flex flex-col items-center px-2 py-3 text-center hover:border-oxblood">
       <span className="font-display text-3xl leading-none text-ink">{value}</span>
       <span className="mt-1 text-[12px] tracking-[0.12em] text-muted uppercase">{label}</span>
       {note && <span className="mt-0.5 text-[11px] text-muted">{note}</span>}
-    </div>
+    </Link>
   );
 }
 
@@ -31,10 +33,10 @@ async function Stats() {
   return (
     <>
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <Tile value={String(s.bottles)} label={s.bottles === 1 ? 'bottle' : 'bottles'} />
-        <Tile value={String(s.samples)} label={s.samples === 1 ? 'sample' : 'samples'} />
-        <Tile value={String(s.sets)} label={s.sets === 1 ? 'set' : 'sets'} />
-        <Tile value={formatGbp(s.value.total)} label="est. value" note={s.value.unpriced ? `${s.value.unpriced} without a price` : undefined} />
+        <Tile value={String(s.bottles)} label={s.bottles === 1 ? 'bottle' : 'bottles'} href={collectionHref({ format: [...BOTTLE_FORMATS] })} />
+        <Tile value={String(s.samples)} label={s.samples === 1 ? 'sample' : 'samples'} href={collectionHref({ format: ['sample'] })} />
+        <Tile value={String(s.sets)} label={s.sets === 1 ? 'set' : 'sets'} href={collectionHref({}, 'sets')} />
+        <Tile value={formatGbp(s.value.total)} label="est. value" note={s.value.unpriced ? `${s.value.unpriced} without a price` : undefined} href={collectionHref({})} />
       </div>
       <p className="mt-2 text-[12px] text-muted">Value is an estimate: what you paid where entered, otherwise typical retail price for the size.</p>
       {empty ? (

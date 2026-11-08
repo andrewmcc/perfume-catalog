@@ -9,15 +9,33 @@ import { FilterSheet } from './filter-sheet';
 import { PerfumeRow } from './perfume-row';
 import { ViewSwitch, type View } from './view-switch';
 import { NoPhoto } from '@/components/ui/no-photo';
+import { shownItemCount } from '@/lib/collection/url-filters';
 
-export function CollectionView({ rows, sets, initialFilters = {} }: { rows: CollectionRow[]; sets: SetRow[]; initialFilters?: Filters }) {
-  const [view, setView] = useState<View>('owned');
+export function CollectionView({
+  rows,
+  sets,
+  initialView = 'owned',
+  initialFilters = {},
+}: {
+  rows: CollectionRow[];
+  sets: SetRow[];
+  initialView?: View;
+  initialFilters?: Filters;
+}) {
+  const [view, setViewState] = useState<View>(initialView);
   const [q, setQ] = useState('');
   const [filters, setFiltersState] = useState<Filters>(initialFilters);
-  // Filters seeded from the URL (?worn=neglected) stop being sticky once changed here.
+  // A view and filters seeded from the URL (?format=sample, ?view=sets) stop being sticky once changed here.
+  const unstick = () => {
+    if (window.location.search) window.history.replaceState(null, '', '/collection');
+  };
   const setFilters = (f: Filters) => {
     setFiltersState(f);
-    if (window.location.search) window.history.replaceState(null, '', '/collection');
+    unstick();
+  };
+  const setView = (v: View) => {
+    setViewState(v);
+    unstick();
   };
   const [sheet, setSheet] = useState(false);
 
@@ -29,7 +47,7 @@ export function CollectionView({ rows, sets, initialFilters = {} }: { rows: Coll
   const options = useMemo(() => filterOptions(inView), [inView]);
   const shown = applyFilters(inView, filters, londonNow(new Date()).date).filter((r) => matchesSearch(r, q));
   const active = Object.values(filters).reduce((n, v) => n + (v?.length ?? 0), 0);
-  const itemCount = inView.reduce((n, r) => n + r.items.length, 0);
+  const itemCount = shownItemCount(shown, filters);
 
   return (
     <>
